@@ -1,0 +1,106 @@
+/**
+ * Berto AI - Design Tokens (CSS Variables)
+ * Generated from docs/brand-guidelines.md & assets/design-tokens.json
+ */
+
+:root {
+  /* Primitive Colors - Slate */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  /* Primitive Colors - Brand Themes */
+  --violet-500: #8b5cf6;
+  --violet-600: #7c3aed;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --rose-500: #f43f5e;
+  --rose-600: #e11d48;
+  --sky-500: #0284c7;
+  --sky-600: #0369a1;
+
+  /* Semantic Variables (Light Default) */
+  --color-bg-canvas: #fbfaf8;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #f8fafc;
+  --color-border-bold: #09090b;
+  --color-text-primary: #020617;
+  --color-text-secondary: #475569;
+
+  /* Dynamic Active Accent (Default: Violet) */
+  --color-accent: var(--violet-500);
+  --color-accent-hover: var(--violet-600);
+  --color-accent-light: #ede9fe;
+  --color-accent-shadow: #2e1065;
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Tactile Physics */
+  --tactile-border-width: 2.5px;
+  --tactile-radius-btn: 1.15rem;
+  --tactile-radius-card: 1.75rem;
+  --tactile-shadow-card: 0 6px 0 0 #09090b;
+  --tactile-shadow-btn: 0 5px 0 0 #09090b;
+}
+
+/* Dark Mode Overrides */
+.dark {
+  --color-bg-canvas: #090d16;
+  --color-bg-surface: #111827;
+  --color-bg-elevated: #1e293b;
+  --color-border-bold: #374151;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --tactile-shadow-card: 0 6px 0 0 #030712;
+  --tactile-shadow-btn: 0 5px 0 0 #020617;
+}
+
+/* Theme Accents */
+[data-accent="indigo"] {
+  --color-accent: var(--indigo-500);
+  --color-accent-hover: var(--indigo-600);
+  --color-accent-light: #e0e7ff;
+  --color-accent-shadow: #1e1b4b;
+}
+
+[data-accent="emerald"] {
+  --color-accent: var(--emerald-500);
+  --color-accent-hover: var(--emerald-600);
+  --color-accent-light: #d1fae5;
+  --color-accent-shadow: #064e3b;
+}
+
+[data-accent="amber"] {
+  --color-accent: var(--amber-500);
+  --color-accent-hover: var(--amber-600);
+  --color-accent-light: #fef3c7;
+  --color-accent-shadow: #78350f;
+}
+
+[data-accent="rose"] {
+  --color-accent: var(--rose-500);
+  --color-accent-hover: var(--rose-600);
+  --color-accent-light: #ffe4e6;
+  --color-accent-shadow: #881337;
+}
+
+[data-accent="sky"] {
+  --color-accent: var(--sky-500);
+  --color-accent-hover: var(--sky-600);
+  --color-accent-light: #e0f2fe;
+  --color-accent-shadow: #082f49;
+}
