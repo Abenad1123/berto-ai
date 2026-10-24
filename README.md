@@ -1,95 +1,138 @@
 <div align="center">
 
-# 🧠 Berto AI
-**Gamified, Local-First Spaced Repetition Mastery Arena**
+```
+  ██████╗ ███████╗██████╗ ████████╗ ██████╗      █████╗ ██╗
+  ██╔══██╗██╔════╝██╔══██╗╚══██╔══╝██╔═══██╗    ██╔══██╗██║
+  ██████╔╝█████╗  ██████╔╝   ██║   ██║   ██║    ███████║██║
+  ██╔══██╗██╔══╝  ██╔══██╗   ██║   ██║   ██║    ██╔══██║██║
+  ██████╔╝███████╗██║  ██║   ██║   ╚██████╔╝    ██║  ██║██║
+  ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝     ╚═╝  ╚═╝╚═╝
+```
 
-[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+### **Gamified, Local-First Spaced Repetition Mastery Arena**
+
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Abenad1123%2Fberto--ai-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Abenad1123/berto-ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
+[![React 19](https://img.shields.io/badge/React-19.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-4.3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vitest](https://img.shields.io/badge/Tests-11%20Passed-brightgreen?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Bundle Size](https://img.shields.io/badge/Gzipped%20Size-164%20kB-blueviolet?style=for-the-badge)](https://github.com/Abenad1123/berto-ai)
 
-*Berto AI turns flashcard study into an engaging, high-retention quest. Powered by modern FSRS scheduling, offline smart question transformations, and optional Gemini/Groq AI generation.*
+<p align="center">
+  <b>Berto AI</b> transforms flashcard study into an engaging, high-retention quest.<br/>
+  Powered by the modern <b>FSRS mathematical memory model</b>, zero-latency <b>offline heuristic transforms</b>,<br/>
+  and transparent <b>client-side AI generation (Gemini & Groq)</b>. Zero ads. Zero paywalls. Zero telemetry.
+</p>
 
-[Features](#-core-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Customization](#-customization--design-system) • [Keyboard Shortcuts](#-keyboard-shortcuts)
+[Key Highlights](#-key-highlights) • [Interactive Quiz Arena](#-interactive-quiz-arena) • [FSRS Spaced Repetition](#-scientific-fsrs-spaced-repetition) • [Quick Start](#-quick-start) • [Design System & Theming](#-design-system--theming) • [Keyboard Shortcuts](#-keyboard-shortcuts) • [BYOK AI Setup](#-byok-ai-setup)
 
 </div>
 
 ---
 
-## 🌟 Core Features
+## ⚡ Key Highlights
 
-### 🧠 Modern FSRS Spaced Repetition
-- Implements the state-of-the-art **Free Spaced Repetition Scheduler (FSRS)** via `ts-fsrs`.
-- Scientific memory decay curves calculated individually per card based on:
-  - **Stability ($S$)**: Expected memory retention duration.
-  - **Difficulty ($D$)**: Inherent complexity factor.
-  - **Lapses ($L$)**: Mistake penalties and memory resets.
-- Four distinct cognitive grades: **Again** (<10m), **Hard** (1d), **Good** (3d), and **Easy** (5d).
-- Supports sandbox **Practice Mode** so you can drill ahead of exams without mutating your scheduling timeline.
+```
+┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
+│        ⚡ 100% Local-First       │       🧠 Modern FSRS Engine     │     🎮 Neo-Brutalist Arena      │
+│  All cards, decks, and schedules│  Replaces rigid SM-2 algorithms │  Chunky 3D buttons, sound FX,   │
+│  are stored in IndexedDB via    │  with mathematical stability    │  streak flames, and celebratory │
+│  Dexie.js. Zero cloud telemetry.│  and lapse decay predictions.   │  confetti bursts at 60 FPS.     │
+└─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
+```
 
-### 🎮 Dynamic Multi-Format Quizzes
-Transform standard flashcards on-the-fly into rich interactive assessments:
-- **Multiple Choice (A, B, C, D)**: Auto-distractor pool sampling with candy-coded letter badges and instant feedback.
-- **True or False**: Giant tactile split-button toggles with color glow indicators.
-- **Cloze / Fill in the Blank**: Highlight-to-cloze card creation, realtime masking `[______]`, and typo tolerance override button.
-- **Multi-Select Checkboxes**: Multi-answer challenges with lively check state animations.
-- **Classic 3D Flip Flashcards**: Tactile flip physics with full keyboard shortcut bindings.
+- **Offline-First Resilience**: Full PWA service worker caching. Import, export, study, and quiz with zero internet connection.
+- **5 Dynamic Question Formats**: Flashcards, Multiple Choice, True/False, Cloze (Fill-in-the-Blank), and Multi-Select Checkboxes.
+- **Offline Smart Heuristic Generator**: Converts any plain deck into multi-choice or true/false quizzes using companion distractor pooling.
+- **Transparent AI Forge**: One-click deck and quiz creation from PDFs, PowerPoint slides (`.pptx`), or raw lecture notes powered by free-tier **Google Gemini** or **Groq Cloud**.
+- **Nested Realm Hierarchy**: Unlimited sub-deck nesting and zero-card organizational **Folder Decks**.
+- **Full Tactile Customization**: 6 vivid accent colors, 3 visual densities (Tactile, Modern, Compact), text scaling, and auto-advance timers.
 
-### ⚡ Offline Smart Heuristic Engine
-- **Zero-Latency & 100% Offline**: Generate multi-choice, true/false, and cloze assessments without an internet connection or API quota.
-- Intelligent distractor extraction draws plausible incorrect options from companion cards in your deck.
+---
 
-### ✨ AI Quiz Forge (Gemini & Groq)
-- Connect free API keys from **Google Gemini** (`gemini-1.5-flash`, `gemini-2.5-flash`) or **Groq Cloud** (`llama-3.3-70b-versatile`).
-- Contextual question extraction, automatic difficulty tuning (Beginner, Balanced, Tough), and instant live connection verification.
-- **Zero-telemetry**: API keys are stored strictly inside your local browser database.
+## 🎮 Interactive Quiz Arena
 
-### 📂 Nested Realm Hierarchy & Folder Decks
-- Create deep deck trees with parent-child relationships (`parentId`).
-- **Folder Decks**: Organizational containers (0 study cards) to group multi-chapter syllabi.
-- Cascade deletion safeguards that clean up all nested sub-decks and cards atomically.
+Transform standard two-sided flashcards into 5 interactive assessment formats:
 
-### 🎨 Vibrant & Gamified Neo-Brutalist Design
-- **Tactile Neo-Brutalism**: Chunky borders (`border-[2.5px] border-slate-900`), 3D solid drop shadows (`shadow-[0_4px_0_0_#09090b]`), and crisp tactile press feedback.
-- **6 Dynamic Accent Themes**: Violet, Indigo, Emerald, Amber, Rose, and Sky.
-- **Gamified Rewards**: Daily study rhythm streak tracker, combo counters (`🔥 5 Combo!`), XP reward previews, audio chimes, and celebratory confetti.
-- **Local-First Privacy**: Powered by IndexedDB (`Dexie.js`) with complete JSON export and date-sanitizing restore.
+```
+  1. MULTIPLE CHOICE [A, B, C, D]         2. TRUE OR FALSE [1 / 2]
+  ┌──────────────────────────────────┐    ┌──────────────────────────────────┐
+  │ [A] Mitochondria                 │    │  [1] True    │  [2] False        │
+  │ [B] Ribosome    [C] Nucleus      │    │    ✓               ✗             │
+  └──────────────────────────────────┘    └──────────────────────────────────┘
+  3. CLOZE FILL-IN-THE-BLANK              4. MULTI-SELECT CHECKBOXES
+  ┌──────────────────────────────────┐    ┌──────────────────────────────────┐
+  │ The powerhouse is [______]       │    │  [✓] Glycolysis                  │
+  │ [ Mitochondria ] <Enter ↵>       │    │  [✓] Krebs Cycle   [ ] Calvin    │
+  └──────────────────────────────────┘    └──────────────────────────────────┘
+```
+
+### Format Breakdown
+
+| Format | Interaction | Key Advantage |
+|---|---|---|
+| **Multiple Choice** | 4 candy-coded choice cards (`A: Violet`, `B: Sky`, `C: Amber`, `D: Rose`) | Tests discrimination among related concepts; auto-generates distractors from your deck. |
+| **True or False** | Split tactile buttons with giant check/cross glyphs (`1 or T` / `2 or F`) | Rapid-fire concept verification for quick revision sessions. |
+| **Cloze Deletion** | Live `[______]` masking with realtime preview card | High active recall; includes a **"Typo / Close Enough"** override button to prevent unfair penalties. |
+| **Checkboxes** | Springy multi-select tiles with emerald check indicators | Tests multi-part truths (e.g. *"Which of the following are steps in cellular respiration?"*). |
+| **3D Flashcard Arena** | Perspective 3D flip card with FSRS cognitive rating buttons | Classic active recall with intervals (`Again <10m`, `Hard 1d`, `Good 3d`, `Easy 5d`). |
+
+---
+
+## 🧠 Scientific FSRS Spaced Repetition
+
+Berto AI discards the 35-year-old SuperMemo SM-2 algorithm in favor of the **Free Spaced Repetition Scheduler (FSRS v5)**.
+
+### Why FSRS Outperforms SM-2
+
+```
+  SM-2 (Legacy)        → Fixed multipliers, ignores lapses, over-reviews easy cards.
+  FSRS (Berto AI)      → Dynamic retention modeling: R(t) = (1 + F · t / S)^(-1)
+```
+
+| Metric | Legacy SM-2 (Anki Default) | Berto AI (FSRS v5) | Advantage |
+|---|---|---|---|
+| **Memory Model** | Heuristic ease factor ($EF$) | Retrievability ($R$), Stability ($S$), Difficulty ($D$) | Clinically validated memory decay curves |
+| **Over-Review Waste** | High (static intervals) | **30% to 50% fewer reviews** | Spend less time for the same retention target |
+| **Lapse Recovery** | Punitive reset to step 1 | Proportional stability penalty | Faster recovery on forgotten facts |
+| **Custom Retention** | Hardcoded ~85% | Selectable: **85%**, **90%**, or **95%** | Tailor rigor to casual learning vs. board exams |
+| **Practice Mode** | Not supported | **Non-destructive sandbox** | Drill ahead of tests without corrupting future review intervals |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ or 20+
-- npm, pnpm, or bun
+- [Node.js](https://nodejs.org/) v18.0.0 or higher
+- [npm](https://www.npmjs.com/) (bundled with Node)
 
-### Installation
+### Installation & Local Run
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/berto-ai.git
+git clone https://github.com/Abenad1123/berto-ai.git
 cd berto-ai
 
 # 2. Install dependencies
 npm install
 
-# 3. Start local development server
+# 3. Start development server with Hot Module Replacement (HMR)
 npm run dev
 ```
 
-Visit `http://localhost:5173` in your browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Build & Testing
+### Quality Verification Commands
 
 ```bash
-# Run automated Vitest test suite
+# Execute automated Vitest algorithm suite (11/11 tests)
 npm test
 
-# Fast code linting (Oxlint)
+# Run Oxlint (fast Rust-based static analysis)
 npm run lint
 
-# Production build with TypeScript checks
+# Compile TypeScript and bundle production assets with Vite
 npm run build
 
 # Preview production build locally
@@ -98,81 +141,212 @@ npm run preview
 
 ---
 
-## 🏗 Architecture
+## 🎨 Design System & Theming
+
+Berto AI combines **Tactile Neo-Brutalism** with flexible design tokens defined in [`docs/brand-guidelines.md`](docs/brand-guidelines.md) and [`assets/design-tokens.json`](assets/design-tokens.json).
 
 ```
-berto-ai/
-├── src/
-│   ├── components/            # UI components and modals
-│   │   ├── CreateDeckPage.tsx # Quest builder, category picker & file importer
-│   │   ├── DeckCard.tsx       # Tactile deck card with theme colors & stats
-│   │   ├── DeckViewPage.tsx   # Subdecks, cloze preview & card management
-│   │   ├── Header.tsx         # Brand mascot, streak flame & action controls
-│   │   ├── SettingsModal.tsx  # 5-section customization hub & API manager
-│   │   ├── Sidebar.tsx        # Learner level card, deck tree & tag filter
-│   │   ├── StudyLauncherModal.tsx # Game mode & question count launcher
-│   │   ├── StudyView.tsx      # Multi-format quiz arena & FSRS scheduler
-│   │   ├── SummaryModal.tsx   # Post-session celebration & accuracy stats
-│   │   └── WeeklyStreakWidget.tsx # 7-day study rhythm matrix
-│   ├── lib/                   # Business logic, engines & database
-│   │   ├── ai.ts              # Resilient Gemini & Groq API handlers
-│   │   ├── aiQuizEngine.ts    # AI dynamic question generation
-│   │   ├── algorithms.test.ts # Vitest test suite for FSRS & heuristics
-│   │   ├── db.ts              # Dexie.js IndexedDB schema & starter seeds
-│   │   ├── fileParser.ts      # Lazy-loaded PDF, PPTX, TXT & JSON parsers
-│   │   ├── fsrs.ts            # FSRS spacing mathematical scheduler
-│   │   ├── offlineQuizEngine.ts # Smart local distractor & question heuristics
-│   │   └── sound.ts           # Web Audio API synthesizers & sound effects
-│   ├── types/                 # Unified TypeScript interfaces
-│   ├── App.tsx                # State coordination, routing & theme listeners
-│   └── index.css              # Neo-brutalist tactile classes & theme tokens
-├── public/                    # Service worker & static icons
-└── package.json
+   NEO-BRUTALIST TACTILE FORMULA
+   ┌───────────────────────────────────────────────┐
+   │  Border:      2.5px solid #09090b             │
+   │  Shadow:      0 5px 0 0 #09090b               │
+   │  Active:      translateY(4px), shadow: none   │
+   │  Transitions: 90ms cubic-bezier(0.34, 1.56)   │
+   └───────────────────────────────────────────────┘
 ```
 
----
+### Customizable Settings (Settings Hub `Ctrl+,`)
 
-## 🎨 Customization & Design System
-
-Access the **Settings Hub** (`Ctrl+,` or Header Gear) to customize:
-
-| Dimension | Options | Description |
-|---|---|---|
-| **Theme Mode** | `Light` • `Dark` • `System` | True dark mode with OLED-friendly background (`#090d16`). |
-| **Accent Theme** | `Violet` • `Indigo` • `Emerald` • `Amber` • `Rose` • `Sky` | Injects global CSS tokens across buttons, badges, and rings. |
-| **Visual Density** | `Tactile` • `Modern` • `Compact` | Choose between bold neo-brutalism, softer elevations, or high-density drill cards. |
-| **Text Scale** | `Normal` • `Large` | High-legibility font scaling (110%) for reading ease. |
-| **Auto-Advance** | `Off` • `Fast (1.0s)` • `Normal (1.8s)` | Automatically moves to next card on correct answers with countdown progress. |
-| **Audio & FX** | `Mute` to `100%` | Synthesized chimes for correct, wrong, tap, and confetti fanfare. |
+- **Theme Mode**:
+  - `Light`: Warm cream canvas (`#fbfaf8`) with dark slate typography.
+  - `Dark`: Deep obsidian canvas (`#090d16`) with high-contrast text.
+  - `System`: Automatically tracks OS preference.
+- **6 Dynamic Accent Palettes**:
+  - 🟣 **Violet** (`#8b5cf6`) • Default, imaginative & cognitive.
+  - 🔵 **Indigo** (`#6366f1`) • Architectural & deep focus.
+  - 🟢 **Emerald** (`#10b981`) • Vitality, biology & life sciences.
+  - 🟡 **Amber** (`#f59e0b`) • Warm streak flame & humanities.
+  - 🔴 **Rose** (`#f43f5e`) • High urgency & vocabulary recall.
+  - 🌊 **Sky** (`#0284c7`) • Crisp physics & mathematical precision.
+- **Card Densities**:
+  - `Tactile Neo-Brutalist`: Chunky borders and solid 3D depth shadows.
+  - `Modern Soft`: Ambient elevations with subtle 1.5px borders.
+  - `Compact Drill`: Reduced padding optimized for speed-drilling large decks.
+- **Auto-Advance Timer**:
+  - Automatically moves to the next card on correct answers with an animated progress bar:
+  - `Off` (manual click) • `Fast Rush (1.0s)` • `Balanced (1.8s)`.
+- **Text Scaling**: Toggle between standard scale (100%) and high-legibility large (110%).
 
 ---
 
 ## ⌨️ Keyboard Shortcuts
 
-Speed through study sessions without taking your hands off the keyboard:
+Complete keyboard controllability designed for high-speed review sessions:
 
-| Shortcut | Context | Action |
+### Navigation & Global
+| Key | Action |
+|---|---|
+| <kbd>/</kbd> | Focus deck search input on Dashboard |
+| <kbd>N</kbd> | Open New Deck quest builder |
+| <kbd>?</kbd> | Toggle Keyboard Shortcuts Cheat Sheet modal |
+| <kbd>Esc</kbd> | Close any open modal or exit active study session |
+
+### In-Session Quiz Controls
+| Key | Context | Action |
 |---|---|---|
-| `/` | Dashboard | Focus deck search input |
-| `N` | Dashboard | Create new deck |
-| `?` | Anywhere | Toggle keyboard shortcuts cheat sheet |
-| `1`, `2`, `3`, `4` | Study (Multiple Choice) | Select choice `A`, `B`, `C`, or `D` |
-| `1` / `T`, `2` / `F` | Study (True / False) | Choose `True` or `False` |
-| `Space` | Study (Flashcard) | Flip flashcard |
-| `1`, `2`, `3`, `4` | Study (Flashcard Flipped) | Rate difficulty: Again (`1`), Hard (`2`), Good (`3`), Easy (`4`) |
-| `Enter` | Study | Submit typed answer or advance to next card |
-| `Esc` | Modals & Study | Close modal or exit to deck view |
+| <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd> | Multiple Choice | Select option `A`, `B`, `C`, or `D` |
+| <kbd>1</kbd> or <kbd>T</kbd>, <kbd>2</kbd> or <kbd>F</kbd> | True / False | Choose `True` or `False` |
+| <kbd>Space</kbd> | Flashcard (Front) | Flip flashcard to reveal answer |
+| <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd>, <kbd>4</kbd> | Flashcard (Back) | Grade recall: Again (<kbd>1</kbd>), Hard (<kbd>2</kbd>), Good (<kbd>3</kbd>), Easy (<kbd>4</kbd>) |
+| <kbd>Enter</kbd> | Fill-in-the-Blank | Submit typed answer |
+| <kbd>Enter</kbd> / <kbd>Space</kbd> | Feedback Screen | Continue immediately to next card (skips auto-advance countdown) |
 
 ---
 
-## 🔒 Privacy & Local-First Philosophy
+## 🔑 BYOK AI Setup
 
-- **No Remote Telemetry**: Your cards, study history, and performance stats stay exclusively in your browser's IndexedDB.
-- **Offline Capable**: Registered Service Worker (`public/sw.js`) caches application assets for full offline usability.
-- **Data Portability**: Full JSON export and backup restore with automatic timestamp and FSRS schedule sanitization.
+Berto AI adopts a **Bring-Your-Own-Key (BYOK)** model with **zero intermediary proxy servers**. Your API key communicates directly from your browser to the official provider and is stored safely in your browser's local IndexedDB.
+
+### Supported Providers
+
+<details>
+<summary><b>1. Google Gemini (Recommended — 100% Free)</b></summary>
+<br/>
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Click **Create API Key**.
+3. In Berto AI, open **Settings** (<kbd>Ctrl+,</kbd>) → **AI Engine**.
+4. Select **Google Gemini**, paste your key, and click **Test Connection**.
+5. *Models supported*: `gemini-1.5-flash`, `gemini-2.5-flash` with dynamic fallback.
+</details>
+
+<details>
+<summary><b>2. Groq Cloud (Ultra-Fast Llama 3.3 70B — Free Tier)</b></summary>
+<br/>
+
+1. Go to [Groq Console](https://console.groq.com/keys).
+2. Create a free API key.
+3. In Berto AI, open **Settings** (<kbd>Ctrl+,</kbd>) → **AI Engine**.
+4. Select **Groq Cloud**, paste your key, and click **Test Connection**.
+5. *Models supported*: `llama-3.3-70b-versatile`.
+</details>
+
+> [!NOTE]
+> An API key is **completely optional**. You can import documents (PDF/PPTX/TXT), create cards manually, or use the **Offline Smart Heuristic Engine** indefinitely without an API key.
+
+---
+
+## 📁 Document Ingestion & File Support
+
+Easily convert study materials into flashcards:
+
+- 📄 **PDF Documents**: Ingest lecture slides, journal articles, and textbooks. Parsed via locally-bundled `pdfjs-dist` (lazy loaded on demand).
+- 📊 **PowerPoint (`.pptx`)**: Extracts all slide text with automatic XML entity decoding (`&amp;`, `&lt;`, `&quot;`).
+- 📝 **Plain Text / Notes (`.txt`, `.md`)**: Paste notes or upload raw text files.
+- 💾 **JSON Vault Backup**: One-click full deck export and restore with automated date sanitization.
+
+---
+
+## 🏛 Technical Architecture & Directory Structure
+
+```
+berto-ai/
+├── src/
+│   ├── components/                # UI Components (React 19 + Tailwind v4)
+│   │   ├── CreateDeckPage.tsx     # Quest builder, category icons & file parser
+│   │   ├── DeckCard.tsx           # Tactile card with dynamic theme colors & count
+│   │   ├── DeckViewPage.tsx       # Subdeck realm cards, cloze tools & card list
+│   │   ├── Header.tsx             # Brand mascot, streak flame & quick controls
+│   │   ├── MobileNav.tsx          # Responsive mobile navigation drawer
+│   │   ├── ProfileModal.tsx       # Learner profile & daily goal tracker
+│   │   ├── SettingsModal.tsx      # 5-section customization hub & API tester
+│   │   ├── ShortcutsModal.tsx     # Keyboard shortcuts cheat sheet modal
+│   │   ├── Sidebar.tsx            # RPG learner card, deck tree & tag filters
+│   │   ├── StudyLauncherModal.tsx # Game mode cards & round length selector
+│   │   ├── StudyView.tsx          # Multi-format quiz arena & FSRS scheduler
+│   │   ├── SummaryModal.tsx       # Post-round celebration & accuracy metrics
+│   │   └── WeeklyStreakWidget.tsx # 7-day study rhythm matrix with celebration glow
+│   ├── lib/                       # Core Algorithms & Local Engines
+│   │   ├── ai.ts                  # Resilient Gemini & Groq API handlers
+│   │   ├── aiQuizEngine.ts        # AI dynamic question generation
+│   │   ├── algorithms.test.ts     # Vitest automated test suite (FSRS & heuristics)
+│   │   ├── categoryIcons.tsx      # Lucide icon resolver by category name
+│   │   ├── db.ts                  # Dexie.js IndexedDB schema & starter deck seeds
+│   │   ├── fileParser.ts          # Lazy dynamic import parser for PDF & PPTX
+│   │   ├── fsrs.ts                # FSRS mathematical memory scheduling algorithms
+│   │   ├── offlineQuizEngine.ts   # Zero-latency local distractor & question heuristics
+│   │   └── sound.ts               # Web Audio API synthesizers (taps, chimes, buzz)
+│   ├── types/                     # Unified TypeScript type definitions
+│   ├── App.tsx                    # State coordinator, routing & theme listeners
+│   ├── index.css                  # Neo-brutalist tactile physics & accent tokens
+│   └── main.tsx                   # React 19 root mounting
+├── assets/                        # Design tokens (JSON & CSS variables)
+├── docs/                          # Brand guidelines & project philosophy
+├── public/                        # PWA manifest & offline service worker
+├── package.json                   # Dependencies & test scripts
+└── vite.config.ts                 # Vite bundler configuration
+```
+
+---
+
+## 🧪 Testing & Verification
+
+Berto AI includes unit tests verifying both FSRS mathematical stability and offline question heuristics:
+
+```bash
+npm test
+```
+
+```
+ ✓ src/lib/algorithms.test.ts (11 tests) 14ms
+   ✓ FSRS Scheduling Algorithm (4)
+     ✓ initializes FSRS fields with valid defaults
+     ✓ updates card state and schedules next review on "good" response
+     ✓ handles "again" (lapse) response for new and review cards
+     ✓ handles "easy" grade
+   ✓ Offline Smart Heuristic Quiz Generator (7)
+     ✓ returns empty array when given empty cards list
+     ✓ respects the count parameter
+     ✓ transforms card to multiple choice with target answer in options
+     ✓ transforms card to true/false question format
+     ✓ transforms card to fill in the blank with cloze deletion
+     ✓ transforms card to multiple select with correct answers
+     ✓ generates a mixed quiz cycling question types
+```
+
+---
+
+## 🔒 Privacy & Local Storage Guarantee
+
+1. **No External Tracking**: No Google Analytics, Mixpanel, or third-party telemetry scripts.
+2. **Local Database**: All flashcards, study logs, schedules, and custom settings live exclusively in your browser's IndexedDB.
+3. **Safe Backup & Restore**: Full JSON export allows backing up your decks to your personal drive, thumb drive, or private cloud storage at any time.
+
+---
+
+## 🤝 Contributing
+
+Contributions are warmly welcomed! Please follow these steps:
+
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feat/amazing-feature`).
+3. Commit your changes with descriptive commit messages (`git commit -m 'feat: add audio speed controls'`).
+4. Ensure all tests pass and linter is clean:
+   ```bash
+   npm test && npm run lint && npm run build
+   ```
+5. Push to the branch (`git push origin feat/amazing-feature`).
+6. Open a Pull Request.
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See `LICENSE` for details.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full details.
+
+---
+
+<div align="center">
+  <sub>Engineered with precision for students, candidates, and lifelong learners worldwide.</sub><br/>
+  <sub>Crafted with ❤️ by <a href="https://github.com/Abenad1123">Abenad1123</a></sub>
+</div>
