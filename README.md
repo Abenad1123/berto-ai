@@ -27,6 +27,13 @@
 
 [Key Highlights](#-key-highlights) • [Interactive Quiz Arena](#-interactive-quiz-arena) • [FSRS Spaced Repetition](#-scientific-fsrs-spaced-repetition) • [Quick Start](#-quick-start) • [Design System & Theming](#-design-system--theming) • [Keyboard Shortcuts](#-keyboard-shortcuts) • [BYOK AI Setup](#-byok-ai-setup)
 
+<br/>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-light.png" alt="Berto AI Dashboard (Light Mode)" width="49%" />
+  <img src="docs/screenshots/dashboard-dark.png" alt="Berto AI Dashboard (Dark Mode)" width="49%" />
+</p>
+
 </div>
 
 ---
@@ -52,6 +59,11 @@
 ---
 
 ## 🎮 Interactive Quiz Arena
+
+<p align="center">
+  <img src="docs/screenshots/study-launcher.png" alt="Berto AI Study Launcher" width="49%" />
+  <img src="docs/screenshots/quiz-session.png" alt="Berto AI Quiz Arena Session" width="49%" />
+</p>
 
 Transform standard two-sided flashcards into 5 interactive assessment formats:
 
@@ -143,6 +155,10 @@ npm run preview
 
 ## 🎨 Design System & Theming
 
+<p align="center">
+  <img src="docs/screenshots/settings-hub.png" alt="Berto AI Settings Hub & Customization" width="98%" />
+</p>
+
 Berto AI combines **Tactile Neo-Brutalism** with flexible design tokens defined in [`docs/brand-guidelines.md`](docs/brand-guidelines.md) and [`assets/design-tokens.json`](assets/design-tokens.json).
 
 ```
@@ -233,6 +249,18 @@ Berto AI adopts a **Bring-Your-Own-Key (BYOK)** model with **zero intermediary p
 
 > [!NOTE]
 > An API key is **completely optional**. You can import documents (PDF/PPTX/TXT), create cards manually, or use the **Offline Smart Heuristic Engine** indefinitely without an API key.
+
+---
+
+## 📂 Realm Hierarchy & Card Creator
+
+<p align="center">
+  <img src="docs/screenshots/deck-view.png" alt="Berto AI Deck View & Realm Tree" width="98%" />
+</p>
+
+- **Subdeck Trees**: Organize multi-chapter syllabi with parent-child deck hierarchies.
+- **Folder Decks**: Zero-card structural containers for organizing topics without cluttering due review queues.
+- **Card Creator Workshop**: Highlight-to-cloze toolbar, live masked preview card, and question type filter chips.
 
 ---
 
