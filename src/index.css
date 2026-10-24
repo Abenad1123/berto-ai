@@ -1,0 +1,316 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+  background-color: #fbfaf8;
+  color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background-color: #090d16;
+  color: #f8fafc;
+}
+
+/* Tactile Dot Matrix Background Pattern */
+.bg-playful-grid {
+  background-color: #fbfaf8;
+  background-image: radial-gradient(#d1d5db 1.6px, transparent 1.6px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-playful-grid {
+  background-color: #090d16;
+  background-image: radial-gradient(#1e293b 1.8px, transparent 1.8px);
+}
+
+/* Dynamic Accent Themes */
+:root {
+  --accent-color: #8b5cf6;
+  --accent-light: #ede9fe;
+  --accent-dark: #6d28d9;
+}
+
+[data-accent="indigo"] {
+  --accent-color: #6366f1;
+  --accent-light: #e0e7ff;
+  --accent-dark: #4338ca;
+}
+
+[data-accent="emerald"] {
+  --accent-color: #10b981;
+  --accent-light: #d1fae5;
+  --accent-dark: #047857;
+}
+
+[data-accent="amber"] {
+  --accent-color: #f59e0b;
+  --accent-light: #fef3c7;
+  --accent-dark: #b45309;
+}
+
+[data-accent="rose"] {
+  --accent-color: #f43f5e;
+  --accent-light: #ffe4e6;
+  --accent-dark: #be123c;
+}
+
+[data-accent="sky"] {
+  --accent-color: #0284c7;
+  --accent-light: #e0f2fe;
+  --accent-dark: #0369a1;
+}
+
+/* Accessibility: Text Scale */
+[data-text-size="large"] {
+  font-size: 110%;
+}
+
+/* Visual Card Density */
+[data-card-style="compact"] .tactile-card {
+  padding: 1.15rem !important;
+  border-radius: 1.35rem !important;
+  box-shadow: 0 4px 0 0 #09090b !important;
+}
+
+[data-card-style="modern"] .tactile-card {
+  border-width: 1.5px !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 1.65rem !important;
+}
+
+/* Ultra-Tactile 3D Button Utility Classes */
+.tactile-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  user-select: none;
+  cursor: pointer;
+  border-width: 2.5px;
+  border-color: #09090b;
+  border-radius: 1.15rem;
+  transition-property: all;
+  transition-duration: 90ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tactile-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 #09090b !important;
+}
+
+.tactile-btn-primary {
+  background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 5px 0 0 #1e1b4b;
+}
+.tactile-btn-primary:hover {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #1e1b4b;
+}
+
+.tactile-btn-emerald {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 5px 0 0 #064e3b;
+}
+.tactile-btn-emerald:hover {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #064e3b;
+}
+
+.tactile-btn-amber {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  color: #0f172a;
+  box-shadow: 0 5px 0 0 #78350f;
+}
+.tactile-btn-amber:hover {
+  background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #78350f;
+}
+
+.tactile-btn-rose {
+  background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+  color: #ffffff;
+  box-shadow: 0 5px 0 0 #881337;
+}
+.tactile-btn-rose:hover {
+  background: linear-gradient(180deg, #fb7185 0%, #f43f5e 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #881337;
+}
+
+.tactile-btn-secondary {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #09090b;
+  box-shadow: 0 5px 0 0 #0f172a;
+}
+.tactile-btn-secondary:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #0f172a;
+}
+.dark .tactile-btn-secondary {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 5px 0 0 #020617;
+}
+.dark .tactile-btn-secondary:hover {
+  background: #334155;
+  box-shadow: 0 6px 0 0 #020617;
+}
+
+.tactile-btn-violet {
+  background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  box-shadow: 0 5px 0 0 #2e1065;
+}
+.tactile-btn-violet:hover {
+  background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #2e1065;
+}
+
+/* Neo-Brutalist Tactile Cards */
+.tactile-card {
+  background-color: #ffffff;
+  border-radius: 1.75rem;
+  border-width: 2.5px;
+  border-color: #09090b;
+  box-shadow: 0 6px 0 0 #09090b;
+  transition: all 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dark .tactile-card {
+  background-color: #111827;
+  border-color: #374151;
+  box-shadow: 0 6px 0 0 #030712;
+}
+
+.tactile-card-interactive {
+  background-color: #ffffff;
+  border-radius: 1.75rem;
+  border-width: 2.5px;
+  border-color: #09090b;
+  box-shadow: 0 6px 0 0 #09090b;
+  transition: all 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+.tactile-card-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 0 #09090b;
+}
+.tactile-card-interactive:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 0 #09090b;
+}
+.dark .tactile-card-interactive {
+  background-color: #111827;
+  border-color: #374151;
+  box-shadow: 0 6px 0 0 #030712;
+}
+.dark .tactile-card-interactive:hover {
+  box-shadow: 0 9px 0 0 #030712;
+}
+.dark .tactile-card-interactive:active {
+  box-shadow: 0 2px 0 0 #030712;
+}
+
+/* Sticker Pill */
+.tactile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-width: 2px;
+  border-color: #09090b;
+  box-shadow: 0 2px 0 0 #09090b;
+}
+
+/* Animations */
+@keyframes pop-in {
+  0% { transform: scale(0.92); opacity: 0; }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop {
+  animation: pop-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.3s ease-in-out forwards;
+}
+
+/* 3D Flip Card Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f8fafc;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border: 2px solid #0f172a;
+}
+
+/* Accessibility: Focus Visible Ring Standards */
+:focus-visible {
+  outline: 2.5px solid #6366f1;
+  outline-offset: 2.5px;
+}
+.dark :focus-visible {
+  outline: 2.5px solid #a5b4fc;
+  outline-offset: 2.5px;
+}
+
+/* Accessibility: Reduced Motion Support (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
