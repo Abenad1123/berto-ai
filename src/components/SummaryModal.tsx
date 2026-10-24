@@ -132,12 +132,12 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="tactile-card w-full max-w-lg bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 p-6 sm:p-7 text-center animate-in zoom-in-95 duration-150 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] my-8 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="tactile-card w-full max-w-lg bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 p-4 sm:p-7 text-center animate-in zoom-in-95 duration-150 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] my-auto max-h-[90vh] overflow-y-auto">
         {/* Celebratory Trophy & Star Badge */}
-        <div className="relative w-20 h-20 mx-auto mb-3">
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 border-[3px] border-slate-900 shadow-[0_4px_0_0_#78350f] flex items-center justify-center text-slate-950 transform -rotate-3 hover:rotate-3 transition-transform">
-            <Trophy className="w-10 h-10 stroke-[2.5]" />
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2.5 sm:mb-3">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 border-[3px] border-slate-900 shadow-[0_3px_0_0_#78350f] sm:shadow-[0_4px_0_0_#78350f] flex items-center justify-center text-slate-950 transform -rotate-3 hover:rotate-3 transition-transform">
+            <Trophy className="w-8 h-8 sm:w-10 sm:h-10 stroke-[2.5]" />
           </div>
           <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-indigo-600 text-white border-[1.5px] border-slate-900 flex items-center justify-center shadow-xs">
             <Sparkles className="w-3.5 h-3.5 fill-amber-300 stroke-none" />
@@ -145,7 +145,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
         </div>
 
         {/* Title & Subtitle */}
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
           Session Complete!
         </h2>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-700 dark:text-slate-300 mt-1 shadow-[0_1px_0_0_#09090b]">
@@ -153,9 +153,9 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
         </div>
 
         {/* Big Accuracy & Grade Banner */}
-        <div className="my-5 p-4 rounded-3xl bg-gradient-to-br from-indigo-50 via-violet-50/60 to-purple-50 dark:from-slate-800 dark:to-indigo-950/60 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#1e1b4b] dark:shadow-[0_4px_0_0_#000] flex items-center justify-around relative overflow-hidden">
+        <div className="my-3.5 sm:my-5 p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-indigo-50 via-violet-50/60 to-purple-50 dark:from-slate-800 dark:to-indigo-950/60 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#1e1b4b] dark:shadow-[0_4px_0_0_#000] flex items-center justify-around relative overflow-hidden">
           <div className="text-center">
-            <div className="text-4xl sm:text-5xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight">
+            <div className="text-3xl sm:text-5xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight">
               {accuracy}%
             </div>
             <div className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mt-1">
@@ -166,7 +166,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
           <div className="h-12 w-[2.5px] bg-slate-300 dark:bg-slate-700 rounded-full" />
 
           <div className="text-center">
-            <div className={`text-4xl sm:text-5xl font-black tracking-tight ${gradeInfo.color}`}>
+            <div className={`text-3xl sm:text-5xl font-black tracking-tight ${gradeInfo.color}`}>
               {gradeInfo.grade}
             </div>
             <div className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mt-1">
@@ -176,26 +176,26 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
         </div>
 
         {/* Quick Stats Grid with Vibrant Accent Rings */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="p-3.5 bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 rounded-2xl flex items-center gap-3 text-left shadow-[0_3px_0_0_#064e3b] dark:shadow-[0_3px_0_0_#000] ring-2 ring-emerald-400/30">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mb-3.5 sm:mb-4">
+          <div className="p-2.5 sm:p-3.5 bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 rounded-2xl flex items-center gap-2 sm:gap-3 text-left shadow-[0_3px_0_0_#064e3b] dark:shadow-[0_3px_0_0_#000] ring-2 ring-emerald-400/30">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Score</div>
-              <div className="text-sm font-black text-slate-950 dark:text-white">
+            <div className="min-w-0">
+              <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">Score</div>
+              <div className="text-xs sm:text-sm font-black text-slate-950 dark:text-white truncate">
                 {correctCount} / {total} Correct
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 rounded-2xl flex items-center gap-3 text-left shadow-[0_3px_0_0_#78350f] dark:shadow-[0_3px_0_0_#000] ring-2 ring-amber-400/30">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/80 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5 text-amber-700 dark:text-amber-400 fill-amber-400 stroke-[2.5]" />
+          <div className="p-2.5 sm:p-3.5 bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 rounded-2xl flex items-center gap-2 sm:gap-3 text-left shadow-[0_3px_0_0_#78350f] dark:shadow-[0_3px_0_0_#000] ring-2 ring-amber-400/30">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 dark:bg-amber-950/80 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700 dark:text-amber-400 fill-amber-400 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">XP Gained</div>
-              <div className="text-sm font-black text-slate-950 dark:text-white">
+            <div className="min-w-0">
+              <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">XP Gained</div>
+              <div className="text-xs sm:text-sm font-black text-slate-950 dark:text-white truncate">
                 +{xpEarned} XP
               </div>
             </div>
@@ -204,7 +204,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
 
         {/* Performance by Question Format */}
         {Object.keys(formatStats).length > 0 && (
-          <div className="mb-4 text-left p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2px] border-slate-900 dark:border-slate-700 space-y-2.5 shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000]">
+          <div className="mb-3.5 sm:mb-4 text-left p-3 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2px] border-slate-900 dark:border-slate-700 space-y-2 sm:space-y-2.5 shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000]">
             <div className="text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
               <span>Performance by Question Format</span>
@@ -284,20 +284,20 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
                 const missedIds = missedAnswers.map((a) => a.sourceCardId || a.cardId);
                 onRetryMissed(missedIds);
               }}
-              className="tactile-btn tactile-btn-amber py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
+              className="tactile-btn tactile-btn-amber w-full min-h-[48px] py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
             >
               <RotateCcw className="w-4 h-4 stroke-[2.5]" />
               <span>Retry Missed Questions ({missedAnswers.length})</span>
             </button>
           )}
 
-          <div className="flex gap-2.5">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2.5">
             <button
               onClick={() => {
                 sounds.playTap();
                 onRestart();
               }}
-              className="tactile-btn tactile-btn-emerald flex-1 py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
+              className="tactile-btn tactile-btn-emerald w-full sm:flex-1 min-h-[48px] py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
             >
               <Sparkles className="w-4 h-4 stroke-[2.5]" />
               <span>Fresh Quiz</span>
@@ -308,7 +308,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
                 sounds.playTap();
                 onHome();
               }}
-              className="tactile-btn tactile-btn-secondary flex-1 py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#000] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
+              className="tactile-btn tactile-btn-secondary w-full sm:flex-1 min-h-[48px] py-3 px-4 text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#000] active:translate-y-1 active:shadow-none rounded-2xl flex items-center justify-center"
             >
               <Home className="w-4 h-4 stroke-[2.5]" />
               <span>All Decks</span>

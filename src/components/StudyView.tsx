@@ -553,10 +553,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col justify-between pb-36 transition-colors">
+    <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col justify-between pb-44 sm:pb-36 transition-colors">
       {/* Top Header & Glowing Segmented Progress Bar */}
-      <div className="sticky top-0 z-20 bg-[#fbfaf8]/95 dark:bg-slate-900/95 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-4 py-3 sm:px-6 transition-colors shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
+      <div className="sticky top-0 z-20 bg-[#fbfaf8]/95 dark:bg-slate-900/95 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-3 py-2.5 sm:px-6 sm:py-3 transition-colors shadow-sm">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <button
             onClick={() => {
               clearAutoAdvance();
@@ -566,14 +566,14 @@ export const StudyView: React.FC<StudyViewProps> = ({
               }
             }}
             aria-label="Exit session"
-            className="w-10 h-10 rounded-2xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 shadow-[0_3px_0_0_#09090b] active:translate-y-0.5 active:shadow-none flex items-center justify-center transition-all cursor-pointer shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 shadow-[0_2.5px_0_0_#09090b] sm:shadow-[0_3px_0_0_#09090b] active:translate-y-0.5 active:shadow-none flex items-center justify-center transition-all cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5 stroke-[2.5]" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
           </button>
 
           {/* Thick Segmented Progress Bar with Glowing Tip */}
-          <div className="flex-1">
-            <div className="h-4 w-full bg-slate-200 dark:bg-slate-800 rounded-full border-[2.5px] border-slate-900 dark:border-slate-700 overflow-hidden relative shadow-inner p-0.5">
+          <div className="flex-1 min-w-[60px]">
+            <div className="h-3.5 sm:h-4 w-full bg-slate-200 dark:bg-slate-800 rounded-full border-[2px] sm:border-[2.5px] border-slate-900 dark:border-slate-700 overflow-hidden relative shadow-inner p-0.5">
               <div
                 className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(16,185,129,0.7)] relative"
                 style={{ width: `${Math.max(5, progressPercent)}%` }}
@@ -585,37 +585,40 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
           {/* Practice Mode or Engine Indicator */}
           {launcherConfig?.practiceMode ? (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-200 dark:bg-amber-950 text-slate-950 dark:text-amber-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
+            <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-200 dark:bg-amber-950 text-slate-950 dark:text-amber-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
               Practice Sandbox
             </span>
           ) : launcherConfig?.engine === 'offline' ? (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
+            <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
               <Zap className="w-3 h-3 fill-current" />
               Offline Quiz
             </span>
           ) : launcherConfig?.engine === 'ai' ? (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-950 dark:text-indigo-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
+            <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-950 dark:text-indigo-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
               <Brain className="w-3 h-3" />
               AI Arena
             </span>
           ) : null}
 
-          {/* Stopwatch Timer */}
-          <div className="hidden xs:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-800 dark:text-slate-200 shadow-[0_2px_0_0_#09090b] shrink-0">
+          {/* Stopwatch Timer - hidden on small mobile to guarantee no-clip fit */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-800 dark:text-slate-200 shadow-[0_2px_0_0_#09090b] shrink-0">
             <Timer className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 stroke-[2.5]" />
             <span>{formatTime(secondsElapsed)}</span>
           </div>
 
           {/* Combo / Streak Counter */}
           {currentStreak > 1 && (
-            <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 border-[2.5px] border-slate-900 px-3 py-1 rounded-xl text-xs font-black shadow-[0_2.5px_0_0_#78350f] animate-bounce shrink-0">
-              <Flame className="w-4 h-4 fill-orange-600 stroke-orange-700 animate-pulse" />
-              <span>🔥 {currentStreak} Combo!</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 border-[2px] sm:border-[2.5px] border-slate-900 px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl text-xs font-black shadow-[0_2px_0_0_#78350f] sm:shadow-[0_2.5px_0_0_#78350f] animate-bounce shrink-0 whitespace-nowrap">
+              <span className="inline sm:hidden">🔥 {currentStreak}</span>
+              <span className="hidden sm:flex items-center gap-1.5">
+                <Flame className="w-4 h-4 fill-orange-600 stroke-orange-700 animate-pulse" />
+                <span>🔥 {currentStreak} Combo!</span>
+              </span>
             </div>
           )}
 
           {/* Step Counter Badge */}
-          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border-[2px] border-slate-900 dark:border-slate-700 shadow-[0_2px_0_0_#09090b] tracking-tight shrink-0">
+          <div className="font-black text-xs sm:text-sm text-slate-900 dark:text-white bg-white dark:bg-slate-800 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl border-[2px] border-slate-900 dark:border-slate-700 shadow-[0_2px_0_0_#09090b] tracking-tight shrink-0 whitespace-nowrap">
             <span>{currentIndex + 1}</span>
             <span className="text-slate-400 dark:text-slate-500"> / {cards.length}</span>
           </div>
@@ -623,65 +626,65 @@ export const StudyView: React.FC<StudyViewProps> = ({
       </div>
 
       {/* Main Arena */}
-      <main className="max-w-2xl w-full mx-auto px-4 py-6 sm:py-8 flex-1 flex flex-col justify-center">
+      <main className="max-w-2xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-8 flex-1 flex flex-col justify-center">
         {/* FLASHCARD MODE */}
         {currentCard.type === 'flashcard' && (
           <div className="flex flex-col items-center w-full">
             <div
-              className="perspective-1000 w-full min-h-[320px] cursor-pointer select-none"
+              className="perspective-1000 w-full min-h-[260px] sm:min-h-[320px] cursor-pointer select-none"
               onClick={() => {
                 sounds.playCardFlip();
                 setIsFlipped(!isFlipped);
               }}
             >
               <div
-                className={`relative w-full min-h-[320px] transform-style-preserve-3d transition-transform duration-300 ${
+                className={`relative w-full min-h-[260px] sm:min-h-[320px] transform-style-preserve-3d transition-transform duration-300 ${
                   isFlipped ? 'rotate-y-180' : ''
                 }`}
               >
                 {/* Front Face: Question */}
-                <div className="absolute inset-0 backface-hidden tactile-card p-7 sm:p-9 flex flex-col justify-between bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617]">
+                <div className="absolute inset-0 backface-hidden tactile-card p-4 sm:p-8 flex flex-col justify-between bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] sm:shadow-[0_8px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] sm:dark:shadow-[0_8px_0_0_#020617]">
                   <div className="flex items-center justify-between text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-900 dark:text-indigo-300 border-[2px] border-slate-900 dark:border-indigo-700 shadow-[0_2px_0_0_#09090b]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-900 dark:text-indigo-300 border-[2px] border-slate-900 dark:border-indigo-700 shadow-[0_2px_0_0_#09090b]">
                       <Brain className="w-3.5 h-3.5" />
                       Question
                     </span>
-                    <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700">
+                    <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700">
                       <RotateCw className="w-3.5 h-3.5" /> Tap card to flip
                     </span>
                   </div>
 
-                  <div className="my-auto text-center py-6">
-                    <p className={`${isLargeText ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-black text-slate-950 dark:text-white leading-snug`}>
+                  <div className="my-auto text-center py-4 sm:py-6">
+                    <p className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-slate-950 dark:text-white leading-snug`}>
                       {currentCard.question}
                     </p>
                   </div>
 
                   <div className="text-center">
-                    <span className="px-3.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider shadow-sm">
+                    <span className="px-3 sm:px-3.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-wider shadow-sm">
                       Tap card or press Space
                     </span>
                   </div>
                 </div>
 
                 {/* Back Face: Answer */}
-                <div className="absolute inset-0 backface-hidden rotate-y-180 tactile-card p-7 sm:p-9 flex flex-col justify-between bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617]">
+                <div className="absolute inset-0 backface-hidden rotate-y-180 tactile-card p-4 sm:p-8 flex flex-col justify-between bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] sm:shadow-[0_8px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] sm:dark:shadow-[0_8px_0_0_#020617]">
                   <div className="flex items-center justify-between text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-[2px] border-slate-900 dark:border-emerald-700 shadow-[0_2px_0_0_#09090b]">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-[2px] border-slate-900 dark:border-emerald-700 shadow-[0_2px_0_0_#09090b]">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       Target Answer
                     </span>
-                    <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700">
+                    <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700">
                       <RotateCw className="w-3.5 h-3.5" /> Tap to flip back
                     </span>
                   </div>
 
-                  <div className="my-auto text-center py-4">
-                    <p className={`${isLargeText ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-3xl'} font-black text-emerald-600 dark:text-emerald-400 leading-snug`}>
+                  <div className="my-auto text-center py-3 sm:py-4">
+                    <p className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-emerald-600 dark:text-emerald-400 leading-snug`}>
                       {currentCard.answer}
                     </p>
                     {currentCard.explanation && (
-                      <p className="mt-4 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 bg-amber-50 dark:bg-amber-950/50 border-[2px] border-slate-900 dark:border-amber-700/60 rounded-2xl p-4 text-left shadow-[0_3px_0_0_#09090b] flex items-start gap-2.5">
+                      <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 bg-amber-50 dark:bg-amber-950/50 border-[2px] border-slate-900 dark:border-amber-700/60 rounded-2xl p-3 sm:p-4 text-left shadow-[0_3px_0_0_#09090b] flex items-start gap-2.5">
                         <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
                         <span>{currentCard.explanation}</span>
                       </p>
@@ -697,11 +700,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
             {/* FSRS Rating Buttons (4 tactile options: Again, Hard, Good, Easy) */}
             {isFlipped && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mt-6 pb-2 py-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 w-full mt-4 sm:mt-6 pb-2 py-1">
                 <button
                   type="button"
                   onClick={() => handleFlashcardGrade('again')}
-                  className="tactile-btn-rose py-3.5 text-xs sm:text-sm font-black flex flex-col items-center gap-0.5 shadow-[0_4px_0_0_#881337] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#881337] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-rose-400"
+                  className="tactile-btn-rose min-h-[52px] py-3 sm:py-3.5 text-xs sm:text-sm font-black flex flex-col items-center justify-center gap-0.5 shadow-[0_4px_0_0_#881337] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#881337] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-rose-400"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Again</span>
@@ -713,7 +716,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleFlashcardGrade('hard')}
-                  className="tactile-btn-amber py-3.5 text-xs sm:text-sm font-black flex flex-col items-center gap-0.5 shadow-[0_4px_0_0_#78350f] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#78350f] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-amber-400"
+                  className="tactile-btn-amber min-h-[52px] py-3 sm:py-3.5 text-xs sm:text-sm font-black flex flex-col items-center justify-center gap-0.5 shadow-[0_4px_0_0_#78350f] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#78350f] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-amber-400"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Hard</span>
@@ -725,7 +728,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleFlashcardGrade('good')}
-                  className="tactile-btn-emerald py-3.5 text-xs sm:text-sm font-black flex flex-col items-center gap-0.5 shadow-[0_4px_0_0_#064e3b] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#064e3b] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-emerald-400"
+                  className="tactile-btn-emerald min-h-[52px] py-3 sm:py-3.5 text-xs sm:text-sm font-black flex flex-col items-center justify-center gap-0.5 shadow-[0_4px_0_0_#064e3b] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#064e3b] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-emerald-400"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Good</span>
@@ -737,7 +740,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleFlashcardGrade('easy')}
-                  className="tactile-btn bg-gradient-to-b from-sky-400 to-sky-600 text-white border-[2.5px] border-slate-900 py-3.5 text-xs sm:text-sm font-black flex flex-col items-center gap-0.5 shadow-[0_4px_0_0_#0369a1] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#0369a1] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-sky-400"
+                  className="tactile-btn bg-gradient-to-b from-sky-400 to-sky-600 text-white border-[2.5px] border-slate-900 min-h-[52px] py-3 sm:py-3.5 text-xs sm:text-sm font-black flex flex-col items-center justify-center gap-0.5 shadow-[0_4px_0_0_#0369a1] hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#0369a1] active:translate-y-1 active:shadow-none focus-visible:ring-4 focus-visible:ring-sky-400"
                 >
                   <div className="flex items-center gap-1.5">
                     <span>Easy</span>
@@ -753,8 +756,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
         {/* MULTIPLE CHOICE MODE */}
         {currentCard.type === 'multiple_choice' && (
           <div>
-            <div className="tactile-card p-6 sm:p-8 mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="tactile-card p-4 sm:p-8 mb-4 sm:mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-100 dark:bg-indigo-950/70 text-indigo-950 dark:text-indigo-300 border-[2px] border-slate-900 dark:border-indigo-700 shadow-[0_2px_0_0_#09090b] transform -rotate-1">
                   <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 fill-indigo-600 dark:fill-indigo-400" />
                   <span>{deck.category}</span>
@@ -769,7 +772,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-3.5 pb-4 py-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pb-4 py-1">
               {currentCard.options?.map((option, idx) => {
                 const letter = String.fromCharCode(65 + idx);
                 const theme = letterThemes[idx % letterThemes.length];
@@ -800,10 +803,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     key={idx}
                     disabled={isAnswerSubmitted}
                     onClick={() => handleSubmitAnswer(option)}
-                    className={`tactile-btn p-4 sm:p-4.5 text-left justify-start gap-4 rounded-2xl w-full text-base sm:text-lg font-black transition-all cursor-pointer ${buttonClasses}`}
+                    className={`tactile-btn min-h-[52px] p-3.5 sm:p-4 text-left justify-start gap-3 sm:gap-4 rounded-2xl w-full text-sm sm:text-base font-black transition-all cursor-pointer ${buttonClasses}`}
                   >
                     <span
-                      className={`w-9 h-9 rounded-xl border-[2px] flex items-center justify-center font-black text-sm shrink-0 shadow-[0_1.5px_0_0_#09090b] ${
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border-[2px] flex items-center justify-center font-black text-xs sm:text-sm shrink-0 shadow-[0_1.5px_0_0_#09090b] ${
                         isAnswerSubmitted && isThisAnswer
                           ? 'bg-white text-emerald-700 border-emerald-950'
                           : isAnswerSubmitted && isSelected
@@ -814,7 +817,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                       {letter}
                     </span>
 
-                    <span className="leading-snug flex-1 font-bold">{option}</span>
+                    <span className="leading-snug flex-1 font-bold text-sm sm:text-base">{option}</span>
 
                     <kbd className="text-[11px] font-mono font-bold text-slate-400 dark:text-slate-500 opacity-70 bg-slate-100 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600 rounded px-1.5 py-0.5 hidden sm:inline-block">
                       [{idx + 1}]
@@ -829,8 +832,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
         {/* MULTIPLE SELECT (CHECKBOXES) MODE */}
         {currentCard.type === 'multiple_select' && (
           <div>
-            <div className="tactile-card p-6 sm:p-8 mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="tactile-card p-4 sm:p-8 mb-4 sm:mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-violet-100 dark:bg-violet-950/70 text-violet-950 dark:text-violet-300 border-[2px] border-slate-900 dark:border-violet-700 shadow-[0_2px_0_0_#09090b]">
                   <HelpCircle className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                   <span>Select all correct answers</span>
@@ -845,7 +848,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 gap-3.5 pb-4 py-1">
+            <div className="grid grid-cols-1 gap-2.5 sm:gap-3 pb-4 py-1">
               {currentCard.options?.map((option, idx) => {
                 const isSelected = selectedMultipleOptions.includes(option);
                 const targetAnswers = (currentCard.correctAnswers || [currentCard.answer]).map((a) =>
@@ -880,7 +883,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     key={idx}
                     disabled={isAnswerSubmitted}
                     onClick={() => toggleMultipleOption(option)}
-                    className={`tactile-btn p-4 text-left justify-start gap-4 rounded-2xl w-full text-base sm:text-lg font-black transition-all cursor-pointer ${buttonClasses}`}
+                    className={`tactile-btn min-h-[52px] p-3.5 sm:p-4 text-left justify-start gap-3 sm:gap-4 rounded-2xl w-full text-sm sm:text-base font-black transition-all cursor-pointer ${buttonClasses}`}
                   >
                     <span
                       className={`w-7 h-7 rounded-xl border-[2px] border-slate-900 flex items-center justify-center shrink-0 transition-transform ${
@@ -903,12 +906,12 @@ export const StudyView: React.FC<StudyViewProps> = ({
             </div>
 
             {!isAnswerSubmitted && (
-              <div className="flex justify-end pt-2">
+              <div className="flex sm:justify-end pt-2">
                 <button
                   type="button"
                   disabled={selectedMultipleOptions.length === 0}
                   onClick={handleSubmitMultipleSelect}
-                  className="tactile-btn-primary px-8 py-3.5 text-base font-black shadow-[0_4px_0_0_#1e1b4b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
+                  className="tactile-btn-primary w-full sm:w-auto min-h-[52px] justify-center px-6 sm:px-8 py-3.5 text-base font-black shadow-[0_4px_0_0_#1e1b4b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
                 >
                   <span>Submit Answer ({selectedMultipleOptions.length} selected)</span>
                   <ArrowRight className="w-5 h-5 stroke-[2.5]" />
@@ -921,8 +924,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
         {/* FILL IN THE BLANK (CLOZE) MODE */}
         {currentCard.type === 'fill_blank' && (
           <div>
-            <div className="tactile-card p-6 sm:p-8 mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="tactile-card p-4 sm:p-8 mb-4 sm:mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-300 border-[2px] border-slate-900 dark:border-amber-700 shadow-[0_2px_0_0_#09090b]">
                   <PenTool className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Fill in the blank</span>
@@ -940,7 +943,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
             {/* Input Box for typing missing answer */}
             <div className="space-y-4">
               <div className="relative">
-                <PenTool className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <PenTool className="w-5 h-5 absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   ref={blankInputRef}
                   type="text"
@@ -948,7 +951,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                   placeholder="Type the missing word or answer..."
                   value={typedBlankAnswer}
                   onChange={(e) => setTypedBlankAnswer(e.target.value)}
-                  className={`w-full pl-12 pr-24 py-4 rounded-2xl border-[2.5px] text-base sm:text-lg font-black shadow-inner focus:outline-none transition-all ${
+                  className={`w-full pl-11 sm:pl-12 pr-20 sm:pr-24 py-3.5 sm:py-4 rounded-2xl border-[2.5px] text-base sm:text-lg font-black shadow-inner focus:outline-none transition-all ${
                     isAnswerSubmitted
                       ? isCurrentCorrect
                         ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100'
@@ -964,12 +967,12 @@ export const StudyView: React.FC<StudyViewProps> = ({
               </div>
 
               {!isAnswerSubmitted && (
-                <div className="flex justify-end pt-1">
+                <div className="flex sm:justify-end pt-1">
                   <button
                     type="button"
                     disabled={!typedBlankAnswer.trim()}
                     onClick={handleSubmitBlank}
-                    className="tactile-btn-amber px-8 py-3.5 text-base font-black shadow-[0_4px_0_0_#78350f] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#78350f] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
+                    className="tactile-btn-amber w-full sm:w-auto min-h-[52px] justify-center px-6 sm:px-8 py-3.5 text-base font-black shadow-[0_4px_0_0_#78350f] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#78350f] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
                   >
                     <span>Submit Answer</span>
                     <ArrowRight className="w-5 h-5 stroke-[2.5]" />
@@ -983,8 +986,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
         {/* TRUE OR FALSE MODE */}
         {currentCard.type === 'true_false' && (
           <div>
-            <div className="tactile-card p-6 sm:p-8 mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="tactile-card p-4 sm:p-8 mb-4 sm:mb-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#020617] relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-sky-100 dark:bg-sky-950/70 text-sky-950 dark:text-sky-300 border-[2px] border-slate-900 dark:border-sky-700 shadow-[0_2px_0_0_#09090b]">
                   <Sparkles className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                   <span>True or False</span>
@@ -999,7 +1002,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pb-4 py-1">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-4 py-1">
               {['True', 'False'].map((val) => {
                 const isSelected = selectedOption === val;
                 const isThisAnswer = val.toLowerCase() === currentCard.answer.trim().toLowerCase();
@@ -1026,12 +1029,12 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     key={val}
                     disabled={isAnswerSubmitted}
                     onClick={() => handleSubmitAnswer(val)}
-                    className={`tactile-btn py-8 rounded-2xl flex flex-col items-center justify-center gap-2.5 text-xl sm:text-2xl font-black transition-all cursor-pointer active:translate-y-1 active:shadow-none ${buttonClasses}`}
+                    className={`tactile-btn min-h-[54px] sm:min-h-[140px] py-4 sm:py-8 rounded-2xl flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 text-lg sm:text-2xl font-black transition-all cursor-pointer active:translate-y-1 active:shadow-none ${buttonClasses}`}
                   >
                     {val === 'True' ? (
-                      <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+                      <CheckCircle2 className="w-7 h-7 sm:w-9 sm:h-9 stroke-[2.5]" />
                     ) : (
-                      <XCircle className="w-9 h-9 stroke-[2.5]" />
+                      <XCircle className="w-7 h-7 sm:w-9 sm:h-9 stroke-[2.5]" />
                     )}
                     <span>{val}</span>
                     <kbd className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-black/10 dark:bg-white/10 border border-current/20">
@@ -1048,27 +1051,27 @@ export const StudyView: React.FC<StudyViewProps> = ({
       {/* Signature High-Energy Bottom Drawer for Interactive Modes */}
       {isAnswerSubmitted && currentCard.type !== 'flashcard' && (
         <div
-          className={`fixed bottom-0 inset-x-0 z-30 p-5 sm:p-6 border-t-[3.5px] border-slate-900 dark:border-slate-800 transition-all duration-200 animate-in slide-in-from-bottom shadow-2xl ${
+          className={`fixed bottom-0 inset-x-0 z-30 p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))] border-t-[3.5px] border-slate-900 dark:border-slate-800 transition-all duration-200 animate-in slide-in-from-bottom shadow-2xl ${
             isCurrentCorrect
               ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-950 dark:text-emerald-100 shadow-[0_-8px_30px_rgba(16,185,129,0.25)]'
               : 'bg-rose-50 dark:bg-rose-950 text-rose-950 dark:text-rose-100 shadow-[0_-8px_30px_rgba(244,63,94,0.25)]'
           }`}
         >
-          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
+          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-start gap-3 sm:gap-4">
               {isCurrentCorrect ? (
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#064e3b] transform -rotate-3">
-                  <CheckCircle2 className="w-7 h-7 stroke-[3]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#064e3b] transform -rotate-3">
+                  <CheckCircle2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
                 </div>
               ) : (
-                <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#881337] transform rotate-3">
-                  <XCircle className="w-7 h-7 stroke-[3]" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#881337] transform rotate-3">
+                  <XCircle className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
                 </div>
               )}
 
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-black text-xl leading-tight text-slate-950 dark:text-white flex items-center gap-1.5">
+                  <h4 className="font-black text-lg sm:text-xl leading-tight text-slate-950 dark:text-white flex items-center gap-1.5">
                     {isCurrentCorrect ? (
                       <>
                         <span>Boom! Spot on!</span>
@@ -1117,7 +1120,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 clearAutoAdvance();
                 handleNextQuestion();
               }}
-              className={`px-8 py-3.5 text-base sm:text-lg shrink-0 font-black gap-2.5 cursor-pointer transition-all active:translate-y-1 active:shadow-none flex items-center justify-center rounded-2xl relative overflow-hidden select-none ${
+              className={`w-full sm:w-auto min-h-[50px] px-6 sm:px-8 py-3.5 text-base sm:text-lg shrink-0 font-black gap-2.5 cursor-pointer transition-all active:translate-y-1 active:shadow-none flex items-center justify-center rounded-2xl relative overflow-hidden select-none ${
                 isCurrentCorrect
                   ? 'tactile-btn-emerald shadow-[0_4px_0_0_#064e3b]'
                   : 'tactile-btn-rose shadow-[0_4px_0_0_#881337]'

@@ -132,17 +132,17 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 rounded-3xl shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617] p-6 sm:p-7 space-y-6 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+      <div className="w-full max-w-xl bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 rounded-3xl shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617] p-4 sm:p-7 space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b-[2.5px] border-slate-100 dark:border-slate-800 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] flex items-center justify-center shrink-0">
+        <div className="flex items-center justify-between border-b-[2.5px] border-slate-100 dark:border-slate-800 pb-3 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-400 text-slate-950 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] flex items-center justify-center shrink-0">
               <Rocket className="w-5 h-5 stroke-[2.5] -rotate-12" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black text-slate-950 dark:text-white leading-tight">
+                <h2 className="text-lg sm:text-xl font-black text-slate-950 dark:text-white leading-tight">
                   Study &amp; Quiz Arena
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-900 dark:text-indigo-300 border border-slate-900 dark:border-indigo-700 text-[10px] font-black uppercase tracking-wider">
@@ -180,7 +180,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
             {/* Offline Smart Engine */}
             <button
               type="button"
@@ -188,7 +188,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                 sounds.playTap();
                 setEngine('offline');
               }}
-              className={`p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group relative ${
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
                 engine === 'offline'
                   ? 'bg-amber-100/90 dark:bg-amber-950/60 border-slate-900 dark:border-amber-400 shadow-[0_4px_0_0_#78350f] -translate-y-0.5'
                   : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
@@ -222,7 +222,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                 sounds.playTap();
                 setEngine('ai');
               }}
-              className={`p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group relative ${
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
                 engine === 'ai'
                   ? 'bg-indigo-100/90 dark:bg-indigo-950/60 border-slate-900 dark:border-indigo-400 shadow-[0_4px_0_0_#1e1b4b] -translate-y-0.5'
                   : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
@@ -256,7 +256,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                 sounds.playTap();
                 setEngine('classic');
               }}
-              className={`p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-3 group relative ${
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
                 engine === 'classic'
                   ? 'bg-emerald-100/90 dark:bg-emerald-950/60 border-slate-900 dark:border-emerald-400 shadow-[0_4px_0_0_#064e3b] -translate-y-0.5'
                   : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
@@ -293,7 +293,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
               <span>2. Question Format Style</span>
             </label>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
               {[
                 { id: 'mixed', label: 'Randomized Mixed', icon: Sparkles, color: 'bg-violet-500 text-white' },
                 { id: 'multiple_choice', label: 'Multiple Choice', icon: HelpCircle, color: 'bg-indigo-500 text-white' },
@@ -311,7 +311,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                       sounds.playTap();
                       setFormat(f.id as QuizFormatPreference);
                     }}
-                    className={`p-3 rounded-2xl border-[2.5px] text-xs font-black flex items-center gap-2.5 transition-all cursor-pointer ${
+                    className={`p-2.5 sm:p-3 rounded-2xl border-[2.5px] text-xs font-black flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer min-h-[44px] ${
                       isSelected
                         ? 'border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-[0_3px_0_0_#09090b] -translate-y-0.5'
                         : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 hover:border-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -347,7 +347,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {countOptions.map((opt) => {
               const isSelected = countSelection === opt;
               const countNum = opt === 'all' ? activeCardPool.length : Math.min(Number(opt), activeCardPool.length);
@@ -360,7 +360,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                     sounds.playTap();
                     setCountSelection(opt as number | 'all');
                   }}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-black border-[2.5px] transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`min-h-[40px] px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl text-xs font-black border-[2.5px] transition-all cursor-pointer flex items-center gap-2 ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 border-slate-900 shadow-[0_3px_0_0_#78350f] -translate-y-0.5'
                       : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-750'
@@ -387,7 +387,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   sounds.playTap();
                   setDueOnly(!dueOnly);
                 }}
-                className={`ml-auto px-3.5 py-2 rounded-2xl text-xs font-black border-[2.5px] flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`min-h-[40px] px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl text-xs font-black border-[2.5px] flex items-center gap-1.5 transition-all cursor-pointer ${
                   dueOnly
                     ? 'bg-rose-500 text-white border-slate-900 shadow-[0_3px_0_0_#881337] -translate-y-0.5'
                     : 'bg-rose-50 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50'
@@ -401,7 +401,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
         </div>
 
         {/* 4. Practice Mode Toggle */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] flex items-center justify-between gap-3">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] flex items-center justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-[2px] border-slate-900 flex items-center justify-center shrink-0 mt-0.5">
               <Shield className="w-4 h-4 stroke-[2.5]" />
@@ -449,12 +449,12 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
         </div>
 
         {/* CTA Launch Button */}
-        <div className="pt-2">
+        <div className="pt-2 pb-1">
           <button
             type="button"
             disabled={isGenerating || activeCardPool.length === 0}
             onClick={handleLaunch}
-            className="tactile-btn-emerald w-full py-4 text-base sm:text-lg font-black shadow-[0_5px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_#064e3b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all"
+            className="tactile-btn-emerald w-full min-h-[52px] py-3.5 sm:py-4 text-base sm:text-lg font-black shadow-[0_5px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_#064e3b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all"
           >
             {isGenerating ? (
               <>

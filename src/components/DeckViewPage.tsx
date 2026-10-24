@@ -359,54 +359,57 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors pb-16">
       {/* Top Sticky Navigation Bar */}
-      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-4 py-3 sm:px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 py-2 sm:px-6 sm:py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
           {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 min-w-0">
             <button
               onClick={() => {
                 sounds.playTap();
                 onBack();
               }}
-              className="tactile-btn-secondary px-3 py-1.5 text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none shrink-0"
+              className="tactile-btn-secondary px-2.5 sm:px-3 py-1.5 min-h-[44px] text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none shrink-0"
+              aria-label="Back to all decks"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>All Decks</span>
+              <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">All Decks</span>
+              <span className="sm:hidden">Decks</span>
             </button>
 
             {parentDeck && (
               <>
-                <span className="text-slate-400 dark:text-slate-500 font-bold">/</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold shrink-0">/</span>
                 <button
                   onClick={() => {
                     sounds.playTap();
                     onSelectSubDeck(parentDeck);
                   }}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-300 dark:border-slate-700 truncate max-w-[150px] shadow-[0_1.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                  className="px-2 sm:px-2.5 py-1 min-h-[44px] flex items-center rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-300 dark:border-slate-700 truncate max-w-[80px] sm:max-w-[150px] shadow-[0_1.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none shrink-0"
                 >
-                  {parentDeck.title}
+                  <span className="truncate">{parentDeck.title}</span>
                 </button>
               </>
             )}
 
-            <span className="text-slate-400 dark:text-slate-500 font-bold">/</span>
-            <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[200px]">
+            <span className="text-slate-400 dark:text-slate-500 font-bold shrink-0">/</span>
+            <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[90px] sm:max-w-[200px]">
               {deck.title}
             </span>
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {cards.length > 0 && (
               <button
                 onClick={() => {
                   sounds.playTap();
                   onStartStudy(deck);
                 }}
-                className="tactile-btn-emerald px-4 py-2 text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-0.5 active:shadow-none"
+                className="tactile-btn-emerald px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-black gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-0.5 active:shadow-none shrink-0"
               >
-                <Play className="w-4 h-4 fill-white stroke-none" />
-                <span>Study ({dueCardsCount > 0 ? `${dueCardsCount} Due` : 'Review'})</span>
+                <Play className="w-4 h-4 fill-white stroke-none shrink-0" />
+                <span className="hidden sm:inline">Study ({dueCardsCount > 0 ? `${dueCardsCount} Due` : 'Review'})</span>
+                <span className="sm:hidden">{dueCardsCount > 0 ? `${dueCardsCount} Due` : 'Study'}</span>
               </button>
             )}
 
@@ -417,7 +420,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                 }
               }}
               aria-label="Delete deck"
-              className="tactile-btn-rose p-2 rounded-xl text-xs shadow-[0_2.5px_0_0_#881337] active:translate-y-0.5 active:shadow-none"
+              className="tactile-btn-rose w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-xs shadow-[0_2.5px_0_0_#881337] active:translate-y-0.5 active:shadow-none flex items-center justify-center shrink-0"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -426,64 +429,64 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
       </header>
 
       {/* Main Content Arena */}
-      <main className="max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
+      <main className="max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6">
         {/* Deck Hero Summary Card with Vibrant Header Banner */}
         <section className="tactile-card bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] relative overflow-hidden">
           {/* Top Dynamic Gradient Accent Stripe matching deck color */}
           <div className={`h-3 w-full bg-gradient-to-r ${activeTheme.gradient} border-b-[2px] border-slate-900`} />
 
-          <div className="p-6 sm:p-8 space-y-5">
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-5">
-              <div className="space-y-3 flex-1">
+          <div className="p-4 sm:p-8 space-y-4 sm:space-y-5">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-5">
+              <div className="space-y-3 flex-1 min-w-0">
                 {/* Playful Stats & Info Badges */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   {/* Category Pill */}
-                  <span className="tactile-pill bg-indigo-100 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 border-slate-900 shadow-[0_2px_0_0_#09090b]">
-                    {getCategoryIcon(deck.category, 'w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400')}
-                    <span>{deck.category}</span>
+                  <span className="tactile-pill bg-indigo-100 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 border-slate-900 shadow-[0_2px_0_0_#09090b] text-[11px] sm:text-xs">
+                    {getCategoryIcon(deck.category, 'w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0')}
+                    <span className="truncate max-w-[120px] sm:max-w-none">{deck.category}</span>
                   </span>
 
                   {/* Due cards with fire badge */}
                   {dueCardsCount > 0 ? (
-                    <span className="tactile-pill bg-rose-500 text-white border-slate-900 shadow-[0_2px_0_0_#881337] animate-pop">
-                      <Flame className="w-3.5 h-3.5 fill-amber-300 text-amber-300 stroke-[2.5]" />
+                    <span className="tactile-pill bg-rose-500 text-white border-slate-900 shadow-[0_2px_0_0_#881337] animate-pop text-[11px] sm:text-xs shrink-0">
+                      <Flame className="w-3.5 h-3.5 fill-amber-300 text-amber-300 stroke-[2.5] shrink-0" />
                       <span>{dueCardsCount} Due for Quest</span>
                     </span>
                   ) : (
-                    <span className="tactile-pill bg-emerald-100 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-300 border-slate-900 shadow-[0_2px_0_0_#09090b]">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 fill-emerald-500" />
+                    <span className="tactile-pill bg-emerald-100 dark:bg-emerald-950/70 text-emerald-950 dark:text-emerald-300 border-slate-900 shadow-[0_2px_0_0_#09090b] text-[11px] sm:text-xs shrink-0">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 fill-emerald-500 shrink-0" />
                       <span>Deck Mastered</span>
                     </span>
                   )}
 
                   {/* Total Cards Chip */}
                   {cards.length === 0 ? (
-                    <span className="tactile-pill bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-300 border-slate-900 shadow-[0_2px_0_0_#78350f]">
-                      <Folder className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="tactile-pill bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-300 border-slate-900 shadow-[0_2px_0_0_#78350f] text-[11px] sm:text-xs shrink-0">
+                      <Folder className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                       <span>Folder Deck</span>
                     </span>
                   ) : (
-                    <span className="tactile-pill bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-900 shadow-[0_2px_0_0_#09090b]">
-                      <Layers className="w-3.5 h-3.5 text-violet-600" />
+                    <span className="tactile-pill bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-900 shadow-[0_2px_0_0_#09090b] text-[11px] sm:text-xs shrink-0">
+                      <Layers className="w-3.5 h-3.5 text-violet-600 shrink-0" />
                       <span>{cards.length} Study Cards</span>
                     </span>
                   )}
 
                   {/* Subdecks Chip if any exist */}
                   {subDecks.length > 0 && (
-                    <span className="tactile-pill bg-sky-100 dark:bg-sky-950/70 text-sky-950 dark:text-sky-300 border-slate-900 shadow-[0_2px_0_0_#09090b]">
-                      <FolderTree className="w-3.5 h-3.5 text-sky-600" />
+                    <span className="tactile-pill bg-sky-100 dark:bg-sky-950/70 text-sky-950 dark:text-sky-300 border-slate-900 shadow-[0_2px_0_0_#09090b] text-[11px] sm:text-xs shrink-0">
+                      <FolderTree className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                       <span>{subDecks.length} Sub-decks</span>
                     </span>
                   )}
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white leading-tight tracking-tight">
+                <h1 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white leading-tight tracking-tight break-words">
                   {deck.title}
                 </h1>
 
                 {deck.description && (
-                  <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl break-words">
                     {deck.description}
                   </p>
                 )}
@@ -491,11 +494,11 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                 {/* Tags with tactile badges */}
                 {deck.tags && deck.tags.length > 0 && (
                   <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                    <Tag className="w-3.5 h-3.5 text-slate-400" />
+                    <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     {deck.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-[1.5px] border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b]"
+                        className="px-2.5 py-0.5 rounded-lg text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-[1.5px] border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b] truncate max-w-[150px]"
                       >
                         {tag.startsWith('#') ? tag : `#${tag}`}
                       </span>
@@ -505,16 +508,16 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
               </div>
 
               {/* Quick Action Block */}
-              <div className="flex sm:flex-col items-center gap-2.5 w-full sm:w-auto shrink-0">
+              <div className="flex sm:flex-col items-center gap-2.5 w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
                 {cards.length > 0 ? (
                   <button
                     onClick={() => {
                       sounds.playTap();
                       onStartStudy(deck);
                     }}
-                    className="tactile-btn-emerald w-full sm:w-auto px-6 py-3.5 text-sm sm:text-base font-black gap-2.5 shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-0.5"
+                    className="tactile-btn-emerald w-full sm:w-auto px-5 py-3 sm:px-6 sm:py-3.5 min-h-[48px] text-sm sm:text-base font-black gap-2.5 shadow-[0_4px_0_0_#064e3b] active:translate-y-1 active:shadow-none hover:-translate-y-0.5"
                   >
-                    <Play className="w-4 h-4 fill-white stroke-none" />
+                    <Play className="w-4 h-4 fill-white stroke-none shrink-0" />
                     <span>Start Study Quest</span>
                   </button>
                 ) : (
@@ -529,17 +532,17 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
 
         {/* Sub-Decks Section with Tactile Folder Pills */}
         {deck.id && (
-          <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#09090b]">
+          <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#09090b] shrink-0">
                   <FolderTree className="w-4 h-4" />
                 </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white truncate">
                     Sub-Decks Realm
                   </h2>
-                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
                     {subDecks.length} sub-deck chapters attached
                   </p>
                 </div>
@@ -551,7 +554,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   sounds.playTap();
                   onCreateSubDeck(deck.id!);
                 }}
-                className="tactile-btn-secondary px-3 py-1.5 text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                className="tactile-btn-secondary px-3 py-2 min-h-[40px] text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Sub-Deck</span>
@@ -567,14 +570,14 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                       sounds.playTap();
                       onSelectSubDeck(sub);
                     }}
-                    className="p-4 rounded-2xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 hover:bg-indigo-50/70 dark:hover:bg-slate-700/80 shadow-[0_3px_0_0_#09090b] hover:shadow-[0_5px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition-all flex items-center justify-between group"
+                    className="p-3.5 sm:p-4 rounded-2xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/90 hover:bg-indigo-50/70 dark:hover:bg-slate-700/80 shadow-[0_3px_0_0_#09090b] hover:shadow-[0_5px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition-all flex items-center justify-between group gap-2"
                   >
-                    <div className="flex items-center gap-3 truncate pr-2">
+                    <div className="flex items-center gap-2.5 sm:gap-3 truncate pr-1 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0 shadow-[0_1.5px_0_0_#09090b]">
                         <Folder className="w-4 h-4 fill-amber-400 stroke-slate-900" />
                       </div>
-                      <div className="space-y-0.5 truncate">
-                        <div className="text-xs font-black text-slate-900 dark:text-white truncate">
+                      <div className="space-y-0.5 truncate min-w-0">
+                        <div className="text-xs sm:text-sm font-black text-slate-900 dark:text-white truncate">
                           {sub.title}
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -591,7 +594,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                         sounds.playTap();
                         onSelectSubDeck(sub);
                       }}
-                      className="tactile-btn-primary px-2.5 py-1 text-[11px] font-black shrink-0 flex items-center gap-1 shadow-[0_2px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none"
+                      className="tactile-btn-primary px-3 py-2 min-h-[40px] text-[11px] font-black shrink-0 flex items-center gap-1 shadow-[0_2px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none"
                     >
                       <span>Open</span>
                       <ChevronRight className="w-3 h-3" />
@@ -611,17 +614,17 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
 
         {/* Card Creator Drawer / Section with Highlight Toolbar & Instant Preview */}
         {isAddingCard && (
-          <section className="tactile-card p-5 sm:p-7 bg-amber-50/90 dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-amber-600 shadow-[0_6px_0_0_#78350f] dark:shadow-[0_6px_0_0_#451a03] space-y-4 animate-in zoom-in-95 duration-100">
-            <div className="flex items-center justify-between pb-2 border-b-[2px] border-slate-900 dark:border-slate-700">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#78350f]">
+          <section className="tactile-card p-4 sm:p-7 bg-amber-50/90 dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-amber-600 shadow-[0_6px_0_0_#78350f] dark:shadow-[0_6px_0_0_#451a03] space-y-4 animate-in zoom-in-95 duration-100">
+            <div className="flex items-center justify-between pb-2 border-b-[2px] border-slate-900 dark:border-slate-700 gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#78350f] shrink-0">
                   <Sparkles className="w-4 h-4 fill-slate-950" />
                 </div>
-                <div>
-                  <h3 className="text-base font-black text-slate-950 dark:text-amber-200">
+                <div className="min-w-0">
+                  <h3 className="text-base font-black text-slate-950 dark:text-amber-200 truncate">
                     Card Creator Workshop
                   </h3>
-                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate">
                     Craft a card with cloze blank, choices, or true/false
                   </p>
                 </div>
@@ -630,18 +633,19 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddingCard(false)}
-                className="w-8 h-8 rounded-xl border-[2px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center cursor-pointer shadow-[0_2px_0_0_#09090b] hover:bg-slate-100 active:translate-y-0.5 active:shadow-none"
+                aria-label="Close card creator"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl border-[2px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center cursor-pointer shadow-[0_2px_0_0_#09090b] hover:bg-slate-100 active:translate-y-0.5 active:shadow-none shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Playful Question Type Selector Tabs with Icons */}
+            {/* Playful Question Type Selector Tabs with Icons - Horizontal scroll on mobile */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 1. Select Question Format
               </label>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 overflow-x-auto pb-1.5 sm:flex-wrap scrollbar-none">
                 {[
                   { id: 'multiple_choice', label: 'Multiple Choice', icon: HelpCircle },
                   { id: 'multiple_select', label: 'Checkboxes (Multi)', icon: CheckSquare },
@@ -664,7 +668,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                           setNewCorrectAnswers(['True']);
                         }
                       }}
-                      className={`px-3 py-1.5 text-xs font-black rounded-xl border-[2px] transition-all flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-3 py-2 min-h-[40px] text-xs font-black rounded-xl border-[2px] transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                         isActive
                           ? 'bg-amber-400 text-slate-950 border-slate-900 shadow-[0_2.5px_0_0_#78350f] -translate-y-0.5'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b] hover:bg-amber-100/50'
@@ -681,19 +685,19 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
             <div className="space-y-4">
               {/* Question Textarea with Vibrant Cloze Toolbar */}
               <div>
-                <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                <div className="flex items-stretch sm:items-center justify-between mb-1.5 flex-col sm:flex-row gap-2">
                   <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <span>2. Question / Statement Prompt *</span>
                   </label>
 
-                  {/* Vibrant Cloze Toolbar Button */}
+                  {/* Vibrant Cloze Toolbar Button formatted for mobile */}
                   <button
                     type="button"
                     onClick={handleHighlightToBlankOrAnswer}
-                    className="tactile-btn-amber px-3 py-1 text-xs font-black gap-1.5 shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none inline-flex items-center"
+                    className="tactile-btn-amber px-3 py-2 min-h-[40px] text-xs font-black gap-1.5 shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none inline-flex items-center justify-center w-full sm:w-auto"
                     title="Highlight text in the box and click to set as cloze blank or answer"
                   >
-                    <Highlighter className="w-3.5 h-3.5" />
+                    <Highlighter className="w-3.5 h-3.5 shrink-0" />
                     <span>Highlight to Cloze Blank / Answer</span>
                   </button>
                 </div>
@@ -710,11 +714,11 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   }
                   value={newQuestion}
                   onChange={(e) => setNewQuestion(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
 
                 <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                  <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                   <span>
                     Pro Tip: Highlight any key word in the box and click the yellow button above to generate a cloze blank!
                   </span>
@@ -723,8 +727,8 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
 
               {/* Instant Preview Card with Glowing Border */}
               {(newQuestion.trim() || newAnswer.trim()) && (
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border-[2.5px] border-amber-400 dark:border-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.2)] space-y-2">
-                  <div className="flex items-center justify-between">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 border-[2.5px] border-amber-400 dark:border-amber-500 shadow-[0_4px_12px_rgba(245,158,11,0.2)] space-y-2">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
                       <Eye className="w-3 h-3" />
                       <span>Instant Card Preview</span>
@@ -734,7 +738,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                     </span>
                   </div>
 
-                  <div className="text-sm font-black text-slate-900 dark:text-white">
+                  <div className="text-sm font-black text-slate-900 dark:text-white break-words">
                     {newType === 'fill_blank' && newQuestion.includes('[______]') ? (
                       newQuestion.split('[______]').map((part, pIdx, arr) => (
                         <React.Fragment key={pIdx}>
@@ -752,8 +756,8 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   </div>
 
                   {newAnswer && (
-                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 pt-1">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 pt-1 break-words">
+                      <Check className="w-3.5 h-3.5 stroke-[3] shrink-0" />
                       <span>Target Answer: {newAnswer}</span>
                     </div>
                   )}
@@ -764,12 +768,12 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
               {/* 1. Multiple Choice */}
               {newType === 'multiple_choice' && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                       Choices (Click letter badge to set correct answer)
                     </label>
                     {newAnswer && (
-                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 truncate">
                         Correct: {newAnswer}
                       </span>
                     )}
@@ -793,7 +797,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                               sounds.playTap();
                               setNewAnswer(opt);
                             }}
-                            className={`w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
+                            className={`w-9 h-9 sm:w-7 sm:h-7 min-w-[36px] min-h-[36px] sm:min-w-[28px] sm:min-h-[28px] rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
                               isCorrect
                                 ? 'bg-emerald-500 text-white'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
@@ -812,7 +816,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                               setNewOptions(copy);
                               if (isCorrect) setNewAnswer(e.target.value);
                             }}
-                            className="w-full text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none"
+                            className="w-full text-base sm:text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none py-1"
                           />
                         </div>
                       );
@@ -824,12 +828,12 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
               {/* 2. Checkboxes (Multiple Select) */}
               {newType === 'multiple_select' && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                      <CheckSquare className="w-3.5 h-3.5 text-indigo-500" />
+                      <CheckSquare className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                       <span>Checkboxes (Check all correct answers)</span>
                     </label>
-                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
+                    <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 shrink-0">
                       {newCorrectAnswers.length} correct
                     </span>
                   </div>
@@ -855,7 +859,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                                 setNewCorrectAnswers([...newCorrectAnswers, opt]);
                               }
                             }}
-                            className={`w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
+                            className={`w-9 h-9 sm:w-7 sm:h-7 min-w-[36px] min-h-[36px] sm:min-w-[28px] sm:min-h-[28px] rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
                               isCorrect
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
@@ -879,7 +883,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                                 );
                               }
                             }}
-                            className="w-full text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none"
+                            className="w-full text-base sm:text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none py-1"
                           />
                         </div>
                       );
@@ -904,7 +908,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                           setNewAnswer(val);
                           setNewCorrectAnswers([val]);
                         }}
-                        className={`py-3 rounded-2xl border-[2.5px] text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        className={`py-3 min-h-[48px] rounded-2xl border-[2.5px] text-sm font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
                           newAnswer === val
                             ? val === 'True'
                               ? 'bg-emerald-500 text-white border-slate-900 shadow-[0_3px_0_0_#064e3b]'
@@ -935,7 +939,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                     }
                     value={newAnswer}
                     onChange={(e) => setNewAnswer(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2.5 min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                 </div>
               )}
@@ -950,23 +954,23 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   placeholder="e.g. Cellular respiration generates ATP through oxidative phosphorylation."
                   value={newExplanation}
                   onChange={(e) => setNewExplanation(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl border-[2px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-4 py-2.5 min-h-[44px] rounded-2xl border-[2px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t-[2px] border-slate-900/20 dark:border-slate-800">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 pt-3 border-t-[2px] border-slate-900/20 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setIsAddingCard(false)}
-                className="tactile-btn-secondary px-4 py-2 text-xs font-black shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                className="tactile-btn-secondary px-4 py-2.5 min-h-[44px] text-xs font-black shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSaveCard}
-                className="tactile-btn-amber px-6 py-2.5 text-xs sm:text-sm font-black shadow-[0_3px_0_0_#78350f] active:translate-y-1 active:shadow-none"
+                className="tactile-btn-amber px-6 py-2.5 min-h-[44px] text-xs sm:text-sm font-black shadow-[0_3px_0_0_#78350f] active:translate-y-1 active:shadow-none w-full sm:w-auto"
               >
                 Save Card to Deck
               </button>
@@ -975,17 +979,17 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
         )}
 
         {/* Cards Management Arena */}
-        <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-5">
+        <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#09090b]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300 border-[2px] border-slate-900 flex items-center justify-center shadow-[0_2px_0_0_#09090b] shrink-0">
                 <Layers className="w-4 h-4" />
               </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white truncate">
                   Study Cards ({cards.length})
                 </h2>
-                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
                   Interactive quest questions with instant answers
                 </p>
               </div>
@@ -998,7 +1002,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   sounds.playTap();
                   setIsAddingCard(true);
                 }}
-                className="tactile-btn-amber px-3.5 py-2 text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#78350f] active:translate-y-0.5 active:shadow-none shrink-0"
+                className="tactile-btn-amber px-4 py-2 min-h-[40px] text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#78350f] active:translate-y-0.5 active:shadow-none w-full sm:w-auto justify-center"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Card</span>
@@ -1007,8 +1011,8 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
           </div>
 
           {/* Question Type Filter Buttons as lively tactile chips with active states */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 mr-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:flex-wrap scrollbar-none">
+            <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 mr-1 shrink-0">
               Filter:
             </span>
             {[
@@ -1029,7 +1033,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                     sounds.playTap();
                     setSelectedTypeFilter(pill.id as 'all' | QuestionType);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black border-[2px] transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-black border-[2px] transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                     isSelected
                       ? 'bg-violet-600 text-white border-slate-900 shadow-[0_2.5px_0_0_#1e1b4b] -translate-y-0.5'
                       : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b] hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -1050,7 +1054,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
               placeholder="Search question prompts, answers, or explanations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -1066,22 +1070,22 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                   <div
                     key={card.id || idx}
                     onClick={() => card.id && toggleFlip(card.id)}
-                    className={`p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 ${typeConfig.borderAccent} shadow-[0_4px_0_0_#09090b] hover:shadow-[0_6px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer group`}
+                    className={`p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800/90 border-[2.5px] border-slate-900 dark:border-slate-700 ${typeConfig.borderAccent} shadow-[0_4px_0_0_#09090b] hover:shadow-[0_6px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer group`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2.5">
+                    <div className="flex items-start justify-between gap-3 sm:gap-4">
+                      <div className="flex-1 space-y-2.5 min-w-0">
                         {/* Header Badge */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs shadow-[0_1.5px_0_0_#09090b]">
+                          <span className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-xs shadow-[0_1.5px_0_0_#09090b] shrink-0">
                             {idx + 1}
                           </span>
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${typeConfig.chipBg} ${typeConfig.chipText} border-[1.5px] ${typeConfig.badgeBorder}`}>
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${typeConfig.chipBg} ${typeConfig.chipText} border-[1.5px] ${typeConfig.badgeBorder} shrink-0`}>
                             <TypeIcon className="w-3 h-3" />
                             <span>{typeConfig.label}</span>
                           </span>
 
                           {/* Interactive test pill */}
-                          <span className="tactile-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 shadow-[0_1.5px_0_0_#09090b] text-[10px] py-0.5 px-2">
+                          <span className="tactile-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 shadow-[0_1.5px_0_0_#09090b] text-[10px] py-0.5 px-2 shrink-0">
                             {isFlipped ? (
                               <>
                                 <EyeOff className="w-3 h-3 text-rose-500" />
@@ -1097,7 +1101,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                         </div>
 
                         {/* Question Text */}
-                        <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-snug">
+                        <h4 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-snug break-words">
                           {card.type === 'fill_blank' && card.question.includes('[______]') ? (
                             card.question.split('[______]').map((part, pIdx, arr) => (
                               <React.Fragment key={pIdx}>
@@ -1140,7 +1144,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                         {/* Revealed Answer Box with Celebration Styling */}
                         {isFlipped && (
                           <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border-[2px] border-emerald-600 dark:border-emerald-600 space-y-1.5 animate-in fade-in zoom-in-95 duration-150 shadow-[0_3px_0_0_#064e3b]">
-                            <div className="text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
+                            <div className="text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-200 flex items-center gap-2 break-words">
                               <span className="w-5 h-5 rounded-md bg-emerald-500 text-white flex items-center justify-center shrink-0">
                                 <Check className="w-3.5 h-3.5 stroke-[3]" />
                               </span>
@@ -1152,7 +1156,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                               </span>
                             </div>
                             {card.explanation && (
-                              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 pt-0.5">
+                              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 pt-0.5 break-words">
                                 <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" aria-hidden="true" />
                                 <span>{card.explanation}</span>
                               </p>
@@ -1170,7 +1174,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                             if (card.id) handleDeleteCard(card.id);
                           }}
                           aria-label="Delete card"
-                          className="text-slate-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-400 transition-colors"
+                          className="text-slate-400 hover:text-rose-600 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-400 active:bg-rose-100 transition-colors cursor-pointer shrink-0"
                         >
                           <Trash2 className="w-4 h-4 stroke-[2.5]" />
                         </button>

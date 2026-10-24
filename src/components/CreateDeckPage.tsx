@@ -429,60 +429,66 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors pb-16">
       {/* Top Sticky Navigation Bar */}
-      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-4 py-3 sm:px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 py-2 sm:px-6 sm:py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => {
                 sounds.playTap();
                 onBack();
               }}
-              className="tactile-btn-secondary px-3 py-1.5 text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+              className="tactile-btn-secondary px-2.5 sm:px-3 py-1.5 min-h-[44px] text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none shrink-0"
+              aria-label="Back to decks"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Decks</span>
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Back to Decks</span>
+              <span className="sm:hidden">Back</span>
             </button>
-            <div className="h-6 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block" />
-            <h1 className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 hidden sm:inline" />
-              <span>Craft New Deck</span>
+            <div className="h-6 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block shrink-0" />
+            <h1 className="text-base sm:text-xl font-black text-slate-950 dark:text-white tracking-tight flex items-center gap-2 truncate">
+              <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 hidden sm:inline shrink-0" />
+              <span className="truncate">Craft New Deck</span>
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {tab === 'ai' ? (
               <button
                 onClick={handleGenerateAI}
                 disabled={isLoading}
-                className="tactile-btn-primary px-4 py-2 text-xs sm:text-sm gap-2 shadow-[0_3px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none disabled:opacity-50"
+                className="tactile-btn-primary px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none disabled:opacity-50 shrink-0"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Forging Cards...</span>
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span className="hidden sm:inline">Forging Cards...</span>
+                    <span className="sm:hidden">Forging...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 fill-amber-300 stroke-none" />
-                    <span>Generate AI Deck</span>
+                    <Sparkles className="w-4 h-4 fill-amber-300 stroke-none shrink-0" />
+                    <span className="hidden sm:inline">Generate AI Deck</span>
+                    <span className="sm:hidden">Generate</span>
                   </>
                 )}
               </button>
             ) : tab === 'folder' ? (
               <button
                 onClick={handleSaveManual}
-                className="tactile-btn-amber px-4 py-2 text-xs sm:text-sm gap-2 shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none"
+                className="tactile-btn-amber px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none shrink-0"
               >
-                <FolderPlus className="w-4 h-4 stroke-[2.5]" />
-                <span>Create Folder Realm</span>
+                <FolderPlus className="w-4 h-4 stroke-[2.5] shrink-0" />
+                <span className="hidden sm:inline">Create Folder Realm</span>
+                <span className="sm:hidden">Create</span>
               </button>
             ) : (
               <button
                 onClick={handleSaveManual}
-                className="tactile-btn-emerald px-4 py-2 text-xs sm:text-sm gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-0.5 active:shadow-none"
+                className="tactile-btn-emerald px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-0.5 active:shadow-none shrink-0"
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Save Quest Deck</span>
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Save Quest Deck</span>
+                <span className="sm:hidden">Save</span>
               </button>
             )}
           </div>
@@ -490,7 +496,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 flex-1 space-y-6">
+      <main className="max-w-4xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8 flex-1 space-y-4 sm:space-y-6">
         {/* Method Switcher Tabs with Playful Drop Shadows */}
         <div className="p-1.5 bg-slate-200/90 dark:bg-slate-800 rounded-2xl border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] flex gap-1.5">
           <button
@@ -499,14 +505,14 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               sounds.playTap();
               setTab('ai');
             }}
-            className={`flex-1 py-2.5 px-3 text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-3 min-h-[44px] text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               tab === 'ai'
                 ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#09090b] -translate-y-0.5'
                 : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400" />
-            <span>AI Generator</span>
+            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-400 shrink-0" />
+            <span className="truncate">AI Generator</span>
           </button>
 
           <button
@@ -515,14 +521,14 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               sounds.playTap();
               setTab('manual');
             }}
-            className={`flex-1 py-2.5 px-3 text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-3 min-h-[44px] text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               tab === 'manual'
                 ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#09090b] -translate-y-0.5'
                 : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <Layers className="w-4 h-4 text-indigo-500" />
-            <span>Manual Cards</span>
+            <Layers className="w-4 h-4 text-indigo-500 shrink-0" />
+            <span className="truncate">Manual<span className="hidden sm:inline">&nbsp;Cards</span></span>
           </button>
 
           <button
@@ -531,15 +537,15 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               sounds.playTap();
               setTab('folder');
             }}
-            className={`flex-1 py-2.5 px-3 text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-2.5 px-2 sm:px-3 min-h-[44px] text-xs sm:text-sm font-black rounded-xl transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
               tab === 'folder'
                 ? 'bg-amber-400 text-slate-950 border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#78350f] -translate-y-0.5'
                 : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white'
             }`}
           >
-            <FolderTree className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-            <span className="hidden sm:inline">Folder Deck (0 Cards)</span>
-            <span className="sm:hidden">Folder Deck</span>
+            <FolderTree className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
+            <span className="hidden sm:inline truncate">Folder Deck (0 Cards)</span>
+            <span className="sm:hidden truncate">Folder</span>
           </button>
         </div>
 
@@ -562,9 +568,9 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
         )}
 
         {/* Step 1: Name Your Quest & Category */}
-        <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-5">
+        <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b]">
+            <span className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
               1
             </span>
             <div>
@@ -589,7 +595,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 placeholder="e.g. Molecular Biology: Cell Respiration & Krebs"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm sm:text-base font-black shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base font-black shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
 
@@ -603,10 +609,10 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 placeholder="e.g. Neuroscience, Calculus, Japanese, Bio..."
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
+                className="w-full px-4 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 mt-2.5">
+              <div className="grid grid-cols-2 min-[420px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2 mt-2.5">
                 {suggestedCategories.map((sCat) => {
                   const isSelected = category.toLowerCase() === sCat.toLowerCase();
                   return (
@@ -617,7 +623,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                         sounds.playTap();
                         setCategory(sCat);
                       }}
-                      className={`p-2.5 rounded-xl border-[2px] font-black text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none hover:-translate-y-0.5 ${
+                      className={`p-2.5 min-h-[52px] rounded-xl border-[2px] font-black text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none hover:-translate-y-0.5 ${
                         isSelected
                           ? 'bg-violet-600 text-white border-slate-900 shadow-[0_2.5px_0_0_#1e1b4b] ring-2 ring-violet-400'
                           : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-900 dark:border-slate-700 hover:bg-violet-50 dark:hover:bg-slate-700'
@@ -636,13 +642,13 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               {/* Nested Parent Deck */}
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <FolderTree className="w-4 h-4 text-violet-600" />
+                  <FolderTree className="w-4 h-4 text-violet-600 shrink-0" />
                   <span>Nest under Parent Deck (Optional)</span>
                 </label>
                 <select
                   value={parentId || ''}
                   onChange={(e) => setParentId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
                 >
                   <option value="">None (Top-Level Deck)</option>
                   {existingDecks.map((d) => (
@@ -663,14 +669,14 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   placeholder="#exam, #chapter3, #midterm"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
                 />
                 {tags && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {parseTags().map((t) => (
                       <span
                         key={t}
-                        className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 border-[1.5px] border-slate-900 shadow-[0_1px_0_0_#09090b]"
+                        className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 border-[1.5px] border-slate-900 shadow-[0_1px_0_0_#09090b] truncate max-w-[120px]"
                       >
                         {t}
                       </span>
@@ -683,30 +689,30 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
         </section>
 
         {/* Step 2: Choose Your Banner Color */}
-        <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b]">
+        <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
                 2
               </span>
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2 truncate">
                   <span>Choose Your Banner Color</span>
-                  <Palette className="w-4 h-4 text-fuchsia-500 hidden sm:inline" />
+                  <Palette className="w-4 h-4 text-fuchsia-500 hidden sm:inline shrink-0" />
                 </h2>
-                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
                   Pick a bouncy theme color for your deck header and study cards
                 </p>
               </div>
             </div>
 
-            <span className="tactile-pill bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-900 shadow-[0_1.5px_0_0_#09090b] text-xs font-black">
+            <span className="tactile-pill bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-900 shadow-[0_1.5px_0_0_#09090b] text-xs font-black shrink-0">
               {colorThemes[color].name}
             </span>
           </div>
 
           {/* Color picker with bouncy color bubbles and selection checkmark */}
-          <div className="flex items-center gap-3 py-2 flex-wrap">
+          <div className="flex items-center gap-2.5 sm:gap-3 py-2 flex-wrap">
             {colorOptions.map((c) => {
               const theme = colorThemes[c];
               const isSelected = color === c;
@@ -718,7 +724,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                     sounds.playTap();
                     setColor(c);
                   }}
-                  className={`w-12 h-12 rounded-2xl border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95 active:translate-y-0.5 active:shadow-none ${theme.bgClass} ${
+                  className={`w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95 active:translate-y-0.5 active:shadow-none shrink-0 ${theme.bgClass} ${
                     isSelected
                       ? '-translate-y-1 shadow-[0_5px_0_0_#09090b] ring-4 ring-offset-2 ring-indigo-500 dark:ring-offset-slate-900'
                       : 'opacity-90'
@@ -740,16 +746,16 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
         {/* Step 3: Tab Content (Folder Deck, AI Generation, or Manual Artisan) */}
         {tab === 'folder' ? (
-          <section className="tactile-card p-6 sm:p-8 bg-amber-50/90 dark:bg-amber-950/30 border-[2.5px] border-slate-900 dark:border-amber-700/80 shadow-[0_6px_0_0_#78350f] space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-amber-400 dark:bg-amber-500 text-slate-950 border-[2.5px] border-slate-900 flex items-center justify-center shrink-0 shadow-[0_3px_0_0_#78350f]">
-                <FolderTree className="w-7 h-7 stroke-[2.5]" aria-hidden="true" />
+          <section className="tactile-card p-4 sm:p-8 bg-amber-50/90 dark:bg-amber-950/30 border-[2.5px] border-slate-900 dark:border-amber-700/80 shadow-[0_6px_0_0_#78350f] space-y-4 sm:space-y-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-400 dark:bg-amber-500 text-slate-950 border-[2.5px] border-slate-900 flex items-center justify-center shrink-0 shadow-[0_3px_0_0_#78350f]">
+                <FolderTree className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" aria-hidden="true" />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 min-w-0">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-200 border-[1.5px] border-slate-900 text-[10px] font-black uppercase tracking-wider">
                   Quest Folder Mode Activated
                 </div>
-                <h3 className="text-xl font-black text-slate-950 dark:text-white">
+                <h3 className="text-lg sm:text-xl font-black text-slate-950 dark:text-white">
                   Organizational Realm Container (0 Direct Cards)
                 </h3>
                 <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -759,7 +765,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             </div>
 
             {/* Folder Mastery Tip */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-[0_3px_0_0_#09090b] flex items-center gap-3">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-[0_3px_0_0_#09090b] flex items-center gap-3">
               <Lightbulb className="w-6 h-6 text-amber-500 shrink-0" />
               <span>
                 <strong>Folder Strategy:</strong> Perfect for broad subjects like &ldquo;Biology 101&rdquo; or &ldquo;Medical School Term 1&rdquo;. Sub-decks can then hold the actual flashcards for each lecture!
@@ -770,7 +776,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               <button
                 type="button"
                 onClick={handleSaveManual}
-                className="tactile-btn-amber px-6 py-3.5 text-xs sm:text-sm gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none"
+                className="tactile-btn-amber px-6 py-3.5 min-h-[44px] text-xs sm:text-sm gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none w-full sm:w-auto"
               >
                 <FolderPlus className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
                 <span>Create Folder Realm Now</span>
@@ -778,9 +784,9 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             </div>
           </section>
         ) : tab === 'ai' ? (
-          <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-5">
+          <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
             <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#78350f]">
+              <span className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#78350f] shrink-0">
                 3
               </span>
               <div>
@@ -806,7 +812,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-[2.5px] border-dashed border-slate-400 dark:border-slate-600 hover:border-indigo-600 dark:hover:border-indigo-400 rounded-2xl p-6 text-center bg-indigo-50/40 dark:bg-slate-800/60 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-all cursor-pointer group shadow-[0_3px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
+                className="border-[2.5px] border-dashed border-slate-400 dark:border-slate-600 hover:border-indigo-600 dark:hover:border-indigo-400 rounded-2xl p-4 sm:p-6 text-center bg-indigo-50/40 dark:bg-slate-800/60 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-all cursor-pointer group shadow-[0_3px_0_0_#09090b] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none"
               >
                 {isExtractingFile ? (
                   <div className="flex flex-col items-center gap-2 text-indigo-600 dark:text-indigo-400">
@@ -815,11 +821,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   </div>
                 ) : importedFileName ? (
                   <div className="flex items-center justify-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b]">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <div className="text-left">
-                      <div className="text-sm font-black text-slate-900 dark:text-white">{importedFileName}</div>
+                    <div className="text-left min-w-0">
+                      <div className="text-sm font-black text-slate-900 dark:text-white truncate">{importedFileName}</div>
                       <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                         Extracted {content.length.toLocaleString()} characters • Click to switch file
                       </div>
@@ -869,7 +875,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 placeholder="Paste lecture notes, study outline, textbook excerpt, or review points..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm font-semibold leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-sm font-semibold leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
@@ -879,7 +885,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                   Question Format Strategy
                 </label>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-2 min-[420px]:grid-cols-3 gap-1.5">
                   {[
                     { id: 'mixed', label: 'Mixed (Best)' },
                     { id: 'multiple_choice', label: 'Multiple Choice' },
@@ -892,7 +898,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       key={fmt.id}
                       type="button"
                       onClick={() => setAiQuestionFormat(fmt.id as any)}
-                      className={`py-2 px-2 text-[11px] font-black rounded-xl border-[2px] transition-all cursor-pointer ${
+                      className={`py-2.5 px-2 min-h-[40px] text-[11px] font-black rounded-xl border-[2px] transition-all cursor-pointer ${
                         aiQuestionFormat === fmt.id
                           ? 'bg-indigo-600 text-white border-slate-900 shadow-[0_2.5px_0_0_#1e1b4b] -translate-y-0.5'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b] hover:bg-slate-100'
@@ -914,7 +920,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       key={n}
                       type="button"
                       onClick={() => setCount(n)}
-                      className={`flex-1 py-2 text-xs font-black rounded-xl border-[2px] transition-all cursor-pointer ${
+                      className={`flex-1 py-2.5 min-h-[44px] text-xs font-black rounded-xl border-[2px] transition-all cursor-pointer ${
                         count === n
                           ? 'bg-indigo-600 text-white border-slate-900 shadow-[0_2.5px_0_0_#1e1b4b] -translate-y-0.5'
                           : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-900 dark:border-slate-700 shadow-[0_1.5px_0_0_#09090b] hover:bg-slate-100'
@@ -933,7 +939,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={isLoading}
-                className="tactile-btn-primary w-full py-3.5 text-sm sm:text-base font-black gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none disabled:opacity-50"
+                className="tactile-btn-primary w-full py-3.5 min-h-[48px] text-sm sm:text-base font-black gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -951,10 +957,10 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
           </section>
         ) : (
           /* Tab B: Interactive Manual Cards Builder with Cloze & Multi-Format */
-          <section className="tactile-card p-5 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-5">
+          <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b]">
+                <span className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
                   3
                 </span>
                 <div>
@@ -968,11 +974,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               </div>
 
               {/* Quick Add Pills */}
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => addManualCardRow('multiple_choice')}
-                  className="tactile-btn-secondary px-3 py-1.5 text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                  className="tactile-btn-secondary px-3 py-2 min-h-[38px] text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Choice</span>
@@ -980,7 +986,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 <button
                   type="button"
                   onClick={() => addManualCardRow('fill_blank')}
-                  className="tactile-btn-amber px-3 py-1.5 text-[11px] font-black gap-1 shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none"
+                  className="tactile-btn-amber px-3 py-2 min-h-[38px] text-[11px] font-black gap-1 shadow-[0_2px_0_0_#78350f] active:translate-y-0.5 active:shadow-none"
                 >
                   <Highlighter className="w-3.5 h-3.5" />
                   <span>Fill Blank</span>
@@ -988,7 +994,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 <button
                   type="button"
                   onClick={() => addManualCardRow('multiple_select')}
-                  className="tactile-btn-secondary px-3 py-1.5 text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                  className="tactile-btn-secondary px-3 py-2 min-h-[38px] text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
                   <span>Checkboxes</span>
@@ -996,7 +1002,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 <button
                   type="button"
                   onClick={() => addManualCardRow('true_false')}
-                  className="tactile-btn-secondary px-3 py-1.5 text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
+                  className="tactile-btn-secondary px-3 py-2 min-h-[38px] text-[11px] font-black gap-1 shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none"
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>True/False</span>
@@ -1004,16 +1010,16 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5">
               {manualCards.map((card, idx) => (
                 <div
                   key={idx}
-                  className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] space-y-3.5 relative"
+                  className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] space-y-3 sm:space-y-3.5 relative"
                 >
                   {/* Card Header & Type Selector */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b-[2px] border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black border-[1.5px] border-slate-900 shadow-[0_1.5px_0_0_#09090b]">
+                      <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black border-[1.5px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] shrink-0">
                         #{idx + 1}
                       </span>
                       <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
@@ -1021,7 +1027,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap scrollbar-none w-full sm:w-auto">
                       {[
                         { id: 'multiple_choice', label: 'Multiple Choice', icon: HelpCircle },
                         { id: 'multiple_select', label: 'Checkboxes (Multi)', icon: CheckSquare },
@@ -1036,7 +1042,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                             key={t.id}
                             type="button"
                             onClick={() => updateManualCardType(idx, t.id as QuestionType)}
-                            className={`px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black border transition-all cursor-pointer flex items-center gap-1 ${
+                            className={`px-2.5 py-1.5 min-h-[34px] rounded-xl text-[10px] sm:text-[11px] font-black border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
                               isActive
                                 ? 'bg-indigo-600 text-white border-slate-900 shadow-[0_1.5px_0_0_#1e1b4b]'
                                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100'
@@ -1053,7 +1059,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                           type="button"
                           onClick={() => removeManualCardRow(idx)}
                           aria-label="Remove card"
-                          className="w-8 h-8 rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 text-slate-400 hover:text-rose-600 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer ml-1 transition-all"
+                          className="w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] sm:min-w-[32px] sm:min-h-[32px] rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 text-slate-400 hover:text-rose-600 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer ml-1 transition-all shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -1063,7 +1069,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
                   {/* Question Prompt with Highlight to Blank Action */}
                   <div>
-                    <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                    <div className="flex items-stretch sm:items-center justify-between mb-1.5 flex-col sm:flex-row gap-2">
                       <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         Question / Statement Prompt *
                       </label>
@@ -1072,10 +1078,10 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       <button
                         type="button"
                         onClick={() => handleHighlightToBlankOrAnswer(idx)}
-                        className="tactile-btn-amber px-2.5 py-1 text-[11px] font-black gap-1.5 shadow-[0_1.5px_0_0_#78350f] active:translate-y-0.5 active:shadow-none inline-flex items-center"
+                        className="tactile-btn-amber px-3 py-2 min-h-[38px] text-[11px] font-black gap-1.5 shadow-[0_1.5px_0_0_#78350f] active:translate-y-0.5 active:shadow-none inline-flex items-center justify-center w-full sm:w-auto shrink-0"
                         title="Highlight text in the box and click to set as answer or cloze blank"
                       >
-                        <Highlighter className="w-3.5 h-3.5" />
+                        <Highlighter className="w-3.5 h-3.5 shrink-0" />
                         <span>Turn Selection into Blank / Answer</span>
                       </button>
                     </div>
@@ -1094,16 +1100,16 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       }
                       value={card.question}
                       onChange={(e) => updateManualCardField(idx, 'question', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                      className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                     />
 
                     {/* Cloze live preview badge if question contains [______] */}
                     {card.type === 'fill_blank' && card.question.includes('[______]') && (
-                      <div className="mt-1.5 p-2 rounded-xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300">
+                      <div className="mt-1.5 p-2 rounded-xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs font-medium text-slate-800 dark:text-slate-200 flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-black uppercase text-amber-800 dark:text-amber-300 shrink-0">
                           Cloze Preview:
                         </span>
-                        <span>
+                        <span className="break-words">
                           {card.question.split('[______]').map((part, pIdx, arr) => (
                             <React.Fragment key={pIdx}>
                               {part}
@@ -1123,12 +1129,12 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   {/* 1. Multiple Choice */}
                   {card.type === 'multiple_choice' && (
                     <div className="space-y-2 pt-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <label className="text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400">
                           Choices (Click letter badge to set correct answer)
                         </label>
                         {card.answer && (
-                          <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">
+                          <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 truncate">
                             Correct: {card.answer}
                           </span>
                         )}
@@ -1153,7 +1159,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                                   sounds.playTap();
                                   updateManualCardField(idx, 'answer', opt);
                                 }}
-                                className={`w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
+                                className={`w-9 h-9 sm:w-7 sm:h-7 min-w-[36px] min-h-[36px] sm:min-w-[28px] sm:min-h-[28px] rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
                                   isCorrect
                                     ? 'bg-emerald-500 text-white'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
@@ -1167,7 +1173,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                                 placeholder={`Option ${letter}...`}
                                 value={opt}
                                 onChange={(e) => updateManualOption(idx, optIdx, e.target.value)}
-                                className="w-full text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none"
+                                className="w-full text-base sm:text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none py-1"
                               />
                             </div>
                           );
@@ -1179,12 +1185,12 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   {/* 2. Multiple Select (Checkboxes) */}
                   {card.type === 'multiple_select' && (
                     <div className="space-y-2 pt-1">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <label className="text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                          <CheckSquare className="w-3.5 h-3.5 text-indigo-500" />
+                          <CheckSquare className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                           <span>Checkboxes (Check all options that are TRUE)</span>
                         </label>
-                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400">
+                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 shrink-0">
                           {card.correctAnswers.length} selected
                         </span>
                       </div>
@@ -1204,7 +1210,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                               <button
                                 type="button"
                                 onClick={() => toggleMultiSelectAnswer(idx, opt)}
-                                className={`w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
+                                className={`w-9 h-9 sm:w-7 sm:h-7 min-w-[36px] min-h-[36px] sm:min-w-[28px] sm:min-h-[28px] rounded-lg font-black text-xs flex items-center justify-center shrink-0 border-[1.5px] border-slate-900 cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
                                   isChecked
                                     ? 'bg-indigo-600 text-white'
                                     : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
@@ -1218,7 +1224,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                                 placeholder={`Checkbox Option ${optIdx + 1}...`}
                                 value={opt}
                                 onChange={(e) => updateManualOption(idx, optIdx, e.target.value)}
-                                className="w-full text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none"
+                                className="w-full text-base sm:text-xs font-bold text-slate-900 dark:text-white bg-transparent focus:outline-none py-1"
                               />
                             </div>
                           );
@@ -1238,7 +1244,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                         placeholder="e.g. Mitochondria (or use highlight button above)"
                         value={card.answer}
                         onChange={(e) => updateManualCardField(idx, 'answer', e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-amber-500 bg-amber-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl border-[2px] border-amber-500 bg-amber-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner"
                       />
                     </div>
                   )}
@@ -1256,7 +1262,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                             sounds.playTap();
                             updateManualCardField(idx, 'answer', 'True');
                           }}
-                          className={`flex-1 py-2.5 rounded-xl text-xs font-black border-[2px] border-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          className={`flex-1 py-3 min-h-[48px] rounded-xl text-xs font-black border-[2px] border-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             card.answer === 'True'
                               ? 'bg-emerald-500 text-white shadow-[0_2.5px_0_0_#064e3b]'
                               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-[0_1.5px_0_0_#09090b]'
@@ -1271,7 +1277,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                             sounds.playTap();
                             updateManualCardField(idx, 'answer', 'False');
                           }}
-                          className={`flex-1 py-2.5 rounded-xl text-xs font-black border-[2px] border-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                          className={`flex-1 py-3 min-h-[48px] rounded-xl text-xs font-black border-[2px] border-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             card.answer === 'False'
                               ? 'bg-rose-500 text-white shadow-[0_2.5px_0_0_#881337]'
                               : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-[0_1.5px_0_0_#09090b]'
@@ -1295,7 +1301,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                         placeholder="Answer / Key concept to recall..."
                         value={card.answer}
                         onChange={(e) => updateManualCardField(idx, 'answer', e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                        className="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                       />
                     </div>
                   )}
@@ -1307,7 +1313,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       placeholder="Explanation / Memory Tip / Context (Optional)..."
                       value={card.explanation || ''}
                       onChange={(e) => updateManualCardField(idx, 'explanation', e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3.5 py-2 min-h-[44px] rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -1318,7 +1324,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               <button
                 type="button"
                 onClick={() => addManualCardRow('multiple_choice')}
-                className="tactile-btn-secondary px-4 py-2.5 text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none w-full sm:w-auto"
+                className="tactile-btn-secondary px-4 py-3 min-h-[44px] text-xs font-black gap-1.5 shadow-[0_2.5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Another Card</span>
@@ -1327,7 +1333,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               <button
                 type="button"
                 onClick={handleSaveManual}
-                className="tactile-btn-emerald px-6 py-3 text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-1 active:shadow-none w-full sm:w-auto"
+                className="tactile-btn-emerald px-6 py-3 min-h-[44px] text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-1 active:shadow-none w-full sm:w-auto"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Save Quest Deck ({manualCards.filter((c) => c.question.trim() && c.answer.trim()).length} Cards)</span>

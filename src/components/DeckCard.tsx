@@ -93,7 +93,7 @@ export const DeckCard: React.FC<DeckCardProps> = ({
   const theme = themeConfigs[deck.color] || themeConfigs.violet;
 
   return (
-    <div className="relative group cursor-pointer">
+    <div className="relative group cursor-pointer w-full">
       {/* Physical Stack Shadow Layer 2 */}
       <div
         className={`absolute inset-0 ${theme.stackBg} ${theme.darkStackBg} rounded-[1.75rem] border-[2.5px] border-slate-900 dark:border-slate-800 translate-x-2 translate-y-2.5 -z-10 transition-transform duration-150 group-hover:translate-x-3 group-hover:translate-y-3.5 shadow-sm`}
@@ -107,27 +107,27 @@ export const DeckCard: React.FC<DeckCardProps> = ({
         onKeyDown={(e) => {
           if (e.key === 'Enter') onViewDetails(deck);
         }}
-        className="tactile-card p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 group-hover:-translate-y-1.5 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_5px_0_0_#09090b] dark:shadow-[0_5px_0_0_#000] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400 relative z-0"
+        className="tactile-card w-full p-4 sm:p-6 flex flex-col justify-between transition-all duration-150 group-hover:-translate-y-1.5 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_5px_0_0_#09090b] dark:shadow-[0_5px_0_0_#000] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400 relative z-0"
       >
         <div>
           {/* Top Header Row */}
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="flex items-center gap-3">
+          <div className="flex items-start justify-between gap-2 sm:gap-3 mb-3">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
               {/* Tilted Icon Container with energetic hover */}
-              <div className={`w-12 h-12 rounded-2xl ${theme.iconBg} border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] flex items-center justify-center transform -rotate-3 group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0`}>
+              <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${theme.iconBg} border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] flex items-center justify-center transform -rotate-3 group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0`}>
                 <div className={theme.accent}>
                   {getCategoryIcon(deck.category, 'w-5 h-5 stroke-[2.5]')}
                 </div>
               </div>
 
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-[0_1px_0_0_#09090b] ${theme.badge}`}>
+                  <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-[0_1px_0_0_#09090b] truncate max-w-[120px] sm:max-w-none ${theme.badge}`}>
                     {deck.category}
                   </span>
 
                   {(deck.isFolder || deck.cardCount === 0) && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-amber-200 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-[1.5px] border-slate-900 dark:border-amber-600 shadow-[0_1px_0_0_#09090b]">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-amber-200 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border-[1.5px] border-slate-900 dark:border-amber-600 shadow-[0_1px_0_0_#09090b] shrink-0">
                       <Folder className="w-2.5 h-2.5 stroke-[2.5]" aria-hidden="true" />
                       <span>Folder</span>
                     </span>
@@ -141,11 +141,11 @@ export const DeckCard: React.FC<DeckCardProps> = ({
                         e.stopPropagation();
                         if (onExploreSubDecks) onExploreSubDecks(deck);
                       }}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase bg-violet-100 dark:bg-violet-950/80 text-violet-900 dark:text-violet-200 border-[1.5px] border-slate-900 dark:border-violet-600 shadow-[0_1px_0_0_#09090b] hover:bg-violet-200 dark:hover:bg-violet-900 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 min-h-[28px] rounded-lg text-[10px] font-black uppercase bg-violet-100 dark:bg-violet-950/80 text-violet-900 dark:text-violet-200 border-[1.5px] border-slate-900 dark:border-violet-600 shadow-[0_1px_0_0_#09090b] hover:bg-violet-200 dark:hover:bg-violet-900 transition-colors cursor-pointer truncate max-w-[140px]"
                       title="View nested sub-decks"
                     >
-                      <FolderTree className="w-3 h-3 stroke-[2.5]" />
-                      <span>{subDeckCount} {subDeckCount === 1 ? 'Sub-deck' : 'Sub-decks'}</span>
+                      <FolderTree className="w-3 h-3 stroke-[2.5] shrink-0" />
+                      <span className="truncate">{subDeckCount} {subDeckCount === 1 ? 'Sub-deck' : 'Sub-decks'}</span>
                     </button>
                   )}
                 </div>
@@ -168,14 +168,14 @@ export const DeckCard: React.FC<DeckCardProps> = ({
                 }
               }}
               aria-label={`Delete deck ${deck.title}`}
-              className="text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 p-2 min-w-[36px] min-h-[36px] rounded-xl border border-transparent hover:border-slate-900 dark:hover:border-slate-700 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer flex items-center justify-center"
+              className="text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl border border-transparent hover:border-slate-900 dark:hover:border-slate-700 active:bg-rose-100 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer flex items-center justify-center shrink-0"
             >
               <Trash2 className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
             </button>
           </div>
 
           {/* Title */}
-          <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-snug mb-1.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          <h3 className="text-lg sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-snug mb-1.5 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 break-words">
             {deck.title}
           </h3>
 
@@ -195,10 +195,10 @@ export const DeckCard: React.FC<DeckCardProps> = ({
                     e.stopPropagation();
                     if (onSelectTag) onSelectTag(tag);
                   }}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[1.5px] border-slate-900 dark:border-slate-700 shadow-[0_1px_0_0_#09090b] hover:bg-violet-100 dark:hover:bg-violet-950 hover:text-violet-800 dark:hover:text-violet-300 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 min-h-[30px] rounded-lg text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[1.5px] border-slate-900 dark:border-slate-700 shadow-[0_1px_0_0_#09090b] hover:bg-violet-100 dark:hover:bg-violet-950 hover:text-violet-800 dark:hover:text-violet-300 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer truncate max-w-[140px]"
                 >
-                  <Tag className="w-2.5 h-2.5 text-amber-500 stroke-[2.5]" />
-                  <span>{tag}</span>
+                  <Tag className="w-2.5 h-2.5 text-amber-500 stroke-[2.5] shrink-0" />
+                  <span className="truncate">{tag}</span>
                 </button>
               ))}
             </div>
@@ -206,14 +206,14 @@ export const DeckCard: React.FC<DeckCardProps> = ({
         </div>
 
         {/* Footer Info & Play Button */}
-        <div className="pt-3.5 border-t-[2px] border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+        <div className="pt-3.5 border-t-[2px] border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onViewDetails(deck);
             }}
-            className="inline-flex items-center gap-1.5 text-xs font-black px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 border-[1.5px] border-slate-900/60 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-[0_1px_0_0_#09090b]"
+            className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-2 min-h-[44px] rounded-xl bg-slate-50 dark:bg-slate-800/80 border-[1.5px] border-slate-900/60 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 active:translate-y-0.5 transition-colors cursor-pointer shadow-[0_1px_0_0_#09090b] shrink-0"
           >
             {deck.isFolder || deck.cardCount === 0 ? (
               <>
@@ -235,7 +235,7 @@ export const DeckCard: React.FC<DeckCardProps> = ({
                 e.stopPropagation();
                 onViewDetails(deck);
               }}
-              className="tactile-btn tactile-btn-amber px-4 py-2 text-xs sm:text-sm font-black gap-1.5 shadow-[0_3.5px_0_0_#78350f] active:translate-y-1 active:shadow-none"
+              className="tactile-btn tactile-btn-amber px-4 py-2.5 min-h-[44px] text-xs sm:text-sm font-black gap-1.5 shadow-[0_3.5px_0_0_#78350f] active:translate-y-1 active:shadow-none shrink-0"
             >
               <Folder className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
               <span>Open Folder</span>
@@ -247,7 +247,7 @@ export const DeckCard: React.FC<DeckCardProps> = ({
                 e.stopPropagation();
                 onStudy(deck);
               }}
-              className={`tactile-btn ${theme.btnClass} px-5 py-2.5 text-xs sm:text-sm font-black gap-2 shadow-[0_3.5px_0_0_#09090b] active:translate-y-1 active:shadow-none`}
+              className={`tactile-btn ${theme.btnClass} px-4 sm:px-5 py-2.5 min-h-[44px] text-xs sm:text-sm font-black gap-2 shadow-[0_3.5px_0_0_#09090b] active:translate-y-1 active:shadow-none shrink-0`}
             >
               <Play className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
               <span>Study Now</span>
