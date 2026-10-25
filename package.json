@@ -8,9 +8,15 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:run": "npm run build && npx cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
     "@tailwindcss/vite": "^4.3.3",
     "canvas-confetti": "^1.9.4",
     "dexie": "^4.4.7",

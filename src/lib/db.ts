@@ -39,44 +39,32 @@ if (typeof window !== 'undefined') {
 
 let isSeeding = false;
 
-// Seed initial starter decks & profile for instant study experience
+// Initialize default user settings if not present (does not seed default decks)
 export async function seedInitialData() {
   if (isSeeding) return;
   isSeeding = true;
   try {
-    const deckCount = await db.decks.count();
-    const now = new Date();
-
-  // Initialize default user settings if not present
-  const settingsCount = await db.settings.count();
-  if (settingsCount === 0) {
-    await db.settings.add({
-      aiProvider: 'gemini',
-      apiKey: '',
-      soundEnabled: true,
-      soundVolume: 0.8,
-      hapticsEnabled: true,
-      darkMode: false,
-    });
+    const settingsCount = await db.settings.count();
+    if (settingsCount === 0) {
+      await db.settings.add({
+        aiProvider: 'gemini',
+        apiKey: '',
+        soundEnabled: true,
+        soundVolume: 0.8,
+        hapticsEnabled: true,
+        darkMode: false,
+      });
+    }
+  } finally {
+    isSeeding = false;
   }
+}
 
-  // Initialize default user profile if not present
-  const profileCount = await db.profile.count();
-  if (profileCount === 0) {
-    await db.profile.add({
-      name: 'Alex',
-      age: 'University Student',
-      major: 'Computer Science & Pre-Med',
-      motto: 'Consistency beats intensity.',
-      avatarColor: 'violet',
-      dailyGoalCards: 20,
-      xp: 340,
-      streakDays: 3,
-      lastStudyDate: now.toISOString().slice(0, 10),
-    });
-  }
-
+// Optional helper to restore starter demo decks on demand via Settings
+export async function seedStarterDecks() {
+  const deckCount = await db.decks.count();
   if (deckCount > 0) return;
+  const now = new Date();
 
   // 1. Cellular Biology Deck (Parent Deck)
   const bioDeckId = await db.decks.add({
@@ -253,7 +241,4 @@ export async function seedInitialData() {
   ];
 
   await db.cards.bulkAdd(csCards as Card[]);
-  } finally {
-    isSeeding = false;
-  }
 }

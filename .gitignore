@@ -1,5 +1,16 @@
-# Logs
-logs
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production & Build outputs
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# Logs & Debug
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,26 +18,67 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment & Secrets
 .env
 .env.*
-.gemini/
-coverage/
+!.env.example
+*.local
 
-# Editor directories and files
+# Testing & Coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Mobile (Android & Capacitor)
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
+*.keystore
+*.jks
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+android/.navigation/
+android/.idea/
+android/*.iml
+android/app/*.iml
+
+# Mobile (iOS & Capacitor)
+ios/App/build/
+ios/App/Pods/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+xcuserdata/
+
+# Editor & IDE directories
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.iml
 
-# Graphify Knowledge Graph
+# OS Metadata & Temp Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.tmp
+*.temp
+
+# AI Agent & Local Tools
+.gemini/
 graphify-out/
-

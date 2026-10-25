@@ -474,7 +474,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors pb-16">
       {/* Top Sticky Navigation Bar */}
-      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 py-2 sm:px-6 sm:py-3">
+      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 sm:pb-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
@@ -984,17 +984,17 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={isLoading}
-                className="tactile-btn-primary w-full py-3.5 min-h-[48px] text-sm sm:text-base font-black gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none disabled:opacity-50"
+                className="tactile-btn tactile-btn-primary w-full py-3.5 min-h-[48px] text-sm sm:text-base font-black flex items-center justify-center gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Extracting high-yield concepts & forging cards...</span>
+                    <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+                    <span>Creating {count} flashcards...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5 fill-amber-300 stroke-none" />
-                    <span>Forge {count} Cards with Spaced Repetition</span>
+                    <Sparkles className="w-5 h-5 fill-amber-300 stroke-none shrink-0" />
+                    <span>Generate {count} Cards</span>
                   </>
                 )}
               </button>

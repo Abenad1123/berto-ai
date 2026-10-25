@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleDarkMode,
 }) => {
   return (
-    <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors">
+    <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5 transition-colors">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4">
         {/* Left: Hamburger Menu & Brand Mascot */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -75,10 +75,10 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Punchy Streak Flame Pill - Compact on mobile, full on desktop */}
           <div
             className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/70 dark:to-orange-950/70 text-orange-800 dark:text-orange-300 border-[2px] sm:border-[2.5px] border-slate-900 px-2 sm:px-3 py-1 rounded-2xl font-black text-[11px] sm:text-xs shadow-[0_2px_0_0_#78350f] sm:shadow-[0_3px_0_0_#78350f] dark:shadow-[0_2px_0_0_#000] select-none hover:scale-105 transition-transform shrink-0"
-            title={`${profile?.streakDays || 1}-Day Study Streak!`}
+            title={`${profile?.streakDays ?? 0}-Day Study Streak!`}
           >
             <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-orange-500 stroke-orange-600 animate-bounce shrink-0" aria-hidden="true" />
-            <span className="tracking-wide">{profile?.streakDays || 1}d<span className="hidden sm:inline"> Streak</span></span>
+            <span className="tracking-wide">{profile?.streakDays ?? 0}d<span className="hidden sm:inline"> Streak</span></span>
           </div>
 
           {/* Dark Mode Quick Toggle */}

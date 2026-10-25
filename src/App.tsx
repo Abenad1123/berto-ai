@@ -14,10 +14,12 @@ import { ShortcutsModal } from './components/ShortcutsModal';
 import { Sidebar } from './components/Sidebar';
 import { ProfilePage } from './components/ProfilePage';
 import { StudyLauncherModal } from './components/StudyLauncherModal';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { db, seedInitialData } from './lib/db';
 import { sounds } from './lib/sound';
 import { getCategoryIcon } from './lib/categoryIcons';
-import type { Deck, Card, QuizAnswer, QuizLauncherConfig } from './types';
+import { calculateStudySessionRewards } from './lib/gamification';
+import type { Deck, Card, QuizAnswer, QuizLauncherConfig, UserProfile } from './types';
 
 export type AppView =
   | { type: 'home' }
@@ -105,6 +107,13 @@ export function App() {
 
   // Initial database seeding & preferences load
   useEffect(() => {
+    // Testing shortcut: if URL has ?reset, clear profile, decks, and cards to test fresh onboarding
+    if (typeof window !== 'undefined' && window.location.search.includes('reset')) {
+      Promise.all([db.profile.clear(), db.decks.clear(), db.cards.clear()]).then(() => {
+        window.history.replaceState({}, '', window.location.pathname);
+      });
+    }
+
     seedInitialData();
 
     const initSettings = async () => {
@@ -175,6 +184,10 @@ export function App() {
 
   const userProfile = useLiveQuery(async () => {
     return await db.profile.toCollection().first();
+  }, []);
+
+  const profileCount = useLiveQuery(async () => {
+    return await db.profile.count();
   }, []);
 
   const userSettings = useLiveQuery(async () => {
@@ -278,28 +291,23 @@ export function App() {
 
     // Persist earned XP and update daily streak in user profile
     const gameMode = activeLauncherConfig?.gameMode || 'normal';
-    const xpPerCorrect = gameMode === 'speed_run' || gameMode === 'hard_mode' ? 15 : 10;
     const correctCount = answers.filter((a) => a.isCorrect).length;
-    const earnedXp = correctCount * xpPerCorrect;
 
     try {
       const prof = await db.profile.toCollection().first();
       if (prof?.id) {
         const todayStr = new Date().toISOString().slice(0, 10);
-        let newStreak = prof.streakDays || 1;
-        if (prof.lastStudyDate) {
-          const lastDate = new Date(prof.lastStudyDate);
-          const today = new Date(todayStr);
-          const diffDays = Math.round((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-          if (diffDays === 1) {
-            newStreak += 1;
-          } else if (diffDays > 1) {
-            newStreak = 1;
-          }
-        }
+        const { newXp, newStreak } = calculateStudySessionRewards({
+          currentXp: prof.xp ?? 0,
+          currentStreakDays: prof.streakDays ?? 0,
+          lastStudyDate: prof.lastStudyDate,
+          todayIsoDate: todayStr,
+          correctAnswersCount: correctCount,
+          gameMode,
+        });
 
         await db.profile.update(prof.id, {
-          xp: (prof.xp || 340) + earnedXp,
+          xp: newXp,
           streakDays: newStreak,
           lastStudyDate: todayStr,
         });
@@ -336,9 +344,27 @@ export function App() {
     navigateTo({ type: 'home' });
   };
 
+  const handleOnboardingComplete = async (profileData: Omit<UserProfile, 'id'>) => {
+    await db.profile.add(profileData as UserProfile);
+    await seedInitialData();
+  };
+
   // ----------------------------------------------------
   // ROUTING / VIEW RENDERING
   // ----------------------------------------------------
+
+  // 0. ONBOARDING GATE FOR NEW USERS
+  if (profileCount === undefined) {
+    return (
+      <div className="min-h-screen bg-playful-grid flex items-center justify-center">
+        <div className="w-10 h-10 rounded-2xl bg-violet-600 animate-pulse border-2 border-slate-900" />
+      </div>
+    );
+  }
+
+  if (profileCount === 0) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
 
   // 1. ACTIVE STUDY SESSION VIEW
   if (view.type === 'study') {
@@ -563,9 +589,9 @@ export function App() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
               <button
                 onClick={() => navigateTo({ type: 'create-deck' })}
-                className="tactile-btn-amber w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#09090b] justify-center"
+                className="tactile-btn tactile-btn-amber w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-[0_3px_0_0_#09090b] cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 fill-slate-950 stroke-none" />
+                <Sparkles className="w-4 h-4 fill-slate-950 stroke-none shrink-0" />
                 <span>Create Deck (File / AI)</span>
               </button>
 
@@ -573,7 +599,7 @@ export function App() {
                 onClick={() => {
                   navigateTo({ type: 'profile' });
                 }}
-                className="tactile-btn-secondary w-full sm:w-auto px-3.5 py-2.5 text-xs font-black shadow-[0_3px_0_0_#09090b] justify-center"
+                className="tactile-btn tactile-btn-secondary w-full sm:w-auto px-3.5 py-2.5 text-xs font-black flex items-center justify-center shadow-[0_3px_0_0_#09090b] cursor-pointer"
               >
                 <span>Edit Profile</span>
               </button>
@@ -587,7 +613,7 @@ export function App() {
         </div>
 
         {/* 7-Day Rhythm & Study Activity Matrix */}
-        <WeeklyStreakWidget streakDays={userProfile?.streakDays || 1} totalCardsStudied={totalCards || 8} />
+        <WeeklyStreakWidget streakDays={userProfile?.streakDays ?? 0} totalCardsStudied={totalCards ?? 0} />
 
         {/* Quick Stats Cards - Mobile 360px optimized */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">

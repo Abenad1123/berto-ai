@@ -55,6 +55,7 @@ export interface UserProfile {
   xp?: number;
   streakDays?: number;
   lastStudyDate?: string;
+  tosAcceptedAt?: string;
 }
 
 export type AccentColor = 'violet' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'sky';

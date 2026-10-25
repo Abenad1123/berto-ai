@@ -153,12 +153,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   // Profile state
   const [profile, setProfile] = useState<UserProfile>({
-    name: 'Alex',
+    name: 'Student',
     age: 'University Student',
-    major: 'Computer Science & Pre-Med',
+    major: 'General Studies',
     motto: 'Consistency beats intensity.',
     avatarColor: 'violet',
     dailyGoalCards: 20,
+    xp: 0,
+    streakDays: 0,
   });
 
   // Modular custom academic goals/notes state
@@ -184,11 +186,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   }, []);
 
   const { cardsDue, cardsLearning, cardsMature, cardsMastered, totalReviews, totalCardsCount } = metrics;
-  const allTimeQuizzes = Math.max(1, Math.floor(totalReviews / 5) || 3);
+  const allTimeQuizzes = Math.floor(totalReviews / 5);
 
   // Gamification XP & Level calculation
-  const totalXP = profile.xp ?? (340 + totalReviews * 12 + cardsMastered * 18);
-  const currentStreakDays = profile.streakDays ?? 3;
+  const totalXP = profile.xp ?? 0;
+  const currentStreakDays = profile.streakDays ?? 0;
   const currentLevel = Math.max(1, Math.floor(totalXP / 500) + 1);
   const levelTitles = ['Novice', 'Scholar', 'Adept', 'Master', 'Grandmaster', 'Sage'];
   const levelTitle = levelTitles[Math.min(currentLevel - 1, levelTitles.length - 1)];
@@ -230,7 +232,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     try {
       const existing = await db.profile.toCollection().first();
       const updatedData: UserProfile = {
-        name: profile.name.trim() || 'Alex',
+        name: profile.name.trim() || existing?.name || 'Student',
         age: profile.age.trim() || 'University Student',
         major: profile.major.trim() || 'General Studies',
         motto: profile.motto.trim() || 'Consistency beats intensity.',
@@ -268,22 +270,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       title: '3-Day Flame',
       iconName: 'Flame',
       description: 'Logged in and drilled for 3 consecutive days.',
-      status: 'unlocked',
+      status: currentStreakDays >= 3 ? 'unlocked' : currentStreakDays > 0 ? 'in_progress' : 'locked',
+      progressText: `${currentStreakDays} / 3 days`,
     },
     {
       id: 'speed_demon',
       title: 'Speed Demon',
       iconName: 'Zap',
       description: 'Conquered a speed-run quiz round with zero errors.',
-      status: 'unlocked',
+      status: 'locked',
+      progressText: 'Try Speed Run in Study Launcher',
     },
     {
       id: 'perfect_recall',
       title: 'Perfect Recall',
       iconName: 'Brain',
       description: 'Achieve 100% accuracy on a 15+ card active-recall session.',
-      status: 'in_progress',
-      progressText: '88% of target reached',
+      status: 'locked',
+      progressText: 'Score 100% in a session',
     },
     {
       id: 'club_100',
@@ -332,7 +336,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors pb-20">
       {/* a) Top Sticky Navigation Bar / Breadcrumb */}
-      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3.5 py-3 sm:px-6 transition-colors shadow-xs">
+      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3.5 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 transition-colors shadow-xs">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
           {/* Back button with neo-brutalist tactile styling */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -407,50 +411,50 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {/* Large Avatar Badge */}
               <div className="relative shrink-0">
                 <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr ${activeTheme.bgGradient} border-[3px] border-slate-900 shadow-[0_5px_0_0_#09090b] flex items-center justify-center font-black text-2xl sm:text-3xl text-white transform -rotate-2 hover:rotate-0 transition-transform`}
+                  className={`w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gradient-to-tr ${activeTheme.bgGradient} border-[2.5px] sm:border-[3px] border-slate-900 shadow-[0_4px_0_0_#09090b] sm:shadow-[0_5px_0_0_#09090b] flex items-center justify-center font-black text-xl sm:text-3xl text-white transform -rotate-2 hover:rotate-0 transition-transform`}
                 >
                   {getInitials(profile.name)}
                 </div>
                 <div
-                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-xl bg-amber-400 text-slate-950 border-[2px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] flex items-center justify-center text-xs font-black"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-amber-400 text-slate-950 border-[2px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] flex items-center justify-center text-xs font-black"
                   title="Active Scholar Status"
                 >
-                  <Sparkles className="w-4 h-4 fill-amber-300 stroke-none" />
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-300 stroke-none" />
                 </div>
               </div>
 
               {/* Title & Level Progress */}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight truncate">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1">
+                  <h2 className="text-xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight truncate">
                     {profile.name || 'Student Scholar'}
                   </h2>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/80 border-[1.5px] border-slate-900 dark:border-violet-700 text-violet-950 dark:text-violet-300 text-[10px] font-black uppercase tracking-wider shadow-[0_1px_0_0_#09090b]">
-                    <GraduationCap className="w-3.5 h-3.5" />
+                  <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/80 border-[1.5px] border-slate-900 dark:border-violet-700 text-violet-950 dark:text-violet-300 text-[10px] font-black uppercase tracking-wider shadow-[0_1px_0_0_#09090b]">
+                    <GraduationCap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     <span>Level {currentLevel} {levelTitle}</span>
                   </span>
                 </div>
 
                 <p className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 mb-1 truncate">
-                  {profile.major || 'Computer Science & Pre-Med'}
+                  {profile.major || 'General Studies'}
                 </p>
 
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic mb-3 line-clamp-2">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 italic mb-2.5 line-clamp-1 sm:line-clamp-2">
                   "{profile.motto || 'Consistency beats intensity.'}"
                 </p>
 
                 {/* Animated XP Progress Bar */}
                 <div className="max-w-md">
-                  <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
-                    <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400">
-                      <Zap className="w-3.5 h-3.5 fill-current" />
-                      Academic XP
+                  <div className="flex items-center justify-between gap-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1">
+                    <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 shrink-0">
+                      <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
+                      <span>XP Progress</span>
                     </span>
-                    <span>
-                      {currentLevelXP} / {xpForNextLevel} XP to Level {currentLevel + 1}
+                    <span className="truncate text-right">
+                      {currentLevelXP} / {xpForNextLevel} XP <span className="hidden sm:inline">to Level {currentLevel + 1}</span>
                     </span>
                   </div>
-                  <div className="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 overflow-hidden shadow-inner p-0.5">
+                  <div className="w-full h-2.5 sm:h-3 rounded-full bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 overflow-hidden shadow-inner p-0.5">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-400 to-indigo-500 transition-all duration-500"
                       style={{ width: `${xpPercent}%` }}
@@ -461,47 +465,47 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             </div>
 
             {/* Right: Quick Stat Pills */}
-            <div className="grid grid-cols-3 sm:flex sm:flex-col gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-slate-800 sm:pl-6">
+            <div className="grid grid-cols-3 sm:flex sm:flex-col gap-2 sm:gap-2.5 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-slate-800 sm:pl-6">
               {/* Stat 1: Current Streak */}
-              <div className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-[2px] border-slate-900 dark:border-amber-800 shadow-[0_2px_0_0_#78350f]">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-400 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
-                  <Flame className="w-4.5 h-4.5 fill-orange-500 stroke-orange-700 animate-bounce" />
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border-[2px] border-slate-900 dark:border-amber-800 shadow-[0_2px_0_0_#78350f] min-w-0">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-400 border-[1.5px] border-slate-900 flex items-center justify-center shrink-0">
+                  <Flame className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 fill-orange-500 stroke-orange-700 animate-bounce" />
                 </div>
-                <div>
-                  <div className="text-sm sm:text-base font-black text-slate-950 dark:text-white leading-none">
+                <div className="min-w-0 w-full overflow-hidden">
+                  <div className="text-xs sm:text-base font-black text-slate-950 dark:text-white leading-tight truncate">
                     {currentStreakDays} {currentStreakDays === 1 ? 'Day' : 'Days'}
                   </div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+                  <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 truncate">
                     Streak
                   </div>
                 </div>
               </div>
 
               {/* Stat 2: Cards Mastered */}
-              <div className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border-[2px] border-slate-900 dark:border-emerald-800 shadow-[0_2px_0_0_#064e3b]">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-500 border-[1.5px] border-slate-900 flex items-center justify-center text-white shrink-0">
-                  <Trophy className="w-4.5 h-4.5 stroke-[2.5]" />
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border-[2px] border-slate-900 dark:border-emerald-800 shadow-[0_2px_0_0_#064e3b] min-w-0">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-500 border-[1.5px] border-slate-900 flex items-center justify-center text-white shrink-0">
+                  <Trophy className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
                 </div>
-                <div>
-                  <div className="text-sm sm:text-base font-black text-slate-950 dark:text-white leading-none">
+                <div className="min-w-0 w-full overflow-hidden">
+                  <div className="text-xs sm:text-base font-black text-slate-950 dark:text-white leading-tight truncate">
                     {cardsMastered}
                   </div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 truncate">
                     Mastered
                   </div>
                 </div>
               </div>
 
               {/* Stat 3: Quizzes Completed */}
-              <div className="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border-[2px] border-slate-900 dark:border-indigo-800 shadow-[0_2px_0_0_#1e1b4b]">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 border-[1.5px] border-slate-900 flex items-center justify-center text-white shrink-0">
-                  <Brain className="w-4.5 h-4.5 stroke-[2.5]" />
+              <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1 sm:gap-2.5 p-2 sm:p-2.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border-[2px] border-slate-900 dark:border-indigo-800 shadow-[0_2px_0_0_#1e1b4b] min-w-0">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 border-[1.5px] border-slate-900 flex items-center justify-center text-white shrink-0">
+                  <Brain className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
                 </div>
-                <div>
-                  <div className="text-sm sm:text-base font-black text-slate-950 dark:text-white leading-none">
+                <div className="min-w-0 w-full overflow-hidden">
+                  <div className="text-xs sm:text-base font-black text-slate-950 dark:text-white leading-tight truncate">
                     {allTimeQuizzes}
                   </div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
+                  <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 truncate">
                     Quizzes
                   </div>
                 </div>

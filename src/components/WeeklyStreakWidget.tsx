@@ -7,8 +7,8 @@ interface WeeklyStreakWidgetProps {
 }
 
 export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
-  streakDays = 1,
-  totalCardsStudied = 12,
+  streakDays = 0,
+  totalCardsStudied = 0,
 }) => {
   // Determine actual day of week (Monday = index 0, Sunday = index 6)
   const [todayDow] = useState(() => (new Date().getDay() + 6) % 7);
@@ -25,7 +25,7 @@ export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
   const days = dayLabels.map((d, idx) => {
     const isToday = idx === todayDow;
     const daysAgo = todayDow - idx;
-    const completed = daysAgo >= 0 && daysAgo < streakDays;
+    const completed = streakDays > 0 && daysAgo >= 0 && daysAgo < streakDays;
     return {
       ...d,
       completed,
@@ -54,7 +54,7 @@ export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
 
           <div className="flex items-center gap-2.5">
             <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
-              {streakDays} Day Study Streak!
+              {streakDays > 0 ? `${streakDays} Day Study Streak!` : 'Start Your Study Streak!'}
             </h3>
             <div className="w-8 h-8 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#78350f] flex items-center justify-center transform rotate-6 hover:rotate-12 transition-transform shrink-0">
               <Flame className="w-4.5 h-4.5 fill-orange-500 stroke-orange-700 animate-bounce" aria-hidden="true" />
@@ -62,7 +62,9 @@ export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
           </div>
 
           <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1 max-w-md leading-relaxed">
-            You're building unstoppable momentum! Practice today to keep your streak glowing.
+            {streakDays > 0
+              ? "You're building unstoppable momentum! Practice today to keep your streak glowing."
+              : 'Complete a study session today to light your first daily streak flame!'}
           </p>
         </div>
 
@@ -86,7 +88,7 @@ export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
                   ) : day.isToday ? (
                     <Sparkles className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 fill-slate-950 stroke-none" />
                   ) : (
-                    <span className="text-[11px] sm:text-xs opacity-75">{day.label}</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
                   )}
                 </div>
                 <span

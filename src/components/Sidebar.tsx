@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {profile?.name || 'Student Hero'}
                 </span>
                 <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-md bg-amber-100 dark:bg-amber-950/70 border border-amber-400/80 text-[10px] font-black text-amber-800 dark:text-amber-300 shrink-0">
-                  🔥 {profile?.streakDays || 1}d
+                  🔥 {profile?.streakDays ?? 0}d
                 </span>
               </div>
               <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 flex items-center gap-0.5 mt-0.5">

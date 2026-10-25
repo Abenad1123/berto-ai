@@ -677,7 +677,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col justify-between pb-44 sm:pb-36 transition-colors">
       {/* Top Header & Glowing Segmented Progress Bar */}
-      <div className="sticky top-0 z-20 bg-[#fbfaf8]/95 dark:bg-slate-900/95 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-3 py-2.5 sm:px-6 sm:py-3 transition-colors shadow-sm">
+      <div className="sticky top-0 z-20 bg-[#fbfaf8]/95 dark:bg-slate-900/95 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-3 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5 sm:pb-3 transition-colors shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           <button
             onClick={() => {
@@ -745,11 +745,9 @@ export const StudyView: React.FC<StudyViewProps> = ({
           {/* Combo / Streak Counter */}
           {currentStreak > 1 && (
             <div className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 border-[2px] sm:border-[2.5px] border-slate-900 px-2 py-0.5 sm:px-3 sm:py-1 rounded-xl text-xs font-black shadow-[0_2px_0_0_#78350f] sm:shadow-[0_2.5px_0_0_#78350f] animate-bounce shrink-0 whitespace-nowrap">
-              <span className="inline sm:hidden">🔥 {currentStreak}</span>
-              <span className="hidden sm:flex items-center gap-1.5">
-                <Flame className="w-4 h-4 fill-orange-600 stroke-orange-700 animate-pulse" />
-                <span>🔥 {currentStreak} Combo!</span>
-              </span>
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-orange-600 stroke-orange-700 animate-pulse shrink-0" />
+              <span className="inline sm:hidden">{currentStreak}</span>
+              <span className="hidden sm:inline">{currentStreak} Combo!</span>
             </div>
           )}
 

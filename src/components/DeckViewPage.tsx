@@ -360,7 +360,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors pb-16">
       {/* Top Sticky Navigation Bar */}
-      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 py-2 sm:px-6 sm:py-3">
+      <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2 sm:pb-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
           {/* Breadcrumbs */}
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1 min-w-0">
