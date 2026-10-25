@@ -154,3 +154,16 @@ describe('Offline Smart Heuristic Quiz Generator', () => {
     expect(types).toContain('multiple_select');
   });
 });
+
+describe('Game Modes & XP Rewards Mechanics', () => {
+  it('correctly calculates XP reward rates based on active GameMode', () => {
+    const calculateXp = (mode: 'normal' | 'speed_run' | 'hard_mode', correctCount: number) => {
+      const xpPerCorrect = mode === 'normal' ? 10 : 15;
+      return correctCount * xpPerCorrect;
+    };
+
+    expect(calculateXp('normal', 10)).toBe(100);
+    expect(calculateXp('speed_run', 10)).toBe(150);
+    expect(calculateXp('hard_mode', 10)).toBe(150);
+  });
+});

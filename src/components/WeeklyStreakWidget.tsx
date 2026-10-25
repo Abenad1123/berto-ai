@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flame, Check, Sparkles } from 'lucide-react';
 
 interface WeeklyStreakWidgetProps {
@@ -7,19 +7,31 @@ interface WeeklyStreakWidgetProps {
 }
 
 export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
-  streakDays = 3,
+  streakDays = 1,
   totalCardsStudied = 12,
 }) => {
-  // Days of current week
-  const days = [
-    { label: 'M', full: 'Mon', completed: true },
-    { label: 'T', full: 'Tue', completed: true },
-    { label: 'W', full: 'Wed', completed: true },
-    { label: 'T', full: 'Thu', completed: false, isToday: true },
-    { label: 'F', full: 'Fri', completed: false },
-    { label: 'S', full: 'Sat', completed: false },
-    { label: 'S', full: 'Sun', completed: false },
+  // Determine actual day of week (Monday = index 0, Sunday = index 6)
+  const [todayDow] = useState(() => (new Date().getDay() + 6) % 7);
+  const dayLabels = [
+    { label: 'M', full: 'Mon' },
+    { label: 'T', full: 'Tue' },
+    { label: 'W', full: 'Wed' },
+    { label: 'T', full: 'Thu' },
+    { label: 'F', full: 'Fri' },
+    { label: 'S', full: 'Sat' },
+    { label: 'S', full: 'Sun' },
   ];
+
+  const days = dayLabels.map((d, idx) => {
+    const isToday = idx === todayDow;
+    const daysAgo = todayDow - idx;
+    const completed = daysAgo >= 0 && daysAgo < streakDays;
+    return {
+      ...d,
+      completed,
+      isToday,
+    };
+  });
 
   return (
     <div className="tactile-card p-4 sm:p-6 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] dark:shadow-[0_6px_0_0_#000] mb-6 relative overflow-hidden transition-colors">

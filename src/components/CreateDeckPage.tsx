@@ -265,34 +265,41 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       }
 
       const now = new Date();
-      const deckId = await db.decks.add({
-        title: title.trim(),
-        description: `Generated from ${importedFileName || content.slice(0, 40)}...`,
-        category: category.trim() || 'General',
-        color,
-        icon: 'Sparkles',
-        cardCount: generated.length,
-        tags: parseTags(),
-        parentId: parentId || null,
-        createdAt: now,
-        updatedAt: now,
+      let createdDeckId = 0;
+
+      await db.transaction('rw', [db.decks, db.cards], async () => {
+        const deckId = await db.decks.add({
+          title: title.trim(),
+          description: `Generated from ${importedFileName || content.slice(0, 40)}...`,
+          category: category.trim() || 'General',
+          color,
+          icon: 'Sparkles',
+          cardCount: generated.length,
+          tags: parseTags(),
+          parentId: parentId || null,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        createdDeckId = Number(deckId);
+
+        const cardsToAdd: Card[] = generated.map((g) => ({
+          deckId: createdDeckId,
+          question: g.question,
+          answer: g.answer,
+          options: g.options,
+          correctAnswers: g.correctAnswers,
+          explanation: g.explanation,
+          type: g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat),
+          createdAt: now,
+          ...initializeFSRSCard(),
+        }));
+
+        await db.cards.bulkAdd(cardsToAdd);
       });
 
-      const cardsToAdd: Card[] = generated.map((g) => ({
-        deckId: Number(deckId),
-        question: g.question,
-        answer: g.answer,
-        options: g.options,
-        correctAnswers: g.correctAnswers,
-        explanation: g.explanation,
-        type: g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat),
-        createdAt: now,
-        ...initializeFSRSCard(),
-      }));
-
-      await db.cards.bulkAdd(cardsToAdd);
       sounds.playCorrect();
-      onCreated(Number(deckId));
+      onCreated(createdDeckId);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
       setError(errorObj.message || 'Failed to generate cards. Check your API key and connection.');
@@ -311,43 +318,49 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
     const isFolderDeck = tab === 'folder' || validCards.length === 0;
 
     const now = new Date();
-    const deckId = await db.decks.add({
-      title: title.trim(),
-      description: isFolderDeck ? 'Organizational folder deck for sub-decks.' : 'Custom student study deck.',
-      category: category.trim() || 'General',
-      color,
-      icon: isFolderDeck ? 'FolderTree' : 'BookOpen',
-      cardCount: validCards.length,
-      isFolder: isFolderDeck,
-      tags: parseTags(),
-      parentId: parentId || null,
-      createdAt: now,
-      updatedAt: now,
+    let createdDeckId = 0;
+
+    await db.transaction('rw', [db.decks, db.cards], async () => {
+      const deckId = await db.decks.add({
+        title: title.trim(),
+        description: isFolderDeck ? 'Organizational folder deck for sub-decks.' : 'Custom student study deck.',
+        category: category.trim() || 'General',
+        color,
+        icon: isFolderDeck ? 'FolderTree' : 'BookOpen',
+        cardCount: validCards.length,
+        isFolder: isFolderDeck,
+        tags: parseTags(),
+        parentId: parentId || null,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      createdDeckId = Number(deckId);
+
+      if (validCards.length > 0) {
+        const cardsToAdd: Card[] = validCards.map((c) => ({
+          deckId: createdDeckId,
+          question: c.question.trim(),
+          answer: c.answer.trim(),
+          options:
+            c.type === 'multiple_choice' || c.type === 'multiple_select'
+              ? c.options.filter((o) => o.trim())
+              : c.type === 'true_false'
+              ? ['True', 'False']
+              : undefined,
+          correctAnswers: c.type === 'multiple_select' ? c.correctAnswers : undefined,
+          explanation: c.explanation?.trim() || undefined,
+          type: c.type,
+          createdAt: now,
+          ...initializeFSRSCard(),
+        }));
+
+        await db.cards.bulkAdd(cardsToAdd);
+      }
     });
 
-    if (validCards.length > 0) {
-      const cardsToAdd: Card[] = validCards.map((c) => ({
-        deckId: Number(deckId),
-        question: c.question.trim(),
-        answer: c.answer.trim(),
-        options:
-          c.type === 'multiple_choice' || c.type === 'multiple_select'
-            ? c.options.filter((o) => o.trim())
-            : c.type === 'true_false'
-            ? ['True', 'False']
-            : undefined,
-        correctAnswers: c.type === 'multiple_select' ? c.correctAnswers : undefined,
-        explanation: c.explanation?.trim() || undefined,
-        type: c.type,
-        createdAt: now,
-        ...initializeFSRSCard(),
-      }));
-
-      await db.cards.bulkAdd(cardsToAdd);
-    }
-
     sounds.playCorrect();
-    onCreated(Number(deckId));
+    onCreated(createdDeckId);
   };
 
   const addManualCardRow = (defaultType: QuestionType = 'multiple_choice') => {

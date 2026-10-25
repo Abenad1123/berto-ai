@@ -12,7 +12,7 @@ import { MobileNav } from './components/MobileNav';
 import { WeeklyStreakWidget } from './components/WeeklyStreakWidget';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { Sidebar } from './components/Sidebar';
-import { ProfileModal } from './components/ProfileModal';
+import { ProfilePage } from './components/ProfilePage';
 import { StudyLauncherModal } from './components/StudyLauncherModal';
 import { db, seedInitialData } from './lib/db';
 import { sounds } from './lib/sound';
@@ -23,7 +23,8 @@ export type AppView =
   | { type: 'home' }
   | { type: 'create-deck'; parentDeckId?: number | null }
   | { type: 'deck-view'; deckId: number }
-  | { type: 'study'; deck: Deck };
+  | { type: 'study'; deck: Deck }
+  | { type: 'profile' };
 
 export function App() {
   const [view, setView] = useState<AppView>({ type: 'home' });
@@ -39,7 +40,6 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Filtering & Search
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -269,8 +269,40 @@ export function App() {
     setCompletedAnswers(null);
   };
 
-  const handleFinishStudy = (answers: QuizAnswer[]) => {
+  const handleFinishStudy = async (answers: QuizAnswer[]) => {
     setCompletedAnswers(answers);
+
+    // Persist earned XP and update daily streak in user profile
+    const gameMode = activeLauncherConfig?.gameMode || 'normal';
+    const xpPerCorrect = gameMode === 'speed_run' || gameMode === 'hard_mode' ? 15 : 10;
+    const correctCount = answers.filter((a) => a.isCorrect).length;
+    const earnedXp = correctCount * xpPerCorrect;
+
+    try {
+      const prof = await db.profile.toCollection().first();
+      if (prof?.id) {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        let newStreak = prof.streakDays || 1;
+        if (prof.lastStudyDate) {
+          const lastDate = new Date(prof.lastStudyDate);
+          const today = new Date(todayStr);
+          const diffDays = Math.round((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            newStreak += 1;
+          } else if (diffDays > 1) {
+            newStreak = 1;
+          }
+        }
+
+        await db.profile.update(prof.id, {
+          xp: (prof.xp || 340) + earnedXp,
+          streakDays: newStreak,
+          lastStudyDate: todayStr,
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to persist study session stats:', e);
+    }
   };
 
   const handleDeleteDeck = async (deckId: number) => {
@@ -288,10 +320,12 @@ export function App() {
         }
       }
     }
-    for (const id of allDeckIdsToDelete) {
-      await db.cards.where('deckId').equals(id).delete();
-      await db.decks.delete(id);
-    }
+    await db.transaction('rw', [db.decks, db.cards], async () => {
+      for (const id of allDeckIdsToDelete) {
+        await db.cards.where('deckId').equals(id).delete();
+        await db.decks.delete(id);
+      }
+    });
     if (activeParentDeck?.id && allDeckIdsToDelete.includes(activeParentDeck.id)) {
       setActiveParentDeck(null);
     }
@@ -322,6 +356,7 @@ export function App() {
           <SummaryModal
             deck={view.deck}
             answers={completedAnswers}
+            launcherConfig={activeLauncherConfig}
             onRestart={() => {
               setCompletedAnswers(null);
               handleStartStudy(view.deck);
@@ -452,7 +487,36 @@ export function App() {
     );
   }
 
-  // 4. MAIN HOME DASHBOARD VIEW
+  // 4. DEDICATED STUDENT PROFILE PAGE VIEW
+  if (view.type === 'profile') {
+    return (
+      <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+        <ProfilePage
+          onBack={() => {
+            sounds.playTap();
+            navigateTo({ type: 'home' });
+          }}
+          onOpenSettings={() => {
+            sounds.playTap();
+            setIsSettingsOpen(true);
+          }}
+          onProfileUpdated={() => {
+            // Live query will refresh automatically
+          }}
+        />
+
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          darkMode={darkMode}
+          onToggleDarkMode={handleToggleDarkMode}
+          userSettings={userSettings}
+        />
+      </div>
+    );
+  }
+
+  // 5. MAIN HOME DASHBOARD VIEW
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-200 dark:selection:bg-indigo-900 transition-colors">
       <Header
@@ -463,8 +527,7 @@ export function App() {
           setIsSettingsOpen(true);
         }}
         onOpenProfile={() => {
-          sounds.playTap();
-          setIsProfileOpen(true);
+          navigateTo({ type: 'profile' });
         }}
         onOpenShortcuts={() => {
           sounds.playTap();
@@ -492,10 +555,10 @@ export function App() {
               {userProfile?.motto || 'Review your flashcards daily to lock knowledge into long-term memory.'}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
               <button
                 onClick={() => navigateTo({ type: 'create-deck' })}
-                className="tactile-btn-amber px-4 py-2 text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#09090b]"
+                className="tactile-btn-amber w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#09090b] justify-center"
               >
                 <Sparkles className="w-4 h-4 fill-slate-950 stroke-none" />
                 <span>Create Deck (File / AI)</span>
@@ -503,10 +566,9 @@ export function App() {
 
               <button
                 onClick={() => {
-                  sounds.playTap();
-                  setIsProfileOpen(true);
+                  navigateTo({ type: 'profile' });
                 }}
-                className="tactile-btn-secondary px-3.5 py-2 text-xs font-black shadow-[0_3px_0_0_#09090b]"
+                className="tactile-btn-secondary w-full sm:w-auto px-3.5 py-2.5 text-xs font-black shadow-[0_3px_0_0_#09090b] justify-center"
               >
                 <span>Edit Profile</span>
               </button>
@@ -520,48 +582,49 @@ export function App() {
         </div>
 
         {/* 7-Day Rhythm & Study Activity Matrix */}
-        <WeeklyStreakWidget streakDays={3} totalCardsStudied={totalCards || 8} />
+        <WeeklyStreakWidget streakDays={userProfile?.streakDays || 1} totalCardsStudied={totalCards || 8} />
 
-        {/* Quick Stats Cards */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
-          <div className="tactile-card p-3.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3.5px_0_0_#09090b] flex items-center gap-2.5 sm:gap-3 transition-colors">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-violet-100 dark:bg-violet-950/70 border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-violet-700 dark:text-violet-400 shrink-0">
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+        {/* Quick Stats Cards - Mobile 360px optimized */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+          <div className="tactile-card p-2.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3px_0_0_#09090b] flex items-center gap-2 sm:gap-3 transition-colors min-w-0">
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-violet-100 dark:bg-violet-950/70 border-[1.5px] sm:border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-violet-700 dark:text-violet-400 shrink-0">
+              <BookOpen className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="text-base sm:text-xl font-black text-slate-950 dark:text-white leading-tight">
+            <div className="min-w-0 overflow-hidden">
+              <div className="text-sm sm:text-xl font-black text-slate-950 dark:text-white leading-tight truncate">
                 {decks?.length || 0}
               </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <div className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wider truncate">
                 Decks
               </div>
             </div>
           </div>
 
-          <div className="tactile-card p-3.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3.5px_0_0_#09090b] flex items-center gap-2.5 sm:gap-3 transition-colors">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
-              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+          <div className="tactile-card p-2.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3px_0_0_#09090b] flex items-center gap-2 sm:gap-3 transition-colors min-w-0">
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 border-[1.5px] sm:border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
+              <Trophy className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="text-base sm:text-xl font-black text-slate-950 dark:text-white leading-tight">
+            <div className="min-w-0 overflow-hidden">
+              <div className="text-sm sm:text-xl font-black text-slate-950 dark:text-white leading-tight truncate">
                 {totalCards || 0}
               </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              <div className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wider truncate">
                 Cards
               </div>
             </div>
           </div>
 
-          <div className="tactile-card p-3.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3.5px_0_0_#09090b] flex items-center gap-2.5 sm:gap-3 transition-colors">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/70 border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
-              <Layers className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+          <div className="tactile-card p-2.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3px_0_0_#09090b] flex items-center gap-2 sm:gap-3 transition-colors min-w-0">
+            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-100 dark:bg-amber-950/70 border-[1.5px] sm:border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
+              <Layers className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
-            <div>
-              <div className="text-base sm:text-xl font-black text-slate-950 dark:text-white leading-tight">
+            <div className="min-w-0 overflow-hidden">
+              <div className="text-sm sm:text-xl font-black text-slate-950 dark:text-white leading-tight truncate">
                 {userProfile?.dailyGoalCards || 20}
               </div>
-              <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                Daily Goal
+              <div className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wider truncate">
+                <span className="sm:hidden">Goal</span>
+                <span className="hidden sm:inline">Daily Goal</span>
               </div>
             </div>
           </div>
@@ -773,8 +836,7 @@ export function App() {
           setIsSettingsOpen(true);
         }}
         onOpenProfile={() => {
-          sounds.playTap();
-          setIsProfileOpen(true);
+          navigateTo({ type: 'profile' });
         }}
         profile={userProfile || null}
       />
@@ -789,7 +851,10 @@ export function App() {
         onToggleDarkMode={handleToggleDarkMode}
         onOpenCreate={() => navigateTo({ type: 'create-deck' })}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={() => {
+          setIsSidebarOpen(false);
+          navigateTo({ type: 'profile' });
+        }}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
         onSelectTag={(tag) => {
           setSelectedTag(tag);
@@ -798,12 +863,6 @@ export function App() {
         onSelectDeck={(d) => {
           if (d.id) navigateTo({ type: 'deck-view', deckId: d.id });
         }}
-      />
-
-      {/* Profile Customization Modal */}
-      <ProfileModal
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
       />
 
       {/* Settings Modal (Volume, Mute, Dark Mode, API Key) */}

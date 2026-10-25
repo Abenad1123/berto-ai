@@ -210,27 +210,13 @@ export function transformToMultipleSelect(card: Card, pool: Card[]): Card {
     };
   }
 
-  // Build multi-select options
-  // Try to find a second related true item from pool, or formulate a multiple true/false challenge
-  const otherCards = pool.filter(
-    (c) => c.id !== card.id && c.answer.trim().toLowerCase() !== card.answer.trim().toLowerCase()
-  );
-
+  // Build multi-select options for single-answer card: target answer is correct, remaining are plausible distractors
   const correctAnswers: string[] = [card.answer.trim()];
-  let distractors: string[] = [];
-
-  if (otherCards.length >= 3) {
-    // 2 correct facts + 2 distractors
-    const companionCard = otherCards[0];
-    correctAnswers.push(companionCard.answer.trim());
-    distractors = getDistractors(card.answer, otherCards.slice(1), 2);
-  } else {
-    // 1 correct answer + 3 distractors
-    distractors = getDistractors(card.answer, pool, 3);
-  }
-
+  const distractors = getDistractors(card.answer, pool, 3);
   const prompt = cleanPrompt(card.question);
-  const questionText = `Which of the following are true regarding "${prompt}"?`;
+  const questionText = card.question.endsWith('?')
+    ? card.question
+    : `Which of the following is correct regarding "${prompt}"?`;
   const options = shuffle([...correctAnswers, ...distractors]);
 
   return {
@@ -240,7 +226,7 @@ export function transformToMultipleSelect(card: Card, pool: Card[]): Card {
     answer: correctAnswers.join(', '),
     options,
     correctAnswers,
-    explanation: card.explanation || `Correct items: ${correctAnswers.join(', ')}`,
+    explanation: card.explanation || `Correct item: ${card.answer}`,
     type: 'multiple_select',
   };
 }

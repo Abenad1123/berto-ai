@@ -95,7 +95,8 @@ Format Instructions:
 
     if (provider === 'gemini') {
       const cleaned = await callGeminiGenerateContent(apiKey, prompt, 0.4);
-      generatedItems = JSON.parse(cleaned);
+      const parsed = JSON.parse(cleaned);
+      generatedItems = Array.isArray(parsed) ? parsed : parsed.questions || parsed.cards || [];
     } else {
       // Groq OpenAI-compatible endpoint
       const url = 'https://api.groq.com/openai/v1/chat/completions';

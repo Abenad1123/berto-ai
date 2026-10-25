@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   ArrowLeft,
   Play,
@@ -322,14 +322,16 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
     onRefreshCards();
   };
 
-  const handleDeleteCard = async (cardId: number) => {
+  const [sessionStartTime] = useState(() => Date.now());
+
+  const handleDeleteCard = useCallback(async (cardId: number) => {
     if (!confirm('Are you sure you want to delete this card?')) return;
     sounds.playTap();
     await db.cards.delete(cardId);
     const count = await db.cards.where('deckId').equals(deck.id!).count();
     await db.decks.update(deck.id!, { cardCount: count, updatedAt: new Date() });
     onRefreshCards();
-  };
+  }, [deck.id, onRefreshCards]);
 
   // Filter cards
   const filteredCards = cards.filter((c) => {
@@ -341,14 +343,13 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
     return qMatch && typeMatch;
   });
 
-  // Calculate FSRS due cards (due <= now or reps === 0)
+  // Calculate FSRS due cards (due <= sessionStartTime or reps === 0)
   const dueCardsCount = useMemo(() => {
-    const now = new Date();
     return cards.filter((c) => {
       if (!c.due) return true;
-      return new Date(c.due) <= now || (c.reps ?? 0) === 0;
+      return new Date(c.due).getTime() <= sessionStartTime || (c.reps ?? 0) === 0;
     }).length;
-  }, [cards]);
+  }, [cards, sessionStartTime]);
 
   const activeTheme = deckColorThemes[deck.color] || deckColorThemes.indigo;
 

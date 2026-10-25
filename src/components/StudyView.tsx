@@ -57,22 +57,38 @@ export const StudyView: React.FC<StudyViewProps> = ({
   onExit,
   onFinish,
 }) => {
+  const gameMode = launcherConfig?.gameMode || 'normal';
+  const xpPerCorrect = gameMode === 'normal' ? 10 : 15;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedMultipleOptions, setSelectedMultipleOptions] = useState<string[]>([]);
   const [typedBlankAnswer, setTypedBlankAnswer] = useState('');
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
   const [isCurrentCorrect, setIsCurrentCorrect] = useState(false);
+  const [isCurrentTimedOut, setIsCurrentTimedOut] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const blankInputRef = useRef<HTMLInputElement>(null);
 
+  // Speed Run Mode timer (10s countdown per question)
+  const [speedRunTimeRemainingMs, setSpeedRunTimeRemainingMs] = useState(10000);
+  const speedRunIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // Auto-advance state & timers
   const [autoAdvanceRemainingMs, setAutoAdvanceRemainingMs] = useState<number | null>(null);
   const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoAdvanceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopSpeedRunTimer = useCallback(() => {
+    if (speedRunIntervalRef.current) {
+      clearInterval(speedRunIntervalRef.current);
+      speedRunIntervalRef.current = null;
+    }
+  }, []);
 
   const stopTimers = useCallback(() => {
     if (autoAdvanceTimerRef.current) {
@@ -93,8 +109,9 @@ export const StudyView: React.FC<StudyViewProps> = ({
   useEffect(() => {
     return () => {
       stopTimers();
+      stopSpeedRunTimer();
     };
-  }, [stopTimers]);
+  }, [stopTimers, stopSpeedRunTimer]);
 
   const triggerMiniConfetti = useCallback(() => {
     if (userSettings?.confettiEnabled === false) return;
@@ -193,13 +210,81 @@ export const StudyView: React.FC<StudyViewProps> = ({
     [currentCard, launcherConfig?.practiceMode]
   );
 
+  // Speed Run Timeout: automatically marks as incorrect/timeout and reveals answer
+  const handleSpeedRunTimeout = useCallback(async () => {
+    if (isAnswerSubmitted || !currentCard) return;
+
+    stopSpeedRunTimer();
+    sounds.playWrong();
+    setIsAnswerSubmitted(true);
+    setIsCurrentCorrect(false);
+    setIsCurrentTimedOut(true);
+    setCurrentStreak(0);
+
+    if (currentCard.type === 'flashcard') {
+      setIsFlipped(true);
+      await updateCardFSRS(false, 'again');
+    } else {
+      await updateCardFSRS(false);
+    }
+
+    setAnswers((prev) => [
+      ...prev,
+      {
+        cardId: currentCard.id || 0,
+        sourceCardId: currentCard.sourceCardId || currentCard.id || 0,
+        userAnswer: 'Timed Out',
+        isCorrect: false,
+        questionType: currentCard.type,
+        questionText: currentCard.question,
+        correctAnswerText:
+          currentCard.type === 'multiple_select'
+            ? (currentCard.correctAnswers || [currentCard.answer]).join(', ')
+            : currentCard.answer,
+      },
+    ]);
+  }, [isAnswerSubmitted, currentCard, stopSpeedRunTimer, updateCardFSRS]);
+
+  const handleSpeedRunTimeoutRef = useRef(handleSpeedRunTimeout);
+  useEffect(() => {
+    handleSpeedRunTimeoutRef.current = handleSpeedRunTimeout;
+  });
+
+  // Speed Run Countdown Timer effect (10-second per-question countdown)
+  useEffect(() => {
+    if (gameMode !== 'speed_run' || isAnswerSubmitted) {
+      stopSpeedRunTimer();
+      return;
+    }
+
+    const startTime = Date.now();
+    const duration = 10000;
+
+    speedRunIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, duration - elapsed);
+      setSpeedRunTimeRemainingMs(remaining);
+
+      if (remaining <= 0) {
+        stopSpeedRunTimer();
+        handleSpeedRunTimeoutRef.current();
+      }
+    }, 50);
+
+    return () => {
+      stopSpeedRunTimer();
+    };
+  }, [currentIndex, isAnswerSubmitted, gameMode, stopSpeedRunTimer]);
+
   // Submit Single Choice or True/False
   const handleSubmitAnswer = useCallback(
     async (chosenAnswer: string) => {
       if (isAnswerSubmitted || !currentCard) return;
 
+      stopSpeedRunTimer();
       setSelectedOption(chosenAnswer);
       setIsAnswerSubmitted(true);
+      setIsCurrentTimedOut(false);
 
       const isCorrect = chosenAnswer.trim().toLowerCase() === currentCard.answer.trim().toLowerCase();
       setIsCurrentCorrect(isCorrect);
@@ -228,7 +313,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
         },
       ]);
     },
-    [isAnswerSubmitted, currentCard, updateCardFSRS, triggerMiniConfetti]
+    [isAnswerSubmitted, currentCard, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]
   );
 
   // Toggle option for Multiple Select
@@ -247,7 +332,9 @@ export const StudyView: React.FC<StudyViewProps> = ({
   const handleSubmitMultipleSelect = useCallback(async () => {
     if (isAnswerSubmitted || !currentCard || selectedMultipleOptions.length === 0) return;
 
+    stopSpeedRunTimer();
     setIsAnswerSubmitted(true);
+    setIsCurrentTimedOut(false);
     const targetAnswers = (currentCard.correctAnswers || [currentCard.answer]).map((a) =>
       a.trim().toLowerCase()
     );
@@ -282,13 +369,15 @@ export const StudyView: React.FC<StudyViewProps> = ({
         correctAnswerText: (currentCard.correctAnswers || [currentCard.answer]).join(', '),
       },
     ]);
-  }, [isAnswerSubmitted, currentCard, selectedMultipleOptions, updateCardFSRS, triggerMiniConfetti]);
+  }, [isAnswerSubmitted, currentCard, selectedMultipleOptions, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]);
 
   // Submit Fill in the Blank
   const handleSubmitBlank = useCallback(async () => {
     if (isAnswerSubmitted || !currentCard || !typedBlankAnswer.trim()) return;
 
+    stopSpeedRunTimer();
     setIsAnswerSubmitted(true);
+    setIsCurrentTimedOut(false);
     const cleanTyped = typedBlankAnswer.trim().toLowerCase();
     const cleanTarget = currentCard.answer.trim().toLowerCase();
     const isCorrect = cleanTyped === cleanTarget;
@@ -317,11 +406,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
         correctAnswerText: currentCard.answer,
       },
     ]);
-  }, [isAnswerSubmitted, currentCard, typedBlankAnswer, updateCardFSRS, triggerMiniConfetti]);
+  }, [isAnswerSubmitted, currentCard, typedBlankAnswer, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]);
 
-  // Override correct for close typo in fill_blank
+  // Override correct for close typo in fill_blank (disabled in Hard Mode)
   const handleOverrideCorrect = async () => {
-    if (!currentCard) return;
+    if (!currentCard || gameMode === 'hard_mode') return;
     sounds.playCorrect();
     setIsCurrentCorrect(true);
     setCurrentStreak((s) => s + 1);
@@ -346,6 +435,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   const handleNextQuestion = useCallback(() => {
     clearAutoAdvance();
+    stopSpeedRunTimer();
     sounds.playCardFlip();
     if (currentIndex + 1 < cards.length) {
       setCurrentIndex((prev) => prev + 1);
@@ -354,16 +444,20 @@ export const StudyView: React.FC<StudyViewProps> = ({
       setTypedBlankAnswer('');
       setIsAnswerSubmitted(false);
       setIsCurrentCorrect(false);
+      setIsCurrentTimedOut(false);
+      setShowHint(false);
       setIsFlipped(false);
+      setSpeedRunTimeRemainingMs(10000);
     } else {
       triggerFinishConfetti();
       onFinish(answers);
     }
-  }, [currentIndex, cards.length, answers, onFinish, clearAutoAdvance, triggerFinishConfetti]);
+  }, [currentIndex, cards.length, answers, onFinish, clearAutoAdvance, stopSpeedRunTimer, triggerFinishConfetti]);
 
   const handleFlashcardGrade = useCallback(
     async (grade: 'again' | 'hard' | 'good' | 'easy') => {
       clearAutoAdvance();
+      stopSpeedRunTimer();
       if (!currentCard) return;
       const isCorrect = grade !== 'again';
       if (isCorrect) {
@@ -400,7 +494,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
         setTypedBlankAnswer('');
         setIsAnswerSubmitted(false);
         setIsCurrentCorrect(false);
+        setIsCurrentTimedOut(false);
+        setShowHint(false);
         setIsFlipped(false);
+        setSpeedRunTimeRemainingMs(10000);
       } else {
         triggerFinishConfetti();
         onFinish(updatedAnswers);
@@ -414,6 +511,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
       onFinish,
       updateCardFSRS,
       clearAutoAdvance,
+      stopSpeedRunTimer,
       currentStreak,
       triggerMiniConfetti,
       triggerFinishConfetti,
@@ -583,8 +681,18 @@ export const StudyView: React.FC<StudyViewProps> = ({
             </div>
           </div>
 
-          {/* Practice Mode or Engine Indicator */}
-          {launcherConfig?.practiceMode ? (
+          {/* Game Mode Badge & Engine Indicator */}
+          {gameMode === 'speed_run' ? (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-amber-300 dark:bg-amber-400 text-slate-950 border-[2px] border-slate-900 text-[10px] sm:text-xs font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#78350f] animate-pulse">
+              <Zap className="w-3.5 h-3.5 fill-slate-950 stroke-none" />
+              <span>SPEED RUN</span>
+            </span>
+          ) : gameMode === 'hard_mode' ? (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-rose-500 text-white border-[2px] border-slate-900 text-[10px] sm:text-xs font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#881337]">
+              <Flame className="w-3.5 h-3.5 fill-amber-300 stroke-none" />
+              <span>HARD MODE (1.5x XP)</span>
+            </span>
+          ) : launcherConfig?.practiceMode ? (
             <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-200 dark:bg-amber-950 text-slate-950 dark:text-amber-300 border-[2px] border-slate-900 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
               Practice Sandbox
             </span>
@@ -598,7 +706,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
               <Brain className="w-3 h-3" />
               AI Arena
             </span>
-          ) : null}
+          ) : (
+            <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-[2px] border-slate-900 dark:border-slate-700 text-[10px] font-black uppercase tracking-wider shrink-0 shadow-[0_2px_0_0_#09090b]">
+              Normal Mode
+            </span>
+          )}
 
           {/* Stopwatch Timer - hidden on small mobile to guarantee no-clip fit */}
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-800 dark:text-slate-200 shadow-[0_2px_0_0_#09090b] shrink-0">
@@ -624,6 +736,45 @@ export const StudyView: React.FC<StudyViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Speed Run Mode Active Countdown Bar */}
+      {gameMode === 'speed_run' && !isAnswerSubmitted && (
+        <div className="sticky top-[53px] sm:top-[57px] z-10 w-full bg-amber-400/20 dark:bg-amber-950/70 backdrop-blur-md border-b-[2.5px] border-slate-900 px-3 sm:px-6 py-2 transition-colors">
+          <div className="max-w-2xl mx-auto flex items-center justify-between gap-3 text-xs font-black">
+            <div className="flex items-center gap-1.5 text-slate-900 dark:text-white">
+              <Zap
+                className={`w-4 h-4 ${
+                  speedRunTimeRemainingMs <= 3000
+                    ? 'text-rose-500 fill-rose-500 animate-bounce'
+                    : 'text-amber-500 fill-amber-500'
+                }`}
+              />
+              <span className="uppercase tracking-wider">Speed Run 10s Blitz</span>
+            </div>
+            <span
+              className={`font-mono text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] transition-all ${
+                speedRunTimeRemainingMs <= 3000
+                  ? 'bg-rose-500 text-white animate-pulse'
+                  : 'bg-amber-300 text-slate-950'
+              }`}
+            >
+              {(speedRunTimeRemainingMs / 1000).toFixed(1)}s
+            </span>
+          </div>
+          <div className="max-w-2xl mx-auto mt-1.5 h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full border-[2px] border-slate-900 overflow-hidden relative p-0.5 shadow-inner">
+            <div
+              className={`h-full rounded-full transition-all duration-75 ease-linear ${
+                speedRunTimeRemainingMs <= 3000
+                  ? 'bg-gradient-to-r from-rose-500 via-rose-600 to-red-600 shadow-[0_0_12px_rgba(244,63,94,0.9)] animate-pulse'
+                  : 'bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.8)]'
+              }`}
+              style={{
+                width: `${Math.max(0, Math.min(100, (speedRunTimeRemainingMs / 10000) * 100))}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Main Arena */}
       <main className="max-w-2xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-8 flex-1 flex flex-col justify-center">
@@ -683,7 +834,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     <p className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-emerald-600 dark:text-emerald-400 leading-snug`}>
                       {currentCard.answer}
                     </p>
-                    {currentCard.explanation && (
+                    {currentCard.explanation && gameMode !== 'hard_mode' && (
                       <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 bg-amber-50 dark:bg-amber-950/50 border-[2px] border-slate-900 dark:border-amber-700/60 rounded-2xl p-3 sm:p-4 text-left shadow-[0_3px_0_0_#09090b] flex items-start gap-2.5">
                         <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
                         <span>{currentCard.explanation}</span>
@@ -770,6 +921,27 @@ export const StudyView: React.FC<StudyViewProps> = ({
               <h2 className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-slate-950 dark:text-white leading-tight`}>
                 {currentCard.question}
               </h2>
+
+              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
+              {currentCard.hint && gameMode !== 'hard_mode' && (
+                <div className="mt-3">
+                  {showHint ? (
+                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>Hint: {currentCard.hint}</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowHint(true)}
+                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span>Need a hint?</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pb-4 py-1">
@@ -846,6 +1018,27 @@ export const StudyView: React.FC<StudyViewProps> = ({
               <h2 className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-slate-950 dark:text-white leading-tight`}>
                 {currentCard.question}
               </h2>
+
+              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
+              {currentCard.hint && gameMode !== 'hard_mode' && (
+                <div className="mt-3">
+                  {showHint ? (
+                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>Hint: {currentCard.hint}</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowHint(true)}
+                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span>Need a hint?</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 sm:gap-3 pb-4 py-1">
@@ -1000,6 +1193,27 @@ export const StudyView: React.FC<StudyViewProps> = ({
               <h2 className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-slate-950 dark:text-white leading-tight`}>
                 {currentCard.question}
               </h2>
+
+              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
+              {currentCard.hint && gameMode !== 'hard_mode' && (
+                <div className="mt-3">
+                  {showHint ? (
+                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>Hint: {currentCard.hint}</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setShowHint(true)}
+                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5" />
+                      <span>Need a hint?</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-4 py-1">
@@ -1049,7 +1263,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
       </main>
 
       {/* Signature High-Energy Bottom Drawer for Interactive Modes */}
-      {isAnswerSubmitted && currentCard.type !== 'flashcard' && (
+      {isAnswerSubmitted && (currentCard.type !== 'flashcard' || isCurrentTimedOut) && (
         <div
           className={`fixed bottom-0 inset-x-0 z-30 p-4 sm:p-5 pb-[max(1rem,env(safe-area-inset-bottom))] border-t-[3.5px] border-slate-900 dark:border-slate-800 transition-all duration-200 animate-in slide-in-from-bottom shadow-2xl ${
             isCurrentCorrect
@@ -1062,6 +1276,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
               {isCurrentCorrect ? (
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#064e3b] transform -rotate-3">
                   <CheckCircle2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
+                </div>
+              ) : isCurrentTimedOut ? (
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#881337] transform rotate-3">
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 fill-white stroke-none animate-pulse" />
                 </div>
               ) : (
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#881337] transform rotate-3">
@@ -1077,6 +1295,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
                         <span>Boom! Spot on!</span>
                         <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 stroke-[2.5]" aria-hidden="true" />
                       </>
+                    ) : isCurrentTimedOut ? (
+                      <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5 font-black">
+                        <Zap className="w-5 h-5 fill-current" />
+                        <span>Time's Up! (10s Speed Run Limit)</span>
+                      </span>
                     ) : (
                       <span>
                         Correct:{' '}
@@ -1089,14 +1312,33 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     )}
                   </h4>
                   {isCurrentCorrect && (
-                    <span className="bg-amber-300 text-slate-950 border border-slate-900 text-xs font-black px-2 py-0.5 rounded-full shadow-[0_1px_0_0_#09090b]">
-                      +10 XP
+                    <span className="bg-amber-300 text-slate-950 border border-slate-900 text-xs font-black px-2.5 py-0.5 rounded-full shadow-[0_1px_0_0_#09090b] flex items-center gap-1">
+                      {gameMode === 'speed_run' && <Zap className="w-3 h-3 fill-slate-950 stroke-none" />}
+                      {gameMode === 'hard_mode' && <Flame className="w-3 h-3 fill-rose-600 stroke-none" />}
+                      <span>+{xpPerCorrect} XP</span>
+                      {gameMode === 'speed_run' && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">(Speed Bonus)</span>
+                      )}
+                      {gameMode === 'hard_mode' && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">(1.5x Boost)</span>
+                      )}
                     </span>
                   )}
                 </div>
 
-                {/* Fill in the blank: "I was right (typo)" override button */}
-                {!isCurrentCorrect && currentCard.type === 'fill_blank' && (
+                {isCurrentTimedOut && (
+                  <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mt-1">
+                    Correct answer:{' '}
+                    <span className="underline decoration-2 text-slate-950 dark:text-white font-black">
+                      {currentCard.type === 'multiple_select'
+                        ? (currentCard.correctAnswers || [currentCard.answer]).join(', ')
+                        : currentCard.answer}
+                    </span>
+                  </p>
+                )}
+
+                {/* Fill in the blank: "I was right (typo)" override button (disabled in Hard Mode) */}
+                {!isCurrentCorrect && !isCurrentTimedOut && currentCard.type === 'fill_blank' && gameMode !== 'hard_mode' && (
                   <button
                     type="button"
                     onClick={handleOverrideCorrect}
@@ -1107,7 +1349,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
                   </button>
                 )}
 
-                {currentCard.explanation && (
+                {/* Explanation (hidden in Hard Mode to strictly maintain zero hints) */}
+                {currentCard.explanation && gameMode !== 'hard_mode' && (
                   <p className="text-xs sm:text-sm font-semibold opacity-95 mt-1.5 max-w-lg leading-relaxed text-slate-800 dark:text-slate-200">
                     {currentCard.explanation}
                   </p>

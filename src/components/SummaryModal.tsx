@@ -17,12 +17,13 @@ import {
   XCircle,
   Check,
 } from 'lucide-react';
-import type { Deck, QuizAnswer, QuestionType } from '../types';
+import type { Deck, QuizAnswer, QuestionType, QuizLauncherConfig } from '../types';
 import { sounds } from '../lib/sound';
 
 interface SummaryModalProps {
   deck: Deck;
   answers: QuizAnswer[];
+  launcherConfig?: QuizLauncherConfig;
   onRestart: () => void;
   onHome: () => void;
   onRetryMissed?: (missedCardIds: number[]) => void;
@@ -31,15 +32,18 @@ interface SummaryModalProps {
 export const SummaryModal: React.FC<SummaryModalProps> = ({
   deck,
   answers,
+  launcherConfig,
   onRestart,
   onHome,
   onRetryMissed,
 }) => {
   const [showReviewList, setShowReviewList] = useState(false);
+  const gameMode = launcherConfig?.gameMode || 'normal';
+  const xpPerCorrect = gameMode === 'normal' ? 10 : 15;
   const total = answers.length;
   const correctCount = answers.filter((a) => a.isCorrect).length;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const xpEarned = correctCount * 10;
+  const xpEarned = correctCount * xpPerCorrect;
   const missedAnswers = answers.filter((a) => !a.isCorrect);
 
   useEffect(() => {
@@ -148,8 +152,20 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
         <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
           Session Complete!
         </h2>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-700 dark:text-slate-300 mt-1 shadow-[0_1px_0_0_#09090b]">
-          <span>{deck.title}</span>
+        <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 text-xs font-black text-slate-700 dark:text-slate-300 shadow-[0_1px_0_0_#09090b]">
+            <span>{deck.title}</span>
+          </div>
+          {gameMode === 'speed_run' ? (
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-300 dark:bg-amber-400 text-slate-950 border-[1.5px] border-slate-900 text-xs font-black uppercase tracking-wider shadow-[0_1px_0_0_#78350f]">
+              <Zap className="w-3.5 h-3.5 fill-slate-950 stroke-none" />
+              <span>Speed Run (+15 XP)</span>
+            </div>
+          ) : gameMode === 'hard_mode' ? (
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-500 text-white border-[1.5px] border-slate-900 text-xs font-black uppercase tracking-wider shadow-[0_1px_0_0_#881337]">
+              <span>🔥 Hard Mode (1.5x XP)</span>
+            </div>
+          ) : null}
         </div>
 
         {/* Big Accuracy & Grade Banner */}

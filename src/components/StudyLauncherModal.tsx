@@ -16,8 +16,9 @@ import {
   Rocket,
   Shield,
   Award,
+  BookOpen,
 } from 'lucide-react';
-import type { Deck, Card, QuizLauncherConfig, QuizEngine, QuizFormatPreference, UserSettings } from '../types';
+import type { Deck, Card, QuizLauncherConfig, QuizEngine, QuizFormatPreference, GameMode, UserSettings } from '../types';
 import { sounds } from '../lib/sound';
 import { generateOfflineQuiz } from '../lib/offlineQuizEngine';
 import { generateAIQuiz } from '../lib/aiQuizEngine';
@@ -43,6 +44,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
   const [format, setFormat] = useState<QuizFormatPreference>(
     () => userSettings?.defaultQuizFormat || 'mixed'
   );
+  const [gameMode, setGameMode] = useState<GameMode>('normal');
   const [countSelection, setCountSelection] = useState<number | 'all'>(
     () => userSettings?.defaultQuestionCount || (cards.length <= 10 ? 'all' : 10)
   );
@@ -74,7 +76,8 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
       ? activeCardPool.length
       : Math.min(countSelection, activeCardPool.length);
 
-  const maxPotentialXp = targetCount * 10;
+  const xpPerQuestion = gameMode === 'normal' ? 10 : 15;
+  const maxPotentialXp = targetCount * xpPerQuestion;
 
   if (!isOpen) return null;
 
@@ -85,6 +88,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
     const config: QuizLauncherConfig = {
       engine,
       format,
+      gameMode,
       count: countSelection,
       dueOnly,
       practiceMode,
@@ -173,7 +177,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
           <div className="flex items-center justify-between">
             <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
               <Sliders className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 stroke-[2.5]" />
-              <span>1. Choose Game Mode</span>
+              <span>1. Choose Study Engine</span>
             </label>
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
               {activeCardPool.length} cards available
@@ -335,12 +339,129 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
           </div>
         )}
 
-        {/* 3. Session Settings: Count & Due filter with XP Preview */}
+        {/* 3. Choose Game Mode (NEW) */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 stroke-none" />
+              <span>3. Choose Game Mode</span>
+            </label>
+            <span className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+              {gameMode === 'normal' ? '10 XP / Q' : '⚡ 15 XP / Q (1.5x)'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
+            {/* Normal Mode */}
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playTap();
+                setGameMode('normal');
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
+                gameMode === 'normal'
+                  ? 'bg-sky-100/90 dark:bg-sky-950/60 border-slate-900 dark:border-sky-400 shadow-[0_4px_0_0_#0369a1] -translate-y-0.5'
+                  : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="w-9 h-9 rounded-xl bg-sky-500 text-white border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 stroke-[2.5]" />
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-200 dark:bg-sky-900 text-sky-950 dark:text-sky-200 border border-slate-900">
+                  Standard
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <div className="text-xs font-black text-slate-950 dark:text-white">Normal Mode</div>
+                  {gameMode === 'normal' && (
+                    <Check className="w-3.5 h-3.5 text-sky-700 dark:text-sky-300 stroke-[3.5]" />
+                  )}
+                </div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
+                  Relaxed pace &bull; Standard scoring &bull; Perfect for deep study
+                </div>
+              </div>
+            </button>
+
+            {/* Speed Run Mode */}
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playTap();
+                setGameMode('speed_run');
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
+                gameMode === 'speed_run'
+                  ? 'bg-amber-100/90 dark:bg-amber-950/60 border-slate-900 dark:border-amber-400 shadow-[0_4px_0_0_#78350f] -translate-y-0.5'
+                  : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] flex items-center justify-center">
+                  <Zap className="w-4 h-4 fill-slate-950 stroke-none" />
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-300 dark:bg-amber-900 text-slate-950 dark:text-amber-200 border border-slate-900">
+                  ⚡ 10s Blitz
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <div className="text-xs font-black text-slate-950 dark:text-white">Speed Run</div>
+                  {gameMode === 'speed_run' && (
+                    <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 stroke-[3.5]" />
+                  )}
+                </div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
+                  10s countdown bar &bull; Rapid recall &bull; Frenzy combo bonuses
+                </div>
+              </div>
+            </button>
+
+            {/* Hard Mode */}
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playTap();
+                setGameMode('hard_mode');
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border-[2.5px] text-left transition-all cursor-pointer flex flex-col justify-between gap-2.5 sm:gap-3 group relative ${
+                gameMode === 'hard_mode'
+                  ? 'bg-rose-100/90 dark:bg-rose-950/60 border-slate-900 dark:border-rose-400 shadow-[0_4px_0_0_#881337] -translate-y-0.5'
+                  : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-slate-400 hover:-translate-y-0.5 hover:shadow-[0_3px_0_0_#09090b]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="w-9 h-9 rounded-xl bg-rose-500 text-white border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] flex items-center justify-center">
+                  <Flame className="w-4 h-4 fill-white stroke-none" />
+                </span>
+                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-200 dark:bg-rose-900 text-rose-950 dark:text-rose-200 border border-slate-900">
+                  🔥 1.5x XP
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <div className="text-xs font-black text-slate-950 dark:text-white">Hard Mode</div>
+                  {gameMode === 'hard_mode' && (
+                    <Check className="w-3.5 h-3.5 text-rose-700 dark:text-rose-300 stroke-[3.5]" />
+                  )}
+                </div>
+                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
+                  Strict zero hints &bull; Immediate combo reset &bull; 1.5x XP multiplier
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* 4. Question Pool & Count options with XP Preview */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span>3. Round Length &amp; XP Rewards</span>
+              <span>4. Question Pool &amp; Count</span>
             </label>
             <span className="text-[11px] font-black text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
               +{maxPotentialXp} XP Max Reward
@@ -351,7 +472,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
             {countOptions.map((opt) => {
               const isSelected = countSelection === opt;
               const countNum = opt === 'all' ? activeCardPool.length : Math.min(Number(opt), activeCardPool.length);
-              const chipXp = countNum * 10;
+              const chipXp = countNum * xpPerQuestion;
               return (
                 <button
                   key={String(opt)}

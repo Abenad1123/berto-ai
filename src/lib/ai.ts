@@ -143,7 +143,11 @@ Instructions:
 
   if (provider === 'gemini') {
     const cleaned = await callGeminiGenerateContent(apiKey, prompt, 0.3);
-    return JSON.parse(cleaned) as GeneratedCardData[];
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed)) return parsed as GeneratedCardData[];
+    if (parsed.cards && Array.isArray(parsed.cards)) return parsed.cards as GeneratedCardData[];
+    if (parsed.questions && Array.isArray(parsed.questions)) return parsed.questions as GeneratedCardData[];
+    return [];
   } else {
     // Groq OpenAI-compatible endpoint
     const url = 'https://api.groq.com/openai/v1/chat/completions';

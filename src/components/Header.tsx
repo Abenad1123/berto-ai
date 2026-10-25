@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-30 w-full border-b-[2.5px] border-slate-900 bg-[#fbfaf8]/95 dark:bg-slate-900/95 dark:border-slate-800 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5 sm:gap-4">
         {/* Left: Hamburger Menu & Brand Mascot */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Hamburger Menu Button */}
           <button
             onClick={() => {
@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
               onOpenMenu();
             }}
             aria-label="Open navigation menu"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-white shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-white shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 shrink-0"
           >
             <Menu className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
           </button>
@@ -58,19 +58,14 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             aria-label="User Profile"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-500 to-purple-500 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] flex items-center justify-center text-white transform -rotate-3 group-hover:rotate-6 group-hover:scale-105 transition-all shrink-0">
+            <div className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-500 to-purple-500 border-[2.5px] border-slate-900 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] flex items-center justify-center text-white transform -rotate-3 group-hover:rotate-6 group-hover:scale-105 transition-all shrink-0">
               <Brain className="w-5.5 h-5.5 stroke-[2.5]" aria-hidden="true" />
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="font-black text-xl sm:text-2xl tracking-tight text-slate-950 dark:text-white truncate">
-                  Berto<span className="text-violet-600 dark:text-violet-400">AI</span>
-                </span>
-                <span className="bg-amber-300 dark:bg-amber-400 text-slate-950 border-[1.5px] border-slate-900 text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md shadow-[0_1.5px_0_0_#09090b] tracking-wider shrink-0">
-                  Free
-                </span>
-              </div>
+              <span className="font-black text-xl sm:text-2xl tracking-tight text-slate-950 dark:text-white truncate block">
+                Berto<span className="text-violet-600 dark:text-violet-400">AI</span>
+              </span>
             </div>
           </div>
         </div>
@@ -79,11 +74,11 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Punchy Streak Flame Pill - Compact on mobile, full on desktop */}
           <div
-            className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/70 dark:to-orange-950/70 text-orange-800 dark:text-orange-300 border-[2px] sm:border-[2.5px] border-slate-900 px-2 sm:px-3 py-1 rounded-2xl font-black text-xs shadow-[0_2px_0_0_#78350f] sm:shadow-[0_3px_0_0_#78350f] dark:shadow-[0_2px_0_0_#000] select-none hover:scale-105 transition-transform"
-            title="3-Day Study Streak!"
+            className="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/70 dark:to-orange-950/70 text-orange-800 dark:text-orange-300 border-[2px] sm:border-[2.5px] border-slate-900 px-2 sm:px-3 py-1 rounded-2xl font-black text-[11px] sm:text-xs shadow-[0_2px_0_0_#78350f] sm:shadow-[0_3px_0_0_#78350f] dark:shadow-[0_2px_0_0_#000] select-none hover:scale-105 transition-transform shrink-0"
+            title={`${profile?.streakDays || 1}-Day Study Streak!`}
           >
-            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-orange-500 stroke-orange-600 animate-bounce" aria-hidden="true" />
-            <span className="tracking-wide text-[11px] sm:text-xs">3d<span className="hidden sm:inline"> Streak</span></span>
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-orange-500 stroke-orange-600 animate-bounce shrink-0" aria-hidden="true" />
+            <span className="tracking-wide">{profile?.streakDays || 1}d<span className="hidden sm:inline"> Streak</span></span>
           </div>
 
           {/* Dark Mode Quick Toggle */}
@@ -94,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             aria-label="Toggle dark mode"
             title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 shrink-0"
           >
             {darkMode ? (
               <Sun className="w-5 h-5 text-amber-400 transition-transform hover:rotate-45" aria-hidden="true" />
@@ -146,17 +141,19 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* New Deck Button (Desktop - on mobile elevated in bottom MobileNav) */}
-          <button
-            onClick={() => {
-              sounds.playTap();
-              onOpenCreate();
-            }}
-            aria-label="Create new deck"
-            className="tactile-btn tactile-btn-violet min-h-[44px] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-black gap-1.5 shadow-[0_3px_0_0_#2e1065] active:translate-y-0.5 active:shadow-none ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 hidden sm:flex items-center"
-          >
-            <Sparkles className="w-4 h-4 fill-amber-300 stroke-amber-400" aria-hidden="true" />
-            <span>New Deck</span>
-          </button>
+          <div className="hidden sm:block">
+            <button
+              onClick={() => {
+                sounds.playTap();
+                onOpenCreate();
+              }}
+              aria-label="Create new deck"
+              className="tactile-btn tactile-btn-violet min-h-[44px] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-black gap-1.5 shadow-[0_3px_0_0_#2e1065] active:translate-y-0.5 active:shadow-none ml-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            >
+              <Sparkles className="w-4 h-4 fill-amber-300 stroke-amber-400" aria-hidden="true" />
+              <span>New Deck</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>

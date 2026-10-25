@@ -54,6 +54,9 @@ export async function seedInitialData() {
       motto: 'Consistency beats intensity.',
       avatarColor: 'violet',
       dailyGoalCards: 20,
+      xp: 340,
+      streakDays: 3,
+      lastStudyDate: now.toISOString().slice(0, 10),
     });
   }
 
