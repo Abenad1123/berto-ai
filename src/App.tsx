@@ -165,9 +165,13 @@ export function App() {
     return await db.decks.toArray();
   }, []);
 
-  const totalCards = useLiveQuery(async () => {
-    return await db.cards.count();
-  }, []);
+  const totalCards = useLiveQuery(
+    async () => {
+      if (view.type !== 'home') return 0;
+      return await db.cards.count();
+    },
+    [view.type === 'home']
+  );
 
   const userProfile = useLiveQuery(async () => {
     return await db.profile.toCollection().first();
@@ -341,6 +345,7 @@ export function App() {
     return (
       <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
         <StudyView
+          key={studyCards.map((c) => c.sourceCardId || c.id || c.question).join(':')}
           deck={view.deck}
           cards={studyCards}
           launcherConfig={activeLauncherConfig}

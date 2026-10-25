@@ -50,6 +50,7 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
     sounds.playFinish();
 
     // Trigger celebratory confetti if score is >= 60%
+    let rafId: number | null = null;
     if (accuracy >= 60) {
       const end = Date.now() + 1.2 * 1000;
       const colors = ['#6366f1', '#10b981', '#fbbf24', '#f43f5e'];
@@ -71,10 +72,14 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
         });
 
         if (Date.now() < end) {
-          requestAnimationFrame(frame);
+          rafId = requestAnimationFrame(frame);
         }
       })();
     }
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
   }, [accuracy]);
 
   // Letter Grade evaluation

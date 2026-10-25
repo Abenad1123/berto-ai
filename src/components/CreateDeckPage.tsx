@@ -217,6 +217,9 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       setError(errorObj.message || 'Failed to extract text from file.');
     } finally {
       setIsExtractingFile(false);
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 
@@ -252,10 +255,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
     try {
       setIsLoading(true);
+      const truncatedContent = content.slice(0, 40000);
       const generated = await generateCardsFromText({
         apiKey,
         provider,
-        content,
+        content: truncatedContent,
         count,
         type: aiQuestionFormat,
       });
@@ -283,17 +287,45 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
         createdDeckId = Number(deckId);
 
-        const cardsToAdd: Card[] = generated.map((g) => ({
-          deckId: createdDeckId,
-          question: g.question,
-          answer: g.answer,
-          options: g.options,
-          correctAnswers: g.correctAnswers,
-          explanation: g.explanation,
-          type: g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat),
-          createdAt: now,
-          ...initializeFSRSCard(),
-        }));
+        const cardsToAdd: Card[] = generated
+          .filter((g) => g && typeof g.question === 'string' && g.question.trim().length > 0)
+          .map((g) => {
+            const rawType = g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat);
+            const validTypes: QuestionType[] = ['multiple_choice', 'multiple_select', 'fill_blank', 'true_false', 'flashcard'];
+            const cardType: QuestionType = validTypes.includes(rawType as QuestionType) ? (rawType as QuestionType) : 'multiple_choice';
+
+            const answer = typeof g.answer === 'string' ? g.answer.trim() : String(g.answer || '');
+            let options = Array.isArray(g.options) ? g.options.map((o) => String(o).trim()).filter(Boolean) : undefined;
+            if (cardType === 'multiple_choice' && options && !options.includes(answer)) {
+              options[0] = answer;
+            }
+            if (cardType === 'true_false') {
+              options = ['True', 'False'];
+            }
+
+            let correctAnswers = Array.isArray(g.correctAnswers)
+              ? g.correctAnswers.map((ca) => String(ca).trim()).filter(Boolean)
+              : undefined;
+            if (cardType === 'multiple_select' && (!correctAnswers || correctAnswers.length === 0)) {
+              correctAnswers = [answer];
+            }
+
+            return {
+              deckId: createdDeckId,
+              question: g.question.trim(),
+              answer,
+              options,
+              correctAnswers,
+              explanation: typeof g.explanation === 'string' ? g.explanation.trim() : undefined,
+              type: cardType,
+              createdAt: now,
+              ...initializeFSRSCard(),
+            };
+          });
+
+        if (cardsToAdd.length === 0) {
+          throw new Error('AI generated cards were not in the expected format. Please try again.');
+        }
 
         await db.cards.bulkAdd(cardsToAdd);
       });
@@ -408,7 +440,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
     const copy = [...manualCards];
     const prevVal = copy[cardIdx].options[optIdx];
     copy[cardIdx].options[optIdx] = val;
-    if (copy[cardIdx].answer === prevVal && prevVal !== '') {
+    if ((copy[cardIdx].answer === prevVal && prevVal !== '') || (!copy[cardIdx].answer && optIdx === 0)) {
       copy[cardIdx].answer = val;
     }
     if (copy[cardIdx].correctAnswers.includes(prevVal)) {

@@ -38,6 +38,7 @@ export async function callGeminiGenerateContent(
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
       const response = await fetch(url, {
         method: 'POST',
+        signal: AbortSignal.timeout(45000),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -153,6 +154,7 @@ Instructions:
     const url = 'https://api.groq.com/openai/v1/chat/completions';
     const response = await fetch(url, {
       method: 'POST',
+      signal: AbortSignal.timeout(45000),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey.trim()}`,

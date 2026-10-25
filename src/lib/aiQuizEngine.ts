@@ -30,7 +30,9 @@ export async function generateAIQuiz(params: AIQuizParams): Promise<Card[]> {
   if (!cards || cards.length === 0) return [];
 
   const targetCount =
-    typeof count === 'number' && count > 0 ? Math.min(count, cards.length) : cards.length;
+    typeof count === 'number' && count > 0
+      ? Math.min(count, cards.length, 20)
+      : Math.min(cards.length, 20);
 
   // Pick target cards
   const selectedCards = [...cards].sort(() => Math.random() - 0.5).slice(0, targetCount);
@@ -102,6 +104,7 @@ Format Instructions:
       const url = 'https://api.groq.com/openai/v1/chat/completions';
       const response = await fetch(url, {
         method: 'POST',
+        signal: AbortSignal.timeout(45000),
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey.trim()}`,

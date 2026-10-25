@@ -21,6 +21,22 @@ export class BertoDatabase extends Dexie {
 
 export const db = new BertoDatabase();
 
+// Handle cross-tab schema upgrades cleanly
+if (typeof window !== 'undefined') {
+  db.on('versionchange', () => {
+    db.close();
+  });
+
+  // Request durable, non-evictable storage for local study vault
+  if (navigator.storage?.persist) {
+    navigator.storage.persisted().then((persisted) => {
+      if (!persisted) {
+        navigator.storage.persist().catch(() => {});
+      }
+    }).catch(() => {});
+  }
+}
+
 let isSeeding = false;
 
 // Seed initial starter decks & profile for instant study experience

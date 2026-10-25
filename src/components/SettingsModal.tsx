@@ -414,6 +414,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const safeParseDate = (val?: string | Date | null, fallback?: Date): Date | undefined => {
+      if (!val) return fallback;
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? fallback : d;
+    };
+
     try {
       const text = await file.text();
       const data = JSON.parse(text);
@@ -435,8 +441,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
         const sanitizedDecks = data.decks.map((d: RawDeck) => ({
           ...d,
-          createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
-          updatedAt: d.updatedAt ? new Date(d.updatedAt) : new Date(),
+          createdAt: safeParseDate(d.createdAt, new Date())!,
+          updatedAt: safeParseDate(d.updatedAt, new Date())!,
         }));
         await db.decks.bulkPut(sanitizedDecks);
       }
@@ -466,9 +472,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
         const sanitizedCards = data.cards.map((c: RawCard) => ({
           ...c,
-          due: c.due ? new Date(c.due) : undefined,
-          last_review: c.last_review ? new Date(c.last_review) : undefined,
-          createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+          due: safeParseDate(c.due),
+          last_review: safeParseDate(c.last_review),
+          createdAt: safeParseDate(c.createdAt, new Date())!,
         }));
         await db.cards.bulkPut(sanitizedCards);
       }
@@ -478,6 +484,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         await db.profile.add(data.profile);
       }
 
+      if (data.settings) {
+        await db.settings.clear();
+        await db.settings.add(data.settings);
+      }
+
       const dCount = await db.decks.count();
       const cCount = await db.cards.count();
       setVaultCounts({ decks: dCount, cards: cCount });
@@ -485,9 +496,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       sounds.playCorrect();
       alert(`Import Successful! Restored ${data.decks?.length || 0} decks and ${data.cards?.length || 0} cards.`);
       window.location.reload();
-    } catch {
+    } catch (err: unknown) {
       sounds.playWrong();
-      alert('Invalid backup file. Please ensure the JSON file is a valid Berto AI backup export.');
+      const errorObj = err as { name?: string; message?: string };
+      if (errorObj?.name === 'QuotaExceededError') {
+        alert('Storage Quota Exceeded! Your device storage is full. Please free up disk space and try again.');
+      } else {
+        alert(`Import Failed: ${errorObj?.message || 'Invalid backup file. Please ensure the JSON file is a valid Berto AI backup export.'}`);
+      }
+    } finally {
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 

@@ -73,6 +73,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
   const [currentStreak, setCurrentStreak] = useState(0);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const blankInputRef = useRef<HTMLInputElement>(null);
+  const isSubmittingRef = useRef(false);
+  const isAdvancingRef = useRef(false);
 
   // Speed Run Mode timer (10s countdown per question)
   const [speedRunTimeRemainingMs, setSpeedRunTimeRemainingMs] = useState(10000);
@@ -212,7 +214,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   // Speed Run Timeout: automatically marks as incorrect/timeout and reveals answer
   const handleSpeedRunTimeout = useCallback(async () => {
-    if (isAnswerSubmitted || !currentCard) return;
+    if (isSubmittingRef.current || isAnswerSubmitted || !currentCard) return;
+    isSubmittingRef.current = true;
 
     stopSpeedRunTimer();
     sounds.playWrong();
@@ -279,7 +282,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
   // Submit Single Choice or True/False
   const handleSubmitAnswer = useCallback(
     async (chosenAnswer: string) => {
-      if (isAnswerSubmitted || !currentCard) return;
+      if (isSubmittingRef.current || isAnswerSubmitted || !currentCard) return;
+      isSubmittingRef.current = true;
 
       stopSpeedRunTimer();
       setSelectedOption(chosenAnswer);
@@ -330,19 +334,20 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   // Submit Multiple Select (Checkboxes)
   const handleSubmitMultipleSelect = useCallback(async () => {
-    if (isAnswerSubmitted || !currentCard || selectedMultipleOptions.length === 0) return;
+    if (isSubmittingRef.current || isAnswerSubmitted || !currentCard || selectedMultipleOptions.length === 0) return;
+    isSubmittingRef.current = true;
 
     stopSpeedRunTimer();
     setIsAnswerSubmitted(true);
     setIsCurrentTimedOut(false);
-    const targetAnswers = (currentCard.correctAnswers || [currentCard.answer]).map((a) =>
-      a.trim().toLowerCase()
+    const targetSet = new Set(
+      (currentCard.correctAnswers || [currentCard.answer]).map((a) => a.trim().toLowerCase())
     );
-    const userSelected = selectedMultipleOptions.map((a) => a.trim().toLowerCase());
+    const userSet = new Set(selectedMultipleOptions.map((a) => a.trim().toLowerCase()));
 
     const isCorrect =
-      targetAnswers.length === userSelected.length &&
-      targetAnswers.every((t) => userSelected.includes(t));
+      targetSet.size === userSet.size &&
+      [...targetSet].every((t) => userSet.has(t));
 
     setIsCurrentCorrect(isCorrect);
 
@@ -373,14 +378,19 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   // Submit Fill in the Blank
   const handleSubmitBlank = useCallback(async () => {
-    if (isAnswerSubmitted || !currentCard || !typedBlankAnswer.trim()) return;
+    if (isSubmittingRef.current || isAnswerSubmitted || !currentCard || !typedBlankAnswer.trim()) return;
+    isSubmittingRef.current = true;
 
     stopSpeedRunTimer();
     setIsAnswerSubmitted(true);
     setIsCurrentTimedOut(false);
-    const cleanTyped = typedBlankAnswer.trim().toLowerCase();
-    const cleanTarget = currentCard.answer.trim().toLowerCase();
-    const isCorrect = cleanTyped === cleanTarget;
+    const normalizeCloze = (str: string) =>
+      str.trim().toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/\s+/g, ' ');
+    const cleanTyped = normalizeCloze(typedBlankAnswer);
+    const cleanTarget = normalizeCloze(currentCard.answer);
+    const isCorrect =
+      cleanTyped === cleanTarget ||
+      cleanTyped.replace(/[.?!,;:]+$/, '') === cleanTarget.replace(/[.?!,;:]+$/, '');
     setIsCurrentCorrect(isCorrect);
 
     if (isCorrect) {
@@ -410,7 +420,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   // Override correct for close typo in fill_blank (disabled in Hard Mode)
   const handleOverrideCorrect = async () => {
-    if (!currentCard || gameMode === 'hard_mode') return;
+    if (!currentCard || gameMode === 'hard_mode' || isCurrentCorrect) return;
     sounds.playCorrect();
     setIsCurrentCorrect(true);
     setCurrentStreak((s) => s + 1);
@@ -434,6 +444,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
   };
 
   const handleNextQuestion = useCallback(() => {
+    if (isAdvancingRef.current) return;
+    isAdvancingRef.current = true;
     clearAutoAdvance();
     stopSpeedRunTimer();
     sounds.playCardFlip();
@@ -448,6 +460,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
       setShowHint(false);
       setIsFlipped(false);
       setSpeedRunTimeRemainingMs(10000);
+      isSubmittingRef.current = false;
+      isAdvancingRef.current = false;
     } else {
       triggerFinishConfetti();
       onFinish(answers);
@@ -456,9 +470,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
   const handleFlashcardGrade = useCallback(
     async (grade: 'again' | 'hard' | 'good' | 'easy') => {
+      if (isSubmittingRef.current || isAdvancingRef.current || !currentCard) return;
+      isSubmittingRef.current = true;
+      isAdvancingRef.current = true;
       clearAutoAdvance();
       stopSpeedRunTimer();
-      if (!currentCard) return;
       const isCorrect = grade !== 'again';
       if (isCorrect) {
         sounds.playCorrect();
@@ -498,6 +514,8 @@ export const StudyView: React.FC<StudyViewProps> = ({
         setShowHint(false);
         setIsFlipped(false);
         setSpeedRunTimeRemainingMs(10000);
+        isSubmittingRef.current = false;
+        isAdvancingRef.current = false;
       } else {
         triggerFinishConfetti();
         onFinish(updatedAnswers);
@@ -561,11 +579,17 @@ export const StudyView: React.FC<StudyViewProps> = ({
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // When typing in input field, allow Enter to submit blank
+      // When typing in input field, allow Enter to submit blank or advance
       if (document.activeElement?.tagName === 'INPUT') {
-        if (e.key === 'Enter' && !isAnswerSubmitted && currentCard?.type === 'fill_blank' && typedBlankAnswer.trim()) {
-          e.preventDefault();
-          handleSubmitBlank();
+        if (e.key === 'Enter') {
+          if (!isAnswerSubmitted && currentCard?.type === 'fill_blank' && typedBlankAnswer.trim()) {
+            e.preventDefault();
+            handleSubmitBlank();
+          } else if (isAnswerSubmitted) {
+            e.preventDefault();
+            clearAutoAdvance();
+            handleNextQuestion();
+          }
         }
         return;
       }
@@ -842,15 +866,17 @@ export const StudyView: React.FC<StudyViewProps> = ({
                     )}
                   </div>
 
-                  <div className="text-center text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Rate recall below to schedule with FSRS
-                  </div>
+                  {!isAnswerSubmitted && (
+                    <div className="text-center text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Rate recall below to schedule with FSRS
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* FSRS Rating Buttons (4 tactile options: Again, Hard, Good, Easy) */}
-            {isFlipped && (
+            {isFlipped && !isAnswerSubmitted && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 w-full mt-4 sm:mt-6 pb-2 py-1">
                 <button
                   type="button"

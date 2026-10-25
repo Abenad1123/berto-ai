@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -117,9 +117,39 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   onOpenSettings,
   onProfileUpdated,
 }) => {
-  // Live queries for real card and deck metrics
-  const cards = useLiveQuery(async () => await db.cards.toArray(), []);
-  const decks = useLiveQuery(async () => await db.decks.toArray(), []);
+  // Live queries for real card and deck metrics without full table memory loads
+  const metrics = useLiveQuery(
+    async () => {
+      const now = new Date();
+      const total = await db.cards.count();
+      const dueCount = await db.cards.where('due').belowOrEqual(now).count();
+      const learningCount = await db.cards.where('state').anyOf([1, 3]).count();
+      const matureCount = await db.cards.where('state').equals(2).count();
+
+      let reviewCount = 0;
+      let masteredCount = 0;
+      await db.cards.each((c) => {
+        if (c.reps && c.reps > 0) {
+          reviewCount += c.reps;
+          masteredCount++;
+        } else if (c.state === 2) {
+          masteredCount++;
+        }
+      });
+
+      return {
+        cardsDue: dueCount,
+        cardsLearning: learningCount,
+        cardsMature: matureCount,
+        cardsMastered: masteredCount,
+        totalReviews: reviewCount,
+        totalCardsCount: total,
+      };
+    },
+    [],
+    { cardsDue: 0, cardsLearning: 0, cardsMature: 0, cardsMastered: 0, totalReviews: 0, totalCardsCount: 0 }
+  );
+  const totalDecksCount = useLiveQuery(async () => await db.decks.count(), [], 0);
 
   // Profile state
   const [profile, setProfile] = useState<UserProfile>({
@@ -153,39 +183,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     loadProfile();
   }, []);
 
-  // Mount timestamp to compare due dates cleanly
-  const [mountTime] = useState(() => Date.now());
-
-  // Compute metrics from real cards data using useMemo
-  const { cardsDue, cardsLearning, cardsMature, cardsMastered, totalReviews } = useMemo(() => {
-    if (!cards) {
-      return { cardsDue: 0, cardsLearning: 0, cardsMature: 0, cardsMastered: 0, totalReviews: 0 };
-    }
-    let dueCount = 0;
-    let learningCount = 0;
-    let matureCount = 0;
-    let masteredCount = 0;
-    let reviewCount = 0;
-
-    for (const c of cards) {
-      if (c.due && new Date(c.due).getTime() <= mountTime) dueCount++;
-      if (c.state === 1 || c.state === 3) learningCount++;
-      if (c.state === 2) matureCount++;
-      if ((c.reps && c.reps > 0) || c.state === 2) masteredCount++;
-      if (c.reps) reviewCount += c.reps;
-    }
-
-    return {
-      cardsDue: dueCount,
-      cardsLearning: learningCount,
-      cardsMature: matureCount,
-      cardsMastered: masteredCount,
-      totalReviews: reviewCount,
-    };
-  }, [cards, mountTime]);
-
-  const totalCardsCount = cards?.length || 0;
-  const totalDecksCount = decks?.length || 0;
+  const { cardsDue, cardsLearning, cardsMature, cardsMastered, totalReviews, totalCardsCount } = metrics;
   const allTimeQuizzes = Math.max(1, Math.floor(totalReviews / 5) || 3);
 
   // Gamification XP & Level calculation

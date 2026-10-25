@@ -24,17 +24,28 @@ export function calculateNextReview(
   isCorrect: boolean,
   grade: 'easy' | 'good' | 'hard' | 'again' = isCorrect ? 'good' : 'again'
 ): Partial<Card> {
+  const safeDue =
+    card.due && !isNaN(new Date(card.due).getTime()) ? new Date(card.due) : new Date();
+  const safeLastReview =
+    card.last_review && !isNaN(new Date(card.last_review).getTime())
+      ? new Date(card.last_review)
+      : undefined;
+  const safeStability =
+    typeof card.stability === 'number' && !isNaN(card.stability) ? card.stability : 0;
+  const safeDifficulty =
+    typeof card.difficulty === 'number' && !isNaN(card.difficulty) ? card.difficulty : 0;
+
   const fsrsCard: FSRSCard = {
-    due: card.due ? new Date(card.due) : new Date(),
-    stability: card.stability ?? 0,
-    difficulty: card.difficulty ?? 0,
-    elapsed_days: card.elapsed_days ?? 0,
-    scheduled_days: card.scheduled_days ?? 0,
-    reps: card.reps ?? 0,
-    lapses: card.lapses ?? 0,
-    learning_steps: card.learning_steps ?? 0,
-    state: card.state ?? 0,
-    last_review: card.last_review ? new Date(card.last_review) : undefined,
+    due: safeDue,
+    stability: safeStability,
+    difficulty: safeDifficulty,
+    elapsed_days: Number(card.elapsed_days) || 0,
+    scheduled_days: Number(card.scheduled_days) || 0,
+    reps: Number(card.reps) || 0,
+    lapses: Number(card.lapses) || 0,
+    learning_steps: Number(card.learning_steps) || 0,
+    state: Number(card.state) || 0,
+    last_review: safeLastReview,
   };
 
   let rating = Rating.Good;
