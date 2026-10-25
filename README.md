@@ -16,8 +16,8 @@
 [![React 19](https://img.shields.io/badge/React-19.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-4.3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vitest](https://img.shields.io/badge/Tests-11%20Passed-brightgreen?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
-[![Bundle Size](https://img.shields.io/badge/Gzipped%20Size-164%20kB-blueviolet?style=for-the-badge)](https://github.com/Abenad1123/berto-ai)
+[![Vitest](https://img.shields.io/badge/Tests-18%20Passed-brightgreen?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Android Ready](https://img.shields.io/badge/Capacitor-Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white)](android/)
 
 <p align="center">
   <b>Berto AI</b> transforms flashcard study into an engaging, high-retention quest.<br/>
@@ -25,7 +25,7 @@
   and transparent <b>client-side AI generation (Gemini & Groq)</b>. Zero ads. Zero paywalls. Zero telemetry.
 </p>
 
-[Key Highlights](#-key-highlights) • [Interactive Quiz Arena](#-interactive-quiz-arena) • [FSRS Spaced Repetition](#-scientific-fsrs-spaced-repetition) • [Quick Start](#-quick-start) • [Design System & Theming](#-design-system--theming) • [Keyboard Shortcuts](#-keyboard-shortcuts) • [BYOK AI Setup](#-byok-ai-setup)
+[Key Highlights](#-key-highlights) • [Interactive Quiz Arena](#-interactive-quiz-arena) • [FSRS Spaced Repetition](#-scientific-fsrs-spaced-repetition) • [Quick Start & Mobile](#-quick-start) • [Design System](#-design-system--theming) • [Keyboard Shortcuts](#-keyboard-shortcuts) • [BYOK AI Setup](#-byok-ai-setup)
 
 <br/>
 
@@ -42,14 +42,16 @@
 
 ```
 ┌─────────────────────────────────┬─────────────────────────────────┬─────────────────────────────────┐
-│        ⚡ 100% Local-First       │       🧠 Modern FSRS Engine     │     🎮 Neo-Brutalist Arena      │
-│  All cards, decks, and schedules│  Replaces rigid SM-2 algorithms │  Chunky 3D buttons, sound FX,   │
-│  are stored in IndexedDB via    │  with mathematical stability    │  streak flames, and celebratory │
-│  Dexie.js. Zero cloud telemetry.│  and lapse decay predictions.   │  confetti bursts at 60 FPS.     │
+│        ⚡ 100% Local-First       │       🧠 Modern FSRS Engine     │     📱 Native Android & Web     │
+│  All cards, decks, and schedules│  Replaces rigid SM-2 algorithms │  Runs as a PWA in any browser   │
+│  are stored in IndexedDB via    │  with mathematical stability    │  or as a standalone native      │
+│  Dexie.js. Zero cloud telemetry.│  and lapse decay predictions.   │  Android APK via Capacitor.     │
 └─────────────────────────────────┴─────────────────────────────────┴─────────────────────────────────┘
 ```
 
-- **Offline-First Resilience**: Full PWA service worker caching. Import, export, study, and quiz with zero internet connection.
+- **Clean Onboarding & Privacy Agreement**: 3-step tactile onboarding with transparent Terms of Service and local privacy guarantee before entering the arena.
+- **Dynamic Gamification Engine**: Functional XP leveling (10 XP normal, 15 XP speed run/hard mode), calendar-accurate daily study streaks, and real-time badge achievements.
+- **Offline-First Resilience**: Full PWA and Capacitor native caching. Import, export, study, and quiz with zero internet connection.
 - **5 Dynamic Question Formats**: Flashcards, Multiple Choice, True/False, Cloze (Fill-in-the-Blank), and Multi-Select Checkboxes.
 - **Offline Smart Heuristic Generator**: Converts any plain deck into multi-choice or true/false quizzes using companion distractor pooling.
 - **Transparent AI Forge**: One-click deck and quiz creation from PDFs, PowerPoint slides (`.pptx`), or raw lecture notes powered by free-tier **Google Gemini** or **Groq Cloud**.
@@ -96,8 +98,6 @@ Transform standard two-sided flashcards into 5 interactive assessment formats:
 
 Berto AI discards the 35-year-old SuperMemo SM-2 algorithm in favor of the **Free Spaced Repetition Scheduler (FSRS v5)**.
 
-### Why FSRS Outperforms SM-2
-
 ```
   SM-2 (Legacy)        → Fixed multipliers, ignores lapses, over-reviews easy cards.
   FSRS (Berto AI)      → Dynamic retention modeling: R(t) = (1 + F · t / S)^(-1)
@@ -115,36 +115,53 @@ Berto AI discards the 35-year-old SuperMemo SM-2 algorithm in favor of the **Fre
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) v18.0.0 or higher
-- [npm](https://www.npmjs.com/) (bundled with Node)
-
-### Installation & Local Run
+### Web Application
 
 ```bash
-# 1. Clone the repository
+# 1. Clone repository
 git clone https://github.com/Abenad1123/berto-ai.git
 cd berto-ai
 
 # 2. Install dependencies
 npm install
 
-# 3. Start development server with Hot Module Replacement (HMR)
+# 3. Start local development server
 npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+---
+
+### 📱 Android Mobile App (Capacitor)
+
+Berto AI is configured for native Android development via Capacitor:
+
+```bash
+# Sync web build to native Android
+npm run cap:sync
+
+# Open native project in Android Studio
+npm run cap:android
+
+# Or build the Debug APK directly via CLI
+cd android
+.\gradlew.bat assembleDebug
+```
+*Generated APK location: `android/app/build/outputs/apk/debug/app-debug.apk`*
+
+---
+
 ### Quality Verification Commands
 
 ```bash
-# Execute automated Vitest algorithm suite (11/11 tests)
+# Execute automated Vitest test suite (18/18 tests across FSRS, heuristics & gamification)
 npm test
 
 # Run Oxlint (fast Rust-based static analysis)
 npm run lint
 
-# Compile TypeScript and bundle production assets with Vite
+# Compile TypeScript and bundle production assets
 npm run build
 
 # Preview production build locally
@@ -279,39 +296,43 @@ Easily convert study materials into flashcards:
 
 ```
 berto-ai/
+├── android/                       # Capacitor Native Android project (Gradle, APK output)
 ├── src/
 │   ├── components/                # UI Components (React 19 + Tailwind v4)
 │   │   ├── CreateDeckPage.tsx     # Quest builder, category icons & file parser
 │   │   ├── DeckCard.tsx           # Tactile card with dynamic theme colors & count
 │   │   ├── DeckViewPage.tsx       # Subdeck realm cards, cloze tools & card list
-│   │   ├── Header.tsx             # Brand mascot, streak flame & quick controls
+│   │   ├── Header.tsx             # Brand mascot, streak flame, notch safe-area & controls
 │   │   ├── MobileNav.tsx          # Responsive mobile navigation drawer
-│   │   ├── ProfileModal.tsx       # Learner profile & daily goal tracker
+│   │   ├── OnboardingScreen.tsx   # 3-step tactile welcome, profile & ToS flow
+│   │   ├── ProfilePage.tsx        # Student profile, dynamic badges & study metrics
 │   │   ├── SettingsModal.tsx      # 5-section customization hub & API tester
 │   │   ├── ShortcutsModal.tsx     # Keyboard shortcuts cheat sheet modal
 │   │   ├── Sidebar.tsx            # RPG learner card, deck tree & tag filters
 │   │   ├── StudyLauncherModal.tsx # Game mode cards & round length selector
 │   │   ├── StudyView.tsx          # Multi-format quiz arena & FSRS scheduler
 │   │   ├── SummaryModal.tsx       # Post-round celebration & accuracy metrics
-│   │   └── WeeklyStreakWidget.tsx # 7-day study rhythm matrix with celebration glow
+│   │   └── WeeklyStreakWidget.tsx # 7-day study rhythm matrix with habit tracking
 │   ├── lib/                       # Core Algorithms & Local Engines
 │   │   ├── ai.ts                  # Resilient Gemini & Groq API handlers
 │   │   ├── aiQuizEngine.ts        # AI dynamic question generation
 │   │   ├── algorithms.test.ts     # Vitest automated test suite (FSRS & heuristics)
 │   │   ├── categoryIcons.tsx      # Lucide icon resolver by category name
-│   │   ├── db.ts                  # Dexie.js IndexedDB schema & starter deck seeds
+│   │   ├── db.ts                  # Dexie.js IndexedDB schema & on-demand starter decks
 │   │   ├── fileParser.ts          # Lazy dynamic import parser for PDF & PPTX
 │   │   ├── fsrs.ts                # FSRS mathematical memory scheduling algorithms
+│   │   ├── gamification.ts        # Dynamic XP & calendar-aware streak continuity
+│   │   ├── gamification.test.ts   # Vitest gamification & rewards unit tests
 │   │   ├── offlineQuizEngine.ts   # Zero-latency local distractor & question heuristics
 │   │   └── sound.ts               # Web Audio API synthesizers (taps, chimes, buzz)
 │   ├── types/                     # Unified TypeScript type definitions
-│   ├── App.tsx                    # State coordinator, routing & theme listeners
+│   ├── App.tsx                    # State coordinator, onboarding gate & theme listeners
 │   ├── index.css                  # Neo-brutalist tactile physics & accent tokens
 │   └── main.tsx                   # React 19 root mounting
-├── assets/                        # Design tokens (JSON & CSS variables)
-├── docs/                          # Brand guidelines & project philosophy
-├── public/                        # PWA manifest & offline service worker
-├── package.json                   # Dependencies & test scripts
+├── capacitor.config.ts            # Capacitor mobile configuration
+├── docs/                          # Brand guidelines, specs & implementation plans
+├── public/                        # PWA manifest & assets
+├── package.json                   # Dependencies, Capacitor scripts & test scripts
 └── vite.config.ts                 # Vite bundler configuration
 ```
 
@@ -319,20 +340,29 @@ berto-ai/
 
 ## 🧪 Testing & Verification
 
-Berto AI includes unit tests verifying both FSRS mathematical stability and offline question heuristics:
+Berto AI includes unit tests verifying FSRS mathematical stability, offline question heuristics, and the gamification rewards engine:
 
 ```bash
 npm test
 ```
 
 ```
- ✓ src/lib/algorithms.test.ts (11 tests) 14ms
+ ✓ src/lib/gamification.test.ts (6 tests)
+   ✓ Gamification: XP and Daily Streak Calculations (6)
+     ✓ awards 10 XP per correct answer in normal game mode
+     ✓ awards 15 XP per correct answer in speed_run or hard_mode
+     ✓ initializes a 1-day streak on user first study session
+     ✓ increments streak on consecutive calendar day
+     ✓ preserves current streak when studying multiple times on the same calendar day
+     ✓ resets streak to 1 when a day is skipped
+
+ ✓ src/lib/algorithms.test.ts (12 tests)
    ✓ FSRS Scheduling Algorithm (4)
      ✓ initializes FSRS fields with valid defaults
      ✓ updates card state and schedules next review on "good" response
      ✓ handles "again" (lapse) response for new and review cards
      ✓ handles "easy" grade
-   ✓ Offline Smart Heuristic Quiz Generator (7)
+   ✓ Offline Smart Heuristic Quiz Generator (8)
      ✓ returns empty array when given empty cards list
      ✓ respects the count parameter
      ✓ transforms card to multiple choice with target answer in options
@@ -340,6 +370,10 @@ npm test
      ✓ transforms card to fill in the blank with cloze deletion
      ✓ transforms card to multiple select with correct answers
      ✓ generates a mixed quiz cycling question types
+     ✓ handles edge cases gracefully without throwing
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
 ```
 
 ---

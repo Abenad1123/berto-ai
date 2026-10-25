@@ -56,8 +56,21 @@ export const WeeklyStreakWidget: React.FC<WeeklyStreakWidgetProps> = ({
             <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
               {streakDays > 0 ? `${streakDays} Day Study Streak!` : 'Start Your Study Streak!'}
             </h3>
-            <div className="w-8 h-8 rounded-2xl bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#78350f] flex items-center justify-center transform rotate-6 hover:rotate-12 transition-transform shrink-0">
-              <Flame className="w-4.5 h-4.5 fill-orange-500 stroke-orange-700 animate-bounce" aria-hidden="true" />
+            <div
+              className={`w-8 h-8 rounded-2xl flex items-center justify-center transform rotate-6 hover:rotate-12 transition-transform shrink-0 ${
+                streakDays > 0
+                  ? 'bg-gradient-to-tr from-amber-400 via-orange-400 to-rose-400 border-[2px] border-slate-900 shadow-[0_2.5px_0_0_#78350f]'
+                  : 'bg-slate-200 dark:bg-slate-800 border-[2px] border-slate-400 dark:border-slate-700 shadow-none'
+              }`}
+            >
+              <Flame
+                className={`w-4.5 h-4.5 ${
+                  streakDays > 0
+                    ? 'fill-orange-500 stroke-orange-700 animate-bounce'
+                    : 'fill-slate-300 dark:fill-slate-600 stroke-slate-400 dark:stroke-slate-500'
+                }`}
+                aria-hidden="true"
+              />
             </div>
           </div>
 

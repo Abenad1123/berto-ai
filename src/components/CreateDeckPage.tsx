@@ -18,7 +18,6 @@ import {
   Palette,
   HelpCircle,
   BookOpen,
-  Lightbulb,
   Compass,
   X,
 } from 'lucide-react';
@@ -103,6 +102,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   const [tags, setTags] = useState('');
   const [parentId, setParentId] = useState<number | null>(defaultParentId);
   const [color, setColor] = useState<'indigo' | 'emerald' | 'amber' | 'rose' | 'sky' | 'violet'>('violet');
+  const [customIcon, setCustomIcon] = useState<string>('');
   const [content, setContent] = useState('');
   const [count, setCount] = useState(10);
   const [aiQuestionFormat, setAiQuestionFormat] = useState<QuestionType | 'mixed'>('mixed');
@@ -188,6 +188,14 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const showError = (msg: string | null) => {
+    setError(msg);
+    if (msg) {
+      sounds.playWrong();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Category suggestions from existing decks plus common defaults
   const existingCategories = Array.from(new Set(existingDecks.map((d) => d.category).filter(Boolean)));
   const defaultSuggestions = ['Science', 'Computer Science', 'History', 'Language', 'Math', 'Medicine', 'Business'];
@@ -214,7 +222,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       sounds.playCorrect();
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setError(errorObj.message || 'Failed to extract text from file.');
+      showError(errorObj.message || 'Failed to extract text from file.');
     } finally {
       setIsExtractingFile(false);
       if (e.target) {
@@ -236,11 +244,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
     setError(null);
 
     if (!title.trim()) {
-      setError('Please provide a title for this quest deck.');
+      showError('Please enter a deck name.');
       return;
     }
     if (!content.trim() || content.trim().length < 20) {
-      setError('Please paste notes or upload a file with study material.');
+      showError('Please paste notes or upload a file with study material.');
       return;
     }
 
@@ -249,7 +257,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
     const provider = settings?.aiProvider || 'gemini';
 
     if (!apiKey) {
-      setError('No AI API key found. Please open Settings to add your free Gemini or Groq key.');
+      showError('No AI API key found. Please open Settings to add your free Gemini or Groq key.');
       return;
     }
 
@@ -277,7 +285,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
           description: `Generated from ${importedFileName || content.slice(0, 40)}...`,
           category: category.trim() || 'General',
           color,
-          icon: 'Sparkles',
+          icon: customIcon || 'Sparkles',
           cardCount: generated.length,
           tags: parseTags(),
           parentId: parentId || null,
@@ -334,7 +342,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       onCreated(createdDeckId);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setError(errorObj.message || 'Failed to generate cards. Check your API key and connection.');
+      showError(errorObj.message || 'Failed to generate cards. Check your API key and connection.');
     } finally {
       setIsLoading(false);
     }
@@ -343,7 +351,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   const handleSaveManual = async () => {
     sounds.playTap();
     if (!title.trim()) {
-      setError('Please provide a title for this quest deck.');
+      showError('Please enter a deck name.');
       return;
     }
     const validCards = manualCards.filter((c) => c.question.trim() && c.answer.trim());
@@ -358,7 +366,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
         description: isFolderDeck ? 'Organizational folder deck for sub-decks.' : 'Custom student study deck.',
         category: category.trim() || 'General',
         color,
-        icon: isFolderDeck ? 'FolderTree' : 'BookOpen',
+        icon: customIcon || (isFolderDeck ? 'FolderTree' : 'BookOpen'),
         cardCount: validCards.length,
         isFolder: isFolderDeck,
         tags: parseTags(),
@@ -492,7 +500,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             <div className="h-6 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block shrink-0" />
             <h1 className="text-base sm:text-xl font-black text-slate-950 dark:text-white tracking-tight flex items-center gap-2 truncate">
               <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400 hidden sm:inline shrink-0" />
-              <span className="truncate">Craft New Deck</span>
+              <span className="truncate">Create Deck</span>
             </h1>
           </div>
 
@@ -506,13 +514,13 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                    <span className="hidden sm:inline">Forging Cards...</span>
-                    <span className="sm:hidden">Forging...</span>
+                    <span className="hidden sm:inline">Generating...</span>
+                    <span className="sm:hidden">Generating...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 fill-amber-300 stroke-none shrink-0" />
-                    <span className="hidden sm:inline">Generate AI Deck</span>
+                    <span className="hidden sm:inline">Generate Deck</span>
                     <span className="sm:hidden">Generate</span>
                   </>
                 )}
@@ -523,7 +531,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 className="tactile-btn-amber px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#78350f] active:translate-y-0.5 active:shadow-none shrink-0"
               >
                 <FolderPlus className="w-4 h-4 stroke-[2.5] shrink-0" />
-                <span className="hidden sm:inline">Create Folder Realm</span>
+                <span className="hidden sm:inline">Create Deck</span>
                 <span className="sm:hidden">Create</span>
               </button>
             ) : (
@@ -532,7 +540,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 className="tactile-btn-emerald px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-0.5 active:shadow-none shrink-0"
               >
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline">Save Quest Deck</span>
+                <span className="hidden sm:inline">Save Deck</span>
                 <span className="sm:hidden">Save</span>
               </button>
             )}
@@ -612,46 +620,41 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
           </div>
         )}
 
-        {/* Step 1: Name Your Quest & Category */}
+        {/* Step 1: Deck Details */}
         <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
           <div className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
               1
             </span>
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
-                <span>Name Your Quest & Category</span>
-                <Compass className="w-4 h-4 text-violet-500 hidden sm:inline" />
-              </h2>
-              <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                Define the title, realm discipline, and organizational tags
-              </p>
-            </div>
+            <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
+              <span>Deck Details</span>
+              <Compass className="w-4 h-4 text-violet-500 hidden sm:inline" />
+            </h2>
           </div>
 
           <div className="space-y-4">
             {/* Title */}
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                Quest Deck Title *
+                Deck Name *
               </label>
               <input
                 type="text"
-                placeholder="e.g. Molecular Biology: Cell Respiration & Krebs"
+                placeholder="Deck name"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base font-black shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
 
-            {/* Category Selector with vibrant icon tiles that have tactile press down animations */}
+            {/* Category Selector */}
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                Category Domain (Select a realm or type your own)
+                Category
               </label>
               <input
                 type="text"
-                placeholder="e.g. Neuroscience, Calculus, Japanese, Bio..."
+                placeholder="Category name"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
@@ -680,6 +683,57 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   );
                 })}
               </div>
+
+              {/* Custom Deck Icon / Emoji */}
+              <div className="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border-[2px] border-slate-900 dark:border-slate-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Icon (Optional)
+                  </span>
+                  {customIcon && (
+                    <button
+                      type="button"
+                      onClick={() => setCustomIcon('')}
+                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {['📚', '🧬', '💻', '📐', '🩺', '⚡', '🌍', '🎨', '🏛️', '🧪', '📈', '⚖️', '⭐', '🔥', '🎯', '🚀'].map((emoji) => {
+                      const isSelected = customIcon === emoji;
+                      return (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => {
+                            sounds.playTap();
+                            setCustomIcon(isSelected ? '' : emoji);
+                          }}
+                          className={`w-8 h-8 text-sm rounded-lg border-[1.5px] border-slate-900 flex items-center justify-center transition-all cursor-pointer shadow-[0_1.5px_0_0_#09090b] ${
+                            isSelected
+                              ? 'bg-amber-300 scale-110 ring-2 ring-slate-900 dark:ring-white -translate-y-0.5'
+                              : 'bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 hover:-translate-y-0.5'
+                          }`}
+                          title={emoji}
+                        >
+                          {emoji}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Emoji"
+                    maxLength={4}
+                    value={customIcon}
+                    onChange={(e) => setCustomIcon(e.target.value)}
+                    className="w-20 px-2 py-1 rounded-lg border-[1.5px] border-slate-900 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-center text-xs font-bold focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Nested Sub-deck Parent Selector & Tags in 2 Columns */}
@@ -688,14 +742,14 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
                   <FolderTree className="w-4 h-4 text-violet-600 shrink-0" />
-                  <span>Nest under Parent Deck (Optional)</span>
+                  <span>Parent Deck (Optional)</span>
                 </label>
                 <select
                   value={parentId || ''}
                   onChange={(e) => setParentId(e.target.value ? Number(e.target.value) : null)}
                   className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
                 >
-                  <option value="">None (Top-Level Deck)</option>
+                  <option value="">None</option>
                   {existingDecks.map((d) => (
                     <option key={d.id} value={d.id}>
                       {d.title} ({d.category})
@@ -707,11 +761,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               {/* Tags */}
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  Tags (comma or space separated)
+                  Tags
                 </label>
                 <input
                   type="text"
-                  placeholder="#exam, #chapter3, #midterm"
+                  placeholder="Tags (e.g. exam, chapter1)"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
@@ -733,22 +787,17 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
           </div>
         </section>
 
-        {/* Step 2: Choose Your Banner Color */}
+        {/* Step 2: Theme Color */}
         <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <span className="w-8 h-8 rounded-xl bg-fuchsia-600 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
                 2
               </span>
-              <div className="min-w-0">
-                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2 truncate">
-                  <span>Choose Your Banner Color</span>
-                  <Palette className="w-4 h-4 text-fuchsia-500 hidden sm:inline shrink-0" />
-                </h2>
-                <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
-                  Pick a bouncy theme color for your deck header and study cards
-                </p>
-              </div>
+              <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2 truncate">
+                <span>Theme Color</span>
+                <Palette className="w-4 h-4 text-fuchsia-500 hidden sm:inline shrink-0" />
+              </h2>
             </div>
 
             <span className="tactile-pill bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-900 shadow-[0_1.5px_0_0_#09090b] text-xs font-black shrink-0">
@@ -791,40 +840,29 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
         {/* Step 3: Tab Content (Folder Deck, AI Generation, or Manual Artisan) */}
         {tab === 'folder' ? (
-          <section className="tactile-card p-4 sm:p-8 bg-amber-50/90 dark:bg-amber-950/30 border-[2.5px] border-slate-900 dark:border-amber-700/80 shadow-[0_6px_0_0_#78350f] space-y-4 sm:space-y-6">
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-400 dark:bg-amber-500 text-slate-950 border-[2.5px] border-slate-900 flex items-center justify-center shrink-0 shadow-[0_3px_0_0_#78350f]">
-                <FolderTree className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" aria-hidden="true" />
+          <section className="tactile-card p-4 sm:p-6 bg-amber-50/90 dark:bg-amber-950/30 border-[2.5px] border-slate-900 dark:border-amber-700/80 shadow-[0_6px_0_0_#78350f] space-y-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-400 dark:bg-amber-500 text-slate-950 border-[2.5px] border-slate-900 flex items-center justify-center shrink-0 shadow-[0_3px_0_0_#78350f]">
+                <FolderTree className="w-6 h-6 stroke-[2.5]" aria-hidden="true" />
               </div>
-              <div className="space-y-1 min-w-0">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-200 border-[1.5px] border-slate-900 text-[10px] font-black uppercase tracking-wider">
-                  Quest Folder Mode Activated
-                </div>
-                <h3 className="text-lg sm:text-xl font-black text-slate-950 dark:text-white">
-                  Organizational Realm Container (0 Direct Cards)
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
+                  Folder Deck (0 Direct Cards)
                 </h3>
-                <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
-                  This deck will serve as a <strong>top-level organizational folder</strong>. You can use it to group multiple chapters, lectures, or topics hierarchically. You can attach sub-decks directly inside it right after creation!
+                <p className="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400">
+                  Organize and group sub-decks under this category.
                 </p>
               </div>
-            </div>
-
-            {/* Folder Mastery Tip */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-[0_3px_0_0_#09090b] flex items-center gap-3">
-              <Lightbulb className="w-6 h-6 text-amber-500 shrink-0" />
-              <span>
-                <strong>Folder Strategy:</strong> Perfect for broad subjects like &ldquo;Biology 101&rdquo; or &ldquo;Medical School Term 1&rdquo;. Sub-decks can then hold the actual flashcards for each lecture!
-              </span>
             </div>
 
             <div className="pt-2 flex justify-end">
               <button
                 type="button"
                 onClick={handleSaveManual}
-                className="tactile-btn-amber px-6 py-3.5 min-h-[44px] text-xs sm:text-sm gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none w-full sm:w-auto"
+                className="tactile-btn-amber px-6 py-3 min-h-[44px] text-xs sm:text-sm font-black gap-2 shadow-[0_4px_0_0_#78350f] active:translate-y-1 active:shadow-none w-full sm:w-auto"
               >
-                <FolderPlus className="w-5 h-5 stroke-[2.5]" aria-hidden="true" />
-                <span>Create Folder Realm Now</span>
+                <FolderPlus className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
+                <span>Create Deck</span>
               </button>
             </div>
           </section>
@@ -836,11 +874,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
               </span>
               <div>
                 <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
-                  <span>Feed Study Notes & Forge AI Cards</span>
+                  <span>Study Material & Cards</span>
                   <Sparkles className="w-4 h-4 text-amber-500 hidden sm:inline" />
                 </h2>
                 <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                  Upload lecture slides (PDF/PPT) or paste notes to generate cards with FSRS spaced repetition
+                  Upload documents or paste notes to generate cards
                 </p>
               </div>
             </div>
@@ -862,7 +900,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 {isExtractingFile ? (
                   <div className="flex flex-col items-center gap-2 text-indigo-600 dark:text-indigo-400">
                     <Loader2 className="w-8 h-8 animate-spin" />
-                    <span className="text-xs font-black">Extracting text from document...</span>
+                    <span className="text-xs font-black">Extracting text...</span>
                   </div>
                 ) : importedFileName ? (
                   <div className="flex items-center justify-center gap-3">
@@ -883,11 +921,10 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                     </div>
                     <div>
                       <div className="text-sm font-black text-slate-900 dark:text-white">
-                        Upload Lecture Slide PPT, PDF, or Text File
+                        Upload File (PDF, PPT, TXT, MD)
                       </div>
                       <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                        Supports <span className="font-black text-slate-800 dark:text-slate-200">.pdf</span>, <span className="font-black text-slate-800 dark:text-slate-200">.pptx</span>,{' '}
-                        <span className="font-black text-slate-800 dark:text-slate-200">.txt</span>, and <span className="font-black text-slate-800 dark:text-slate-200">.md</span> (Runs 100% locally in browser)
+                        Processed locally on your device
                       </div>
                     </div>
                   </div>
@@ -899,7 +936,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Notes / Extracted Text Content ({content.length} chars)
+                  Notes / Text ({content.length} chars)
                 </label>
                 {content && (
                   <button
@@ -917,7 +954,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
               <textarea
                 rows={6}
-                placeholder="Paste lecture notes, study outline, textbook excerpt, or review points..."
+                placeholder="Paste study notes or text here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 className="w-full px-4 py-3 rounded-2xl border-[2.5px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-sm font-semibold leading-relaxed shadow-inner focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -928,7 +965,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             <div className="pt-4 border-t-[2.5px] border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  Question Format Strategy
+                  Question Format
                 </label>
                 <div className="grid grid-cols-2 min-[420px]:grid-cols-3 gap-1.5">
                   {[
@@ -989,7 +1026,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin shrink-0" />
-                    <span>Creating {count} flashcards...</span>
+                    <span>Generating {count} cards...</span>
                   </>
                 ) : (
                   <>
@@ -1001,21 +1038,16 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
             </div>
           </section>
         ) : (
-          /* Tab B: Interactive Manual Cards Builder with Cloze & Multi-Format */
+          /* Tab B: Manual Cards */
           <section className="tactile-card p-4 sm:p-7 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] space-y-4 sm:space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm border-[2px] border-slate-900 shadow-[0_2px_0_0_#09090b] shrink-0">
                   3
                 </span>
-                <div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
-                    <span>Manual Card Artisan ({manualCards.length} cards)</span>
-                  </h2>
-                  <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                    Highlight text to create cloze blanks, or set multiple choice, checkboxes, or true/false
-                  </p>
-                </div>
+                <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
+                  <span>Cards ({manualCards.length})</span>
+                </h2>
               </div>
 
               {/* Quick Add Pills */}
@@ -1381,12 +1413,44 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 className="tactile-btn-emerald px-6 py-3 min-h-[44px] text-xs sm:text-sm font-black gap-2 shadow-[0_3px_0_0_#064e3b] active:translate-y-1 active:shadow-none w-full sm:w-auto"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Save Quest Deck ({manualCards.filter((c) => c.question.trim() && c.answer.trim()).length} Cards)</span>
+                <span>Save Deck ({manualCards.filter((c) => c.question.trim() && c.answer.trim()).length} Cards)</span>
               </button>
             </div>
           </section>
         )}
       </main>
+
+      {/* Floating Instant Error Banner for high visibility on all scroll positions */}
+      {error && (
+        <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md z-50 p-3.5 sm:p-4 rounded-2xl bg-rose-600 text-white border-[2.5px] border-slate-950 shadow-[0_6px_0_0_#881337] flex items-center justify-between gap-3 animate-shake">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <AlertCircle className="w-5 h-5 shrink-0 text-white" />
+            <span className="text-xs font-black leading-snug">{error}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {error.includes('Settings') && onOpenSettings && (
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playTap();
+                  onOpenSettings();
+                }}
+                className="px-2.5 py-1 rounded-xl bg-white text-rose-950 text-xs font-black border border-slate-900 shadow-sm cursor-pointer"
+              >
+                Open Settings
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="w-7 h-7 rounded-xl bg-rose-700 hover:bg-rose-800 flex items-center justify-center text-white cursor-pointer"
+              aria-label="Dismiss error"
+            >
+              <X className="w-4 h-4 stroke-[3]" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

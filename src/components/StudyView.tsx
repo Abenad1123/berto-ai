@@ -14,6 +14,7 @@ import {
   Check,
   HelpCircle,
   Zap,
+  Eye,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { Deck, Card, QuizAnswer, QuizLauncherConfig, UserSettings } from '../types';
@@ -27,7 +28,7 @@ interface StudyViewProps {
   launcherConfig?: QuizLauncherConfig;
   userSettings?: UserSettings;
   onExit: () => void;
-  onFinish: (answers: QuizAnswer[]) => void;
+  onFinish: (answers: QuizAnswer[], maxCombo?: number) => void;
 }
 
 const letterThemes = [
@@ -71,7 +72,16 @@ export const StudyView: React.FC<StudyViewProps> = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
+
+  const incrementCombo = useCallback(() => {
+    setCurrentStreak((s) => {
+      const next = s + 1;
+      setMaxCombo((m) => Math.max(m, next));
+      return next;
+    });
+  }, []);
   const blankInputRef = useRef<HTMLInputElement>(null);
   const isSubmittingRef = useRef(false);
   const isAdvancingRef = useRef(false);
@@ -112,6 +122,11 @@ export const StudyView: React.FC<StudyViewProps> = ({
     return () => {
       stopTimers();
       stopSpeedRunTimer();
+      try {
+        confetti.reset();
+      } catch {
+        // Graceful cleanup
+      }
     };
   }, [stopTimers, stopSpeedRunTimer]);
 
@@ -119,10 +134,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
     if (userSettings?.confettiEnabled === false) return;
     try {
       confetti({
-        particleCount: 25,
-        spread: 60,
+        particleCount: 12,
+        spread: 45,
         origin: { y: 0.8 },
-        colors: ['#10b981', '#6366f1', '#fbbf24', '#f43f5e', '#a855f7'],
+        colors: ['#10b981', '#6366f1', '#fbbf24', '#f43f5e'],
         disableForReducedMotion: true,
         zIndex: 100,
       });
@@ -135,10 +150,10 @@ export const StudyView: React.FC<StudyViewProps> = ({
     if (userSettings?.confettiEnabled === false) return;
     try {
       confetti({
-        particleCount: 60,
-        spread: 90,
+        particleCount: 35,
+        spread: 75,
         origin: { y: 0.65 },
-        colors: ['#10b981', '#6366f1', '#fbbf24', '#f43f5e', '#ec4899'],
+        colors: ['#10b981', '#6366f1', '#fbbf24', '#f43f5e'],
         disableForReducedMotion: true,
         zIndex: 100,
       });
@@ -248,6 +263,41 @@ export const StudyView: React.FC<StudyViewProps> = ({
     ]);
   }, [isAnswerSubmitted, currentCard, stopSpeedRunTimer, updateCardFSRS]);
 
+  const handleRevealAnswer = useCallback(async () => {
+    if (isAnswerSubmitted || isSubmittingRef.current || !currentCard) return;
+    isSubmittingRef.current = true;
+    sounds.playWrong();
+    stopSpeedRunTimer();
+    stopTimers();
+    clearAutoAdvance();
+    setCurrentStreak(0); // Resets combo per user requirement 4!
+    setIsCurrentCorrect(false);
+    setIsAnswerSubmitted(true);
+
+    if (currentCard.type === 'flashcard') {
+      await updateCardFSRS(false, 'again');
+    } else {
+      await updateCardFSRS(false);
+    }
+
+    setAnswers((prev) => [
+      ...prev,
+      {
+        cardId: currentCard.id || 0,
+        sourceCardId: currentCard.sourceCardId || currentCard.id || 0,
+        userAnswer: '(Answer Revealed)',
+        isCorrect: false,
+        questionType: currentCard.type,
+        questionText: currentCard.question,
+        correctAnswerText:
+          currentCard.type === 'multiple_select'
+            ? (currentCard.correctAnswers || [currentCard.answer]).join(', ')
+            : currentCard.answer,
+      },
+    ]);
+    isSubmittingRef.current = false;
+  }, [isAnswerSubmitted, currentCard, stopSpeedRunTimer, stopTimers, clearAutoAdvance, updateCardFSRS]);
+
   const handleSpeedRunTimeoutRef = useRef(handleSpeedRunTimeout);
   useEffect(() => {
     handleSpeedRunTimeoutRef.current = handleSpeedRunTimeout;
@@ -295,7 +345,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
       if (isCorrect) {
         sounds.playCorrect();
-        setCurrentStreak((s) => s + 1);
+        incrementCombo();
         triggerMiniConfetti();
       } else {
         sounds.playWrong();
@@ -317,7 +367,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
         },
       ]);
     },
-    [isAnswerSubmitted, currentCard, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]
+    [isAnswerSubmitted, currentCard, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer, incrementCombo]
   );
 
   // Toggle option for Multiple Select
@@ -353,7 +403,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
     if (isCorrect) {
       sounds.playCorrect();
-      setCurrentStreak((s) => s + 1);
+      incrementCombo();
       triggerMiniConfetti();
     } else {
       sounds.playWrong();
@@ -374,7 +424,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
         correctAnswerText: (currentCard.correctAnswers || [currentCard.answer]).join(', '),
       },
     ]);
-  }, [isAnswerSubmitted, currentCard, selectedMultipleOptions, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]);
+  }, [isAnswerSubmitted, currentCard, selectedMultipleOptions, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer, incrementCombo]);
 
   // Submit Fill in the Blank
   const handleSubmitBlank = useCallback(async () => {
@@ -395,7 +445,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
 
     if (isCorrect) {
       sounds.playCorrect();
-      setCurrentStreak((s) => s + 1);
+      incrementCombo();
       triggerMiniConfetti();
     } else {
       sounds.playWrong();
@@ -416,7 +466,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
         correctAnswerText: currentCard.answer,
       },
     ]);
-  }, [isAnswerSubmitted, currentCard, typedBlankAnswer, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer]);
+  }, [isAnswerSubmitted, currentCard, typedBlankAnswer, updateCardFSRS, triggerMiniConfetti, stopSpeedRunTimer, incrementCombo]);
 
   // Override correct for close typo in fill_blank (disabled in Hard Mode)
   const handleOverrideCorrect = async () => {
@@ -464,9 +514,9 @@ export const StudyView: React.FC<StudyViewProps> = ({
       isAdvancingRef.current = false;
     } else {
       triggerFinishConfetti();
-      onFinish(answers);
+      onFinish(answers, maxCombo);
     }
-  }, [currentIndex, cards.length, answers, onFinish, clearAutoAdvance, stopSpeedRunTimer, triggerFinishConfetti]);
+  }, [currentIndex, cards.length, answers, maxCombo, onFinish, clearAutoAdvance, stopSpeedRunTimer, triggerFinishConfetti]);
 
   const handleFlashcardGrade = useCallback(
     async (grade: 'again' | 'hard' | 'good' | 'easy') => {
@@ -478,7 +528,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
       const isCorrect = grade !== 'again';
       if (isCorrect) {
         sounds.playCorrect();
-        setCurrentStreak((s) => s + 1);
+        incrementCombo();
         if (grade === 'easy' || currentStreak + 1 >= 3) {
           triggerMiniConfetti();
         }
@@ -518,7 +568,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
         isAdvancingRef.current = false;
       } else {
         triggerFinishConfetti();
-        onFinish(updatedAnswers);
+        onFinish(updatedAnswers, maxCombo);
       }
     },
     [
@@ -526,6 +576,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
       currentIndex,
       cards.length,
       answers,
+      maxCombo,
       onFinish,
       updateCardFSRS,
       clearAutoAdvance,
@@ -533,6 +584,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
       currentStreak,
       triggerMiniConfetti,
       triggerFinishConfetti,
+      incrementCombo,
     ]
   );
 
@@ -946,26 +998,42 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 {currentCard.question}
               </h2>
 
-              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
-              {currentCard.hint && gameMode !== 'hard_mode' && (
-                <div className="mt-3">
-                  {showHint ? (
-                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
-                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
-                      <span>Hint: {currentCard.hint}</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowHint(true)}
-                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <Lightbulb className="w-3.5 h-3.5" />
-                      <span>Need a hint?</span>
-                    </button>
-                  )}
-                </div>
-              )}
+              {/* Dynamic Hint Toggle & Reveal Answer */}
+              <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                {currentCard.hint && gameMode !== 'hard_mode' ? (
+                  <div>
+                    {showHint ? (
+                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                        <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Hint: {currentCard.hint}</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowHint(true)}
+                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Lightbulb className="w-3.5 h-3.5" />
+                        <span>Need a hint?</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                {!isAnswerSubmitted && (
+                  <button
+                    type="button"
+                    onClick={handleRevealAnswer}
+                    aria-label="Reveal answer and reset combo"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border-[1.5px] border-slate-900 dark:border-rose-700 shadow-[0_1.5px_0_0_#09090b] cursor-pointer transition-all active:translate-y-0.5 active:shadow-none"
+                  >
+                    <Eye className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Reveal Answer</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pb-4 py-1">
@@ -976,7 +1044,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 const isThisAnswer = option.trim().toLowerCase() === currentCard.answer.trim().toLowerCase();
 
                 let buttonClasses =
-                  'bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#020617] hover:bg-slate-50 dark:hover:bg-slate-750 hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_#09090b] active:translate-y-0.5 active:shadow-none';
+                  'bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#020617] hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 hover:shadow-[0_6px_0_0_#09090b] active:translate-y-0.5 active:shadow-none';
 
                 if (isAnswerSubmitted) {
                   if (isThisAnswer) {
@@ -1043,26 +1111,42 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 {currentCard.question}
               </h2>
 
-              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
-              {currentCard.hint && gameMode !== 'hard_mode' && (
-                <div className="mt-3">
-                  {showHint ? (
-                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
-                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
-                      <span>Hint: {currentCard.hint}</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowHint(true)}
-                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <Lightbulb className="w-3.5 h-3.5" />
-                      <span>Need a hint?</span>
-                    </button>
-                  )}
-                </div>
-              )}
+              {/* Dynamic Hint Toggle & Reveal Answer */}
+              <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                {currentCard.hint && gameMode !== 'hard_mode' ? (
+                  <div>
+                    {showHint ? (
+                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                        <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Hint: {currentCard.hint}</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowHint(true)}
+                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Lightbulb className="w-3.5 h-3.5" />
+                        <span>Need a hint?</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                {!isAnswerSubmitted && (
+                  <button
+                    type="button"
+                    onClick={handleRevealAnswer}
+                    aria-label="Reveal answer and reset combo"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border-[1.5px] border-slate-900 dark:border-rose-700 shadow-[0_1.5px_0_0_#09090b] cursor-pointer transition-all active:translate-y-0.5 active:shadow-none"
+                  >
+                    <Eye className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Reveal Answer</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2.5 sm:gap-3 pb-4 py-1">
@@ -1074,7 +1158,7 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 const isTarget = targetAnswers.includes(option.trim().toLowerCase());
 
                 let buttonClasses =
-                  'bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#020617] hover:bg-slate-50 dark:hover:bg-slate-750 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none';
+                  'bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_4px_0_0_#09090b] dark:shadow-[0_4px_0_0_#020617] hover:bg-slate-50 dark:hover:bg-slate-700 hover:-translate-y-0.5 hover:shadow-[0_5px_0_0_#09090b] active:translate-y-0.5 active:shadow-none';
 
                 if (isAnswerSubmitted) {
                   if (isTarget && isSelected) {
@@ -1155,6 +1239,20 @@ export const StudyView: React.FC<StudyViewProps> = ({
               <h2 className={`${isLargeText ? 'text-2xl sm:text-3xl md:text-4xl' : 'text-xl sm:text-2xl md:text-3xl'} font-black text-slate-950 dark:text-white leading-relaxed`}>
                 {renderClozeQuestion(currentCard.question)}
               </h2>
+
+              {!isAnswerSubmitted && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleRevealAnswer}
+                    aria-label="Reveal answer and reset combo"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border-[1.5px] border-slate-900 dark:border-rose-700 shadow-[0_1.5px_0_0_#09090b] cursor-pointer transition-all active:translate-y-0.5 active:shadow-none"
+                  >
+                    <Eye className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Reveal Answer</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Input Box for typing missing answer */}
@@ -1218,26 +1316,42 @@ export const StudyView: React.FC<StudyViewProps> = ({
                 {currentCard.question}
               </h2>
 
-              {/* Dynamic Hint Toggle (Disabled in Hard Mode) */}
-              {currentCard.hint && gameMode !== 'hard_mode' && (
-                <div className="mt-3">
-                  {showHint ? (
-                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
-                      <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
-                      <span>Hint: {currentCard.hint}</span>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setShowHint(true)}
-                      className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <Lightbulb className="w-3.5 h-3.5" />
-                      <span>Need a hint?</span>
-                    </button>
-                  )}
-                </div>
-              )}
+              {/* Dynamic Hint Toggle & Reveal Answer */}
+              <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                {currentCard.hint && gameMode !== 'hard_mode' ? (
+                  <div>
+                    {showHint ? (
+                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-2 animate-in fade-in">
+                        <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>Hint: {currentCard.hint}</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowHint(true)}
+                        className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Lightbulb className="w-3.5 h-3.5" />
+                        <span>Need a hint?</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div />
+                )}
+
+                {!isAnswerSubmitted && (
+                  <button
+                    type="button"
+                    onClick={handleRevealAnswer}
+                    aria-label="Reveal answer and reset combo"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border-[1.5px] border-slate-900 dark:border-rose-700 shadow-[0_1.5px_0_0_#09090b] cursor-pointer transition-all active:translate-y-0.5 active:shadow-none"
+                  >
+                    <Eye className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>Reveal Answer</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-4 py-1">

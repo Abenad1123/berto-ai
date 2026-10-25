@@ -76,9 +76,6 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
       ? activeCardPool.length
       : Math.min(countSelection, activeCardPool.length);
 
-  const xpPerQuestion = gameMode === 'normal' ? 10 : 15;
-  const maxPotentialXp = targetCount * xpPerQuestion;
-
   if (!isOpen) return null;
 
   const handleLaunch = async () => {
@@ -137,7 +134,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 rounded-3xl shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617] p-4 sm:p-7 space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-xl bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 rounded-3xl shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#020617] p-4 sm:p-7 space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto animate-pop">
         {/* Header */}
         <div className="flex items-center justify-between border-b-[2.5px] border-slate-100 dark:border-slate-800 pb-3 sm:pb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -166,7 +163,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
               onClose();
             }}
             aria-label="Close modal"
-            className="w-9 h-9 rounded-xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-750 flex items-center justify-center cursor-pointer shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none transition-all"
+            className="w-9 h-9 rounded-xl border-[2.5px] border-slate-900 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center cursor-pointer shadow-[0_2px_0_0_#09090b] active:translate-y-0.5 active:shadow-none transition-all"
           >
             <X className="w-4 h-4 stroke-[3]" />
           </button>
@@ -203,19 +200,14 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   <Zap className="w-4 h-4 fill-slate-950 stroke-none" />
                 </span>
                 <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-300 dark:bg-amber-900/80 text-slate-950 dark:text-amber-200 border border-slate-900">
-                  Instant / Offline
+                  Offline
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">Offline Practice</div>
-                  {engine === 'offline' && (
-                    <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  Instant &bull; 0 API cost &bull; Smart heuristic distractors
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">Offline Practice</div>
+                {engine === 'offline' && (
+                  <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
 
@@ -240,16 +232,11 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   {userSettings?.aiProvider === 'groq' ? 'Groq AI' : 'Gemini AI'}
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">AI Dynamic</div>
-                  {engine === 'ai' && (
-                    <Check className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  Contextual questions &bull; Dynamic hints &bull; Rich insights
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">AI Dynamic</div>
+                {engine === 'ai' && (
+                  <Check className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
 
@@ -271,19 +258,14 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   <Layers className="w-4 h-4 stroke-[2.5]" />
                 </span>
                 <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-950 dark:text-emerald-200 border border-slate-900">
-                  FSRS Spaced Rep
+                  Spaced Rep
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">Flashcard Arena</div>
-                  {engine === 'classic' && (
-                    <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  3D card flip &bull; Spaced repetition &bull; Memory schedule
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">Flashcard Arena</div>
+                {engine === 'classic' && (
+                  <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
           </div>
@@ -341,15 +323,10 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
 
         {/* 3. Choose Game Mode (NEW) */}
         <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 stroke-none" />
-              <span>3. Choose Game Mode</span>
-            </label>
-            <span className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-              {gameMode === 'normal' ? '10 XP / Q' : '⚡ 15 XP / Q (1.5x)'}
-            </span>
-          </div>
+          <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 stroke-none" />
+            <span>3. Choose Game Mode</span>
+          </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
             {/* Normal Mode */}
@@ -373,16 +350,11 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   Standard
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">Normal Mode</div>
-                  {gameMode === 'normal' && (
-                    <Check className="w-3.5 h-3.5 text-sky-700 dark:text-sky-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  Relaxed pace &bull; Standard scoring &bull; Perfect for deep study
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">Normal Mode</div>
+                {gameMode === 'normal' && (
+                  <Check className="w-3.5 h-3.5 text-sky-700 dark:text-sky-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
 
@@ -407,16 +379,11 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   ⚡ 10s Blitz
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">Speed Run</div>
-                  {gameMode === 'speed_run' && (
-                    <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  10s countdown bar &bull; Rapid recall &bull; Frenzy combo bonuses
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">Speed Run</div>
+                {gameMode === 'speed_run' && (
+                  <Check className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
 
@@ -441,38 +408,26 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                   🔥 1.5x XP
                 </span>
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <div className="text-xs font-black text-slate-950 dark:text-white">Hard Mode</div>
-                  {gameMode === 'hard_mode' && (
-                    <Check className="w-3.5 h-3.5 text-rose-700 dark:text-rose-300 stroke-[3.5]" />
-                  )}
-                </div>
-                <div className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 leading-tight mt-1">
-                  Strict zero hints &bull; Immediate combo reset &bull; 1.5x XP multiplier
-                </div>
+              <div className="flex items-center gap-1.5">
+                <div className="text-xs font-black text-slate-950 dark:text-white">Hard Mode</div>
+                {gameMode === 'hard_mode' && (
+                  <Check className="w-3.5 h-3.5 text-rose-700 dark:text-rose-300 stroke-[3.5]" />
+                )}
               </div>
             </button>
           </div>
         </div>
 
-        {/* 4. Question Pool & Count options with XP Preview */}
+        {/* 4. Question Pool & Count options */}
         <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span>4. Question Pool &amp; Count</span>
-            </label>
-            <span className="text-[11px] font-black text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
-              +{maxPotentialXp} XP Max Reward
-            </span>
-          </div>
+          <label className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-amber-500" />
+            <span>4. Question Pool &amp; Count</span>
+          </label>
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {countOptions.map((opt) => {
               const isSelected = countSelection === opt;
-              const countNum = opt === 'all' ? activeCardPool.length : Math.min(Number(opt), activeCardPool.length);
-              const chipXp = countNum * xpPerQuestion;
               return (
                 <button
                   key={String(opt)}
@@ -481,22 +436,13 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
                     sounds.playTap();
                     setCountSelection(opt as number | 'all');
                   }}
-                  className={`min-h-[40px] px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl text-xs font-black border-[2.5px] transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`min-h-[40px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-xs font-black border-[2.5px] transition-all cursor-pointer flex items-center justify-center ${
                     isSelected
                       ? 'bg-amber-400 text-slate-950 border-slate-900 shadow-[0_3px_0_0_#78350f] -translate-y-0.5'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-750'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span>{opt === 'all' ? `All (${activeCardPool.length})` : `${opt} Qs`}</span>
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${
-                      isSelected
-                        ? 'bg-amber-500/30 border-slate-900 text-slate-950'
-                        : 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400'
-                    }`}
-                  >
-                    +{chipXp} XP
-                  </span>
                 </button>
               );
             })}
@@ -521,7 +467,7 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
           </div>
         </div>
 
-        {/* 4. Practice Mode Toggle */}
+        {/* 5. Practice Sandbox Mode Toggle */}
         <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] flex items-center justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-[2px] border-slate-900 flex items-center justify-center shrink-0 mt-0.5">
@@ -529,21 +475,15 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
             </div>
             <div>
               <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <span>{practiceMode ? 'Practice Sandbox' : 'Ranked Spaced Repetition'}</span>
-                <span
-                  className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-900 ${
-                    practiceMode
-                      ? 'bg-amber-300 text-slate-950'
-                      : 'bg-emerald-300 text-slate-950'
-                  }`}
-                >
-                  {practiceMode ? 'Sandbox' : 'Ranked FSRS'}
-                </span>
+                <span>Practice Sandbox Mode</span>
+                {practiceMode && (
+                  <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-900 bg-amber-300 text-slate-950">
+                    Active
+                  </span>
+                )}
               </div>
               <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-1">
-                {practiceMode
-                  ? 'Casual practice mode: answers will not alter your FSRS memory intervals.'
-                  : 'Answers will update memory retention schedules and advance your cards.'}
+                Casual study without altering card memory retention schedules.
               </div>
             </div>
           </div>
@@ -586,9 +526,6 @@ export const StudyLauncherModal: React.FC<StudyLauncherModalProps> = ({
               <>
                 <Rocket className="w-5 h-5 stroke-[2.5] -rotate-12" />
                 <span>Enter Quiz Arena</span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-700/60 text-white text-xs font-bold border border-emerald-400">
-                  +{maxPotentialXp} XP
-                </span>
               </>
             )}
           </button>

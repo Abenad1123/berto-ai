@@ -32,6 +32,7 @@ import {
   Vibrate,
   Type,
   PartyPopper,
+  Compass,
 } from 'lucide-react';
 import { db, seedStarterDecks } from '../lib/db';
 import { sounds } from '../lib/sound';
@@ -51,6 +52,7 @@ interface SettingsModalProps {
   darkMode: boolean;
   onToggleDarkMode: (isDark?: boolean) => void;
   userSettings?: UserSettings | null;
+  onReplayTour?: () => void;
 }
 
 type SettingsTab = 'look' | 'study' | 'ai' | 'audio' | 'vault';
@@ -121,6 +123,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   darkMode,
   onToggleDarkMode,
   userSettings,
+  onReplayTour,
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('look');
 
@@ -636,15 +639,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                       <span>{tab.label}</span>
                     </div>
-                    <span
-                      className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-                      }`}
-                    >
-                      {tab.tag}
-                    </span>
+                    
                   </button>
                 );
               })}
@@ -683,7 +678,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className={`p-3 rounded-2xl border-2 transition-all text-left flex flex-col justify-between relative cursor-pointer ${
                         themeMode === 'light'
                           ? 'border-slate-900 bg-amber-50/90 dark:bg-slate-800 shadow-[0_4px_0_0_#78350f] dark:shadow-[0_4px_0_0_#f59e0b]'
-                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-slate-400'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400'
                       }`}
                     >
                       {themeMode === 'light' && (
@@ -691,7 +686,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           <Check className="w-3 h-3 stroke-[3]" />
                         </span>
                       )}
-                      <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 mb-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 flex items-center justify-center text-amber-700 dark:text-amber-300 mb-2">
                         <Sun className="w-4 h-4" />
                       </div>
                       <div>
@@ -707,7 +702,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className={`p-3 rounded-2xl border-2 transition-all text-left flex flex-col justify-between relative cursor-pointer ${
                         themeMode === 'dark'
                           ? 'border-slate-900 bg-violet-50 dark:bg-slate-800 shadow-[0_4px_0_0_#2e1065] dark:shadow-[0_4px_0_0_#8b5cf6]'
-                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-slate-400'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400'
                       }`}
                     >
                       {themeMode === 'dark' && (
@@ -731,7 +726,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       className={`p-3 rounded-2xl border-2 transition-all text-left flex flex-col justify-between relative cursor-pointer ${
                         themeMode === 'system'
                           ? 'border-slate-900 bg-sky-50 dark:bg-slate-800 shadow-[0_4px_0_0_#0369a1] dark:shadow-[0_4px_0_0_#38bdf8]'
-                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-850 hover:border-slate-400'
+                          : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-400'
                       }`}
                     >
                       {themeMode === 'system' && (
@@ -1106,6 +1101,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     })}
                   </div>
                 </div>
+              
+                {/* Dashboard Tour Replay */}
+                {onReplayTour && (
+                  <div className="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border-2 border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <Compass className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                        <span>Interactive App Tour</span>
+                      </div>
+                      <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 mt-0.5 leading-snug">
+                        Need a refresher? Replay the 60-second guided dashboard tour.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playTap();
+                        onClose();
+                        onReplayTour();
+                      }}
+                      className="tactile-btn tactile-btn-secondary px-3.5 py-1.5 text-xs font-black shrink-0 shadow-[0_2px_0_0_#09090b] cursor-pointer"
+                    >
+                      Replay Tour
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

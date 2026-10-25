@@ -5,8 +5,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
-  Minus,
-  Plus,
   Flame,
 } from 'lucide-react';
 import type { UserProfile } from '../types';
@@ -65,18 +63,16 @@ const colorThemes: Record<
   },
 };
 
-const dailyGoalPresets = [10, 20, 30, 50];
-
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Form State
   const [name, setName] = useState('');
-  const [age, setAge] = useState('University Student');
+  const [age, setAge] = useState('');
   const [major, setMajor] = useState('');
-  const [motto, setMotto] = useState('Consistency beats intensity.');
+  const [motto, setMotto] = useState('');
   const [avatarColor, setAvatarColor] = useState<AvatarColor>('violet');
-  const [dailyGoalCards, setDailyGoalCards] = useState<number>(20);
+  const [avatarIcon, setAvatarIcon] = useState<string>('🧠');
   const [acceptedTos, setAcceptedTos] = useState(false);
   const [nameError, setNameError] = useState('');
 
@@ -125,7 +121,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       major: major.trim() || 'General Studies',
       motto: motto.trim() || 'Consistency beats intensity.',
       avatarColor,
-      dailyGoalCards: Math.max(5, Math.min(100, dailyGoalCards)),
+      avatarIcon: avatarIcon || undefined,
       xp: 0,
       streakDays: 0,
       lastStudyDate: undefined,
@@ -136,7 +132,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   };
 
   return (
-    <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 transition-colors">
+    <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col items-center justify-center px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+1rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] transition-colors">
       <div className="w-full max-w-xl">
         {/* Progress indicator */}
         <div className="flex items-center justify-between mb-6 px-2">
@@ -236,7 +232,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               <div
                 className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${activeTheme.bgGradient} border-[2.5px] ${activeTheme.borderClass} text-white font-black text-xl flex items-center justify-center shadow-[0_3px_0_0_#09090b] shrink-0`}
               >
-                {getInitials(name)}
+                {avatarIcon ? (
+                  <span className="text-2xl">{avatarIcon}</span>
+                ) : (
+                  getInitials(name)
+                )}
               </div>
             </div>
 
@@ -340,59 +340,42 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 </div>
               </div>
 
-              {/* Daily Target Stepper */}
+              {/* Avatar Icon Picker */}
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Daily Card Goal
-                  </label>
-                  <span className="text-xs font-bold text-violet-600 dark:text-violet-400">
-                    {dailyGoalCards} cards / day
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sounds.playTap();
-                      setDailyGoalCards((g) => Math.max(5, g - 5));
-                    }}
-                    className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 flex items-center justify-center text-slate-900 dark:text-white font-bold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-
-                  <div className="flex-1 flex gap-1.5 justify-center">
-                    {dailyGoalPresets.map((preset) => (
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                  <span>Avatar Icon</span>
+                  {avatarIcon && (
+                    <button
+                      type="button"
+                      onClick={() => setAvatarIcon('')}
+                      className="text-[10px] font-bold text-slate-400 hover:text-violet-600 underline"
+                    >
+                      Use Initials
+                    </button>
+                  )}
+                </label>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {['🧠', '🎓', '⚡', '🚀', '👑', '🔥', '🎯', '💡', '🦉', '🦊', '⭐', '🦾'].map((icon) => {
+                    const isSelected = avatarIcon === icon;
+                    return (
                       <button
-                        key={preset}
+                        key={icon}
                         type="button"
                         onClick={() => {
                           sounds.playTap();
-                          setDailyGoalCards(preset);
+                          setAvatarIcon(isSelected ? '' : icon);
                         }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-black border-2 transition-all cursor-pointer ${
-                          dailyGoalCards === preset
-                            ? 'bg-violet-600 text-white border-slate-900 shadow-[0_2px_0_0_#1e1b4b]'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:border-slate-900'
+                        className={`w-9 h-9 rounded-xl border-2 border-slate-900 flex items-center justify-center text-base transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-amber-300 scale-110 shadow-[0_2px_0_0_#09090b] ring-2 ring-violet-500'
+                            : 'bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
                         }`}
+                        title={icon}
                       >
-                        {preset}
+                        {icon}
                       </button>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sounds.playTap();
-                      setDailyGoalCards((g) => Math.min(100, g + 5));
-                    }}
-                    className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-900 dark:border-slate-700 flex items-center justify-center text-slate-900 dark:text-white font-bold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

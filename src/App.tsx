@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Sparkles, BookOpen, Search, Zap, Trophy, Brain, X, ArrowLeft, Tag, FolderTree, Layers } from 'lucide-react';
+import { Sparkles, BookOpen, Search, Zap, Trophy, Brain, X, ArrowLeft, Tag, FolderTree } from 'lucide-react';
 import { Header } from './components/Header';
 import { DeckCard } from './components/DeckCard';
 import { StudyView } from './components/StudyView';
@@ -15,10 +15,18 @@ import { Sidebar } from './components/Sidebar';
 import { ProfilePage } from './components/ProfilePage';
 import { StudyLauncherModal } from './components/StudyLauncherModal';
 import { OnboardingScreen } from './components/OnboardingScreen';
+import { WelcomeCelebrationModal } from './components/WelcomeCelebrationModal';
+import { SpotlightTour } from './components/SpotlightTour';
+import { NotFoundPage } from './components/NotFoundPage';
+import { HelpFaqPage } from './components/HelpFaqPage';
+import { AboutPrivacyPage } from './components/AboutPrivacyPage';
+import { FeedbackPage } from './components/FeedbackPage';
+import { ChangelogPage } from './components/ChangelogPage';
+
 import { db, seedInitialData } from './lib/db';
 import { sounds } from './lib/sound';
 import { getCategoryIcon } from './lib/categoryIcons';
-import { calculateStudySessionRewards } from './lib/gamification';
+import { calculateStudySessionRewards, type StudySessionRewards } from './lib/gamification';
 import type { Deck, Card, QuizAnswer, QuizLauncherConfig, UserProfile } from './types';
 
 export type AppView =
@@ -26,12 +34,26 @@ export type AppView =
   | { type: 'create-deck'; parentDeckId?: number | null }
   | { type: 'deck-view'; deckId: number }
   | { type: 'study'; deck: Deck }
-  | { type: 'profile' };
+  | { type: 'profile' }
+  | { type: 'help-faq' }
+  | { type: 'about-privacy' }
+  | { type: 'feedback' }
+  | { type: 'changelog' }
+  | { type: 'not-found' };
 
 export function App() {
-  const [view, setView] = useState<AppView>({ type: 'home' });
+  const [view, setView] = useState<AppView>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      if (path && path !== '/' && !path.endsWith('index.html')) {
+        return { type: 'not-found' };
+      }
+    }
+    return { type: 'home' };
+  });
   const [studyCards, setStudyCards] = useState<Card[]>([]);
   const [completedAnswers, setCompletedAnswers] = useState<QuizAnswer[] | null>(null);
+  const [sessionRewards, setSessionRewards] = useState<StudySessionRewards | null>(null);
 
   // Dynamic Quiz Launcher State
   const [launcherDeck, setLauncherDeck] = useState<Deck | null>(null);
@@ -42,6 +64,10 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [createdProfile, setCreatedProfile] = useState<UserProfile | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
+
 
   // Filtering & Search
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -182,6 +208,20 @@ export function App() {
     [view.type === 'home']
   );
 
+  const totalReviews = useLiveQuery(
+    async () => {
+      if (view.type !== 'home') return 0;
+      let count = 0;
+      await db.cards.each((c) => {
+        if (c.reps && c.reps > 0) {
+          count += c.reps;
+        }
+      });
+      return count;
+    },
+    [view.type === 'home']
+  );
+
   const userProfile = useLiveQuery(async () => {
     return await db.profile.toCollection().first();
   }, []);
@@ -284,9 +324,10 @@ export function App() {
     }
     setLauncherDeck(null);
     setCompletedAnswers(null);
+    setSessionRewards(null);
   };
 
-  const handleFinishStudy = async (answers: QuizAnswer[]) => {
+  const handleFinishStudy = async (answers: QuizAnswer[], maxCombo = 0) => {
     setCompletedAnswers(answers);
 
     // Persist earned XP and update daily streak in user profile
@@ -295,20 +336,25 @@ export function App() {
 
     try {
       const prof = await db.profile.toCollection().first();
-      if (prof?.id) {
-        const todayStr = new Date().toISOString().slice(0, 10);
-        const { newXp, newStreak } = calculateStudySessionRewards({
-          currentXp: prof.xp ?? 0,
-          currentStreakDays: prof.streakDays ?? 0,
-          lastStudyDate: prof.lastStudyDate,
-          todayIsoDate: todayStr,
-          correctAnswersCount: correctCount,
-          gameMode,
-        });
+      const currentXp = prof?.xp ?? 0;
+      const currentStreakDays = prof?.streakDays ?? 0;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const rewards = calculateStudySessionRewards({
+        currentXp,
+        currentStreakDays,
+        lastStudyDate: prof?.lastStudyDate,
+        todayIsoDate: todayStr,
+        correctAnswersCount: correctCount,
+        gameMode,
+        maxCombo,
+      });
 
+      setSessionRewards(rewards);
+
+      if (prof?.id) {
         await db.profile.update(prof.id, {
-          xp: newXp,
-          streakDays: newStreak,
+          xp: rewards.newXp,
+          streakDays: rewards.newStreak,
           lastStudyDate: todayStr,
         });
       }
@@ -345,8 +391,10 @@ export function App() {
   };
 
   const handleOnboardingComplete = async (profileData: Omit<UserProfile, 'id'>) => {
-    await db.profile.add(profileData as UserProfile);
+    const id = await db.profile.add(profileData as UserProfile);
     await seedInitialData();
+    setCreatedProfile({ ...profileData, id: typeof id === 'number' ? id : undefined });
+    setShowWelcomeModal(true);
   };
 
   // ----------------------------------------------------
@@ -387,14 +435,17 @@ export function App() {
           <SummaryModal
             deck={view.deck}
             answers={completedAnswers}
+            sessionRewards={sessionRewards ?? undefined}
             launcherConfig={activeLauncherConfig}
             onRestart={() => {
               setCompletedAnswers(null);
+              setSessionRewards(null);
               handleStartStudy(view.deck);
             }}
             onRetryMissed={async (missedIds) => {
               sounds.playTap();
               setCompletedAnswers(null);
+              setSessionRewards(null);
               const filtered = studyCards.filter((c) =>
                 missedIds.includes(c.sourceCardId || c.id || 0)
               );
@@ -407,6 +458,7 @@ export function App() {
             onHome={() => {
               setStudyCards([]);
               setCompletedAnswers(null);
+              setSessionRewards(null);
               navigateTo({ type: 'deck-view', deckId: view.deck.id! });
             }}
           />
@@ -450,19 +502,10 @@ export function App() {
 
     if (!currentDeck) {
       return (
-        <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col items-center justify-center p-4">
-          <div className="tactile-card p-8 bg-white dark:bg-slate-900 border-[2.5px] border-slate-900 dark:border-slate-800 text-center max-w-md">
-            <BookOpen className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">Deck Not Found</h2>
-            <p className="text-xs text-slate-500 mt-1 mb-4">This deck may have been deleted.</p>
-            <button
-              onClick={() => navigateTo({ type: 'home' })}
-              className="tactile-btn-primary px-5 py-2 text-xs font-black"
-            >
-              Return to All Decks
-            </button>
-          </div>
-        </div>
+        <NotFoundPage
+          onHome={() => navigateTo({ type: 'home' })}
+          onCreateDeck={() => navigateTo({ type: 'create-deck' })}
+        />
       );
     }
 
@@ -547,7 +590,65 @@ export function App() {
     );
   }
 
-  // 5. MAIN HOME DASHBOARD VIEW
+  // 5. HELP & FAQ VIEW
+  if (view.type === 'help-faq') {
+    return (
+      <HelpFaqPage
+        onBack={() => {
+          sounds.playTap();
+          navigateTo({ type: 'home' });
+        }}
+      />
+    );
+  }
+
+  // 6. ABOUT & PRIVACY VIEW
+  if (view.type === 'about-privacy') {
+    return (
+      <AboutPrivacyPage
+        onBack={() => {
+          sounds.playTap();
+          navigateTo({ type: 'home' });
+        }}
+      />
+    );
+  }
+
+  // 7. FEEDBACK & BUG REPORT VIEW
+  if (view.type === 'feedback') {
+    return (
+      <FeedbackPage
+        onBack={() => {
+          sounds.playTap();
+          navigateTo({ type: 'home' });
+        }}
+      />
+    );
+  }
+
+  // 8. CHANGELOG & UPDATES VIEW
+  if (view.type === 'changelog') {
+    return (
+      <ChangelogPage
+        onBack={() => {
+          sounds.playTap();
+          navigateTo({ type: 'home' });
+        }}
+      />
+    );
+  }
+
+  // 9. CUSTOM 404 NOT FOUND VIEW
+  if (view.type === 'not-found') {
+    return (
+      <NotFoundPage
+        onHome={() => navigateTo({ type: 'home' })}
+        onCreateDeck={() => navigateTo({ type: 'create-deck' })}
+      />
+    );
+  }
+
+  // 10. MAIN HOME DASHBOARD VIEW
   return (
     <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-200 dark:selection:bg-indigo-900 transition-colors">
       <Header
@@ -589,10 +690,11 @@ export function App() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
               <button
                 onClick={() => navigateTo({ type: 'create-deck' })}
+                data-tour="create-deck"
                 className="tactile-btn tactile-btn-amber w-full sm:w-auto px-4 py-2.5 text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-[0_3px_0_0_#09090b] cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 fill-slate-950 stroke-none shrink-0" />
-                <span>Create Deck (File / AI)</span>
+                <span>Create Deck</span>
               </button>
 
               <button
@@ -647,15 +749,14 @@ export function App() {
 
           <div className="tactile-card p-2.5 sm:p-4 bg-white dark:bg-slate-900 border-[2px] border-slate-900 dark:border-slate-800 shadow-[0_3px_0_0_#09090b] flex items-center gap-2 sm:gap-3 transition-colors min-w-0">
             <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-100 dark:bg-amber-950/70 border-[1.5px] sm:border-[2px] border-slate-900 dark:border-slate-700 flex items-center justify-center text-amber-700 dark:text-amber-400 shrink-0">
-              <Layers className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
+              <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5 stroke-[2.5]" />
             </div>
             <div className="min-w-0 overflow-hidden">
               <div className="text-sm sm:text-xl font-black text-slate-950 dark:text-white leading-tight truncate">
-                {userProfile?.dailyGoalCards || 20}
+                {totalReviews || 0}
               </div>
               <div className="text-[9px] sm:text-[11px] font-black text-slate-500 uppercase tracking-wider truncate">
-                <span className="sm:hidden">Goal</span>
-                <span className="hidden sm:inline">Daily Goal</span>
+                Reviews
               </div>
             </div>
           </div>
@@ -779,7 +880,7 @@ export function App() {
 
         {/* Decks Grid */}
         {filteredDecks && filteredDecks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-8">
+          <div data-tour="deck-cards" className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 pb-8">
             {filteredDecks.map((deck) => (
               <DeckCard
                 key={deck.id}
@@ -801,7 +902,7 @@ export function App() {
             ))}
           </div>
         ) : (
-          <div className="tactile-card p-10 text-center bg-white dark:bg-slate-900 my-6 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] transition-colors">
+          <div data-tour="deck-cards" className="tactile-card p-10 text-center bg-white dark:bg-slate-900 my-6 border-[2.5px] border-slate-900 dark:border-slate-800 shadow-[0_6px_0_0_#09090b] transition-colors">
             <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-2.5" />
             <h3 className="text-lg font-black text-slate-900 dark:text-white">No decks found</h3>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
@@ -836,24 +937,44 @@ export function App() {
         )}
       </main>
 
-      {/* Clean Footer */}
-      <footer className="border-t-[2.5px] border-slate-900 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-4 text-center mt-auto hidden sm:block transition-colors">
+      {/* Clean Minimal Footer */}
+      <footer className="border-t-[2.5px] border-slate-900 dark:border-slate-800 bg-white dark:bg-slate-900 py-3.5 px-4 text-center mt-auto hidden sm:block transition-colors">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-black text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-500 fill-amber-400 stroke-[2]" aria-hidden="true" />
-            <span>Berto AI — Free Active Recall Flashcards</span>
+            <span className="text-slate-900 dark:text-white font-black tracking-wide">Berto AI</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-xs font-bold">
             <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 underline cursor-pointer"
+              onClick={() => {
+                sounds.playTap();
+                setIsSettingsOpen(true);
+              }}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer transition-colors"
             >
-              Settings & Audio
+              Settings
             </button>
             <span>•</span>
-            <span>FSRS Spaced Repetition</span>
+            <button
+              onClick={() => navigateTo({ type: 'help-faq' })}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer transition-colors"
+            >
+              Help & FAQ
+            </button>
             <span>•</span>
-            <span>Offline PWA</span>
+            <button
+              onClick={() => navigateTo({ type: 'about-privacy' })}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer transition-colors"
+            >
+              Privacy & About
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => navigateTo({ type: 'feedback' })}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer transition-colors"
+            >
+              Feedback
+            </button>
           </div>
         </div>
       </footer>
@@ -887,6 +1008,10 @@ export function App() {
           navigateTo({ type: 'profile' });
         }}
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenHelp={() => navigateTo({ type: 'help-faq' })}
+        onOpenAbout={() => navigateTo({ type: 'about-privacy' })}
+        onOpenFeedback={() => navigateTo({ type: 'feedback' })}
+        onOpenChangelog={() => navigateTo({ type: 'changelog' })}
         onSelectTag={(tag) => {
           setSelectedTag(tag);
           setActiveParentDeck(null);
@@ -903,6 +1028,7 @@ export function App() {
         darkMode={darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         userSettings={userSettings}
+        onReplayTour={() => setIsTourActive(true)}
       />
 
       {/* Keyboard Shortcuts Cheat Sheet */}
@@ -922,7 +1048,31 @@ export function App() {
           onStart={handleLauncherStart}
         />
       )}
-    </div>
+    
+      {/* Post-Onboarding Celebration & Walkthrough Invite */}
+      {showWelcomeModal && createdProfile && (
+        <WelcomeCelebrationModal
+          profile={createdProfile}
+          onStartTour={() => {
+            setShowWelcomeModal(false);
+            setIsTourActive(true);
+          }}
+          onSkip={() => {
+            setShowWelcomeModal(false);
+            localStorage.setItem('berto_tour_completed', 'true');
+          }}
+        />
+      )}
+
+      {/* Interactive Spotlight Tour */}
+      <SpotlightTour
+        isOpen={isTourActive}
+        onClose={() => {
+          setIsTourActive(false);
+          localStorage.setItem('berto_tour_completed', 'true');
+        }}
+      />
+</div>
   );
 }
 

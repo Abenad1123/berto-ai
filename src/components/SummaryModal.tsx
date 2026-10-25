@@ -7,22 +7,19 @@ import {
   Target,
   Zap,
   Sparkles,
-  HelpCircle,
-  PenTool,
-  CheckCircle2,
-  CheckSquare,
-  Layers,
   ChevronDown,
   ChevronUp,
   XCircle,
   Check,
 } from 'lucide-react';
-import type { Deck, QuizAnswer, QuestionType, QuizLauncherConfig } from '../types';
+import type { Deck, QuizAnswer, QuizLauncherConfig } from '../types';
+import type { StudySessionRewards } from '../lib/gamification';
 import { sounds } from '../lib/sound';
 
 interface SummaryModalProps {
   deck: Deck;
   answers: QuizAnswer[];
+  sessionRewards?: StudySessionRewards;
   launcherConfig?: QuizLauncherConfig;
   onRestart: () => void;
   onHome: () => void;
@@ -32,6 +29,7 @@ interface SummaryModalProps {
 export const SummaryModal: React.FC<SummaryModalProps> = ({
   deck,
   answers,
+  sessionRewards,
   launcherConfig,
   onRestart,
   onHome,
@@ -43,42 +41,33 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
   const total = answers.length;
   const correctCount = answers.filter((a) => a.isCorrect).length;
   const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  const xpEarned = correctCount * xpPerCorrect;
+  const xpEarned = sessionRewards ? sessionRewards.earnedXp : correctCount * xpPerCorrect;
   const missedAnswers = answers.filter((a) => !a.isCorrect);
 
   useEffect(() => {
     sounds.playFinish();
 
-    // Trigger celebratory confetti if score is >= 60%
-    let rafId: number | null = null;
+    // Trigger celebratory confetti if score is >= 60% (single lightweight burst for low-end device performance)
     if (accuracy >= 60) {
-      const end = Date.now() + 1.2 * 1000;
-      const colors = ['#6366f1', '#10b981', '#fbbf24', '#f43f5e'];
-
-      (function frame() {
+      try {
         confetti({
-          particleCount: 3,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors,
+          particleCount: 35,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: ['#6366f1', '#10b981', '#fbbf24', '#f43f5e'],
+          disableForReducedMotion: true,
         });
-        confetti({
-          particleCount: 3,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors,
-        });
-
-        if (Date.now() < end) {
-          rafId = requestAnimationFrame(frame);
-        }
-      })();
+      } catch {
+        // Graceful fallback
+      }
     }
 
     return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
+      try {
+        confetti.reset();
+      } catch {
+        // Graceful cleanup
+      }
     };
   }, [accuracy]);
 
@@ -93,56 +82,9 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
 
   const gradeInfo = getGrade(accuracy);
 
-  // Group answers by Question Type for format-by-format breakdown
-  const formatStats: Record<
-    string,
-    { total: number; correct: number; type: QuestionType }
-  > = {};
-
-  for (const a of answers) {
-    const qType = a.questionType || 'multiple_choice';
-    if (!formatStats[qType]) {
-      formatStats[qType] = { total: 0, correct: 0, type: qType };
-    }
-    formatStats[qType].total += 1;
-    if (a.isCorrect) formatStats[qType].correct += 1;
-  }
-
-  const getFormatIcon = (type: QuestionType) => {
-    switch (type) {
-      case 'multiple_choice':
-        return <HelpCircle className="w-3.5 h-3.5 text-indigo-500" />;
-      case 'true_false':
-        return <CheckCircle2 className="w-3.5 h-3.5 text-sky-500" />;
-      case 'fill_blank':
-        return <PenTool className="w-3.5 h-3.5 text-amber-500" />;
-      case 'multiple_select':
-        return <CheckSquare className="w-3.5 h-3.5 text-emerald-500" />;
-      case 'flashcard':
-      default:
-        return <Layers className="w-3.5 h-3.5 text-violet-500" />;
-    }
-  };
-
-  const getFormatTitle = (type: QuestionType) => {
-    switch (type) {
-      case 'multiple_choice':
-        return 'Multiple Choice';
-      case 'true_false':
-        return 'True / False';
-      case 'fill_blank':
-        return 'Fill in Blank';
-      case 'multiple_select':
-        return 'Checkboxes';
-      case 'flashcard':
-      default:
-        return 'Flashcard';
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="tactile-card w-full max-w-lg bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 p-4 sm:p-7 text-center animate-in zoom-in-95 duration-150 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] my-auto max-h-[90vh] overflow-y-auto">
+      <div className="tactile-card w-full max-w-lg bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-800 p-4 sm:p-7 text-center animate-pop shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] my-auto max-h-[90vh] overflow-y-auto">
         {/* Celebratory Trophy & Star Badge */}
         <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2.5 sm:mb-3">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 border-[3px] border-slate-900 shadow-[0_3px_0_0_#78350f] sm:shadow-[0_4px_0_0_#78350f] flex items-center justify-center text-slate-950 transform -rotate-3 hover:rotate-3 transition-transform">
@@ -219,39 +161,23 @@ export const SummaryModal: React.FC<SummaryModalProps> = ({
               <div className="text-xs sm:text-sm font-black text-slate-950 dark:text-white truncate">
                 +{xpEarned} XP
               </div>
+              {sessionRewards && (sessionRewards.streakMultiplier > 1 || sessionRewards.comboMultiplier > 1) && (
+                <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                  {sessionRewards.streakMultiplier > 1 && (
+                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-400">
+                      🔥 {sessionRewards.streakMultiplier}x
+                    </span>
+                  )}
+                  {sessionRewards.comboMultiplier > 1 && (
+                    <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400">
+                      ⚡ {sessionRewards.comboMultiplier}x
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Performance by Question Format */}
-        {Object.keys(formatStats).length > 0 && (
-          <div className="mb-3.5 sm:mb-4 text-left p-3 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border-[2px] border-slate-900 dark:border-slate-700 space-y-2 sm:space-y-2.5 shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000]">
-            <div className="text-[11px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Performance by Question Format</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {Object.entries(formatStats).map(([qType, stat]) => {
-                const typeAcc = Math.round((stat.correct / stat.total) * 100);
-                return (
-                  <div
-                    key={qType}
-                    className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border-[1.5px] border-slate-900 dark:border-slate-700 flex items-center justify-between text-xs shadow-[0_1.5px_0_0_#09090b]"
-                  >
-                    <div className="flex items-center gap-2 font-black text-slate-800 dark:text-slate-200 truncate">
-                      {getFormatIcon(stat.type)}
-                      <span className="truncate">{getFormatTitle(stat.type)}</span>
-                    </div>
-                    <div className="font-black text-slate-950 dark:text-white ml-2 shrink-0">
-                      {stat.correct}/{stat.total} <span className="text-indigo-600 dark:text-indigo-400">({typeAcc}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Missed Questions Review */}
         {missedAnswers.length > 0 && (

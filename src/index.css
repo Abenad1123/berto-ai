@@ -2,6 +2,12 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
@@ -10,6 +16,7 @@ body {
   background-color: #fbfaf8;
   color: #0f172a;
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
 }
 
 .dark body {
@@ -241,14 +248,21 @@ body {
   box-shadow: 0 2px 0 0 #09090b;
 }
 
-/* Animations */
+/* Animations & Spring Curves */
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ease-spring-snappy {
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 @keyframes pop-in {
   0% { transform: scale(0.92); opacity: 0; }
   70% { transform: scale(1.03); }
   100% { transform: scale(1); opacity: 1; }
 }
 .animate-pop {
-  animation: pop-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: pop-in 0.24s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes shake {

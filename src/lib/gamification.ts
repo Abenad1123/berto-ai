@@ -7,16 +7,20 @@ export interface StudySessionRewardParams {
   todayIsoDate: string; // YYYY-MM-DD
   correctAnswersCount: number;
   gameMode?: GameMode;
+  maxCombo?: number;
 }
 
 export interface StudySessionRewards {
   earnedXp: number;
   newXp: number;
   newStreak: number;
+  streakMultiplier: number;
+  comboMultiplier: number;
+  baseEarnedXp: number;
 }
 
 /**
- * Calculates XP gain and updates daily streak continuity based on study performance.
+ * Calculates XP gain with daily streak and combo multipliers, updating daily streak continuity.
  */
 export function calculateStudySessionRewards(
   params: StudySessionRewardParams
@@ -28,11 +32,8 @@ export function calculateStudySessionRewards(
     todayIsoDate,
     correctAnswersCount,
     gameMode = 'normal',
+    maxCombo = 0,
   } = params;
-
-  const xpPerCorrect = gameMode === 'speed_run' || gameMode === 'hard_mode' ? 15 : 10;
-  const earnedXp = Math.max(0, correctAnswersCount) * xpPerCorrect;
-  const newXp = (currentXp ?? 0) + earnedXp;
 
   let newStreak = currentStreakDays > 0 ? currentStreakDays : 1;
 
@@ -54,9 +55,24 @@ export function calculateStudySessionRewards(
     }
   }
 
+  // Multipliers:
+  // Streak multiplier: each day of current streak increases XP by 0.1x, max 2.0x
+  const streakMultiplier = Math.min(2.0, Math.round((1.0 + Math.max(0, currentStreakDays) * 0.1) * 10) / 10);
+
+  // Combo multiplier: each combo point increases XP by 0.1x, max 3.0x
+  const comboMultiplier = Math.min(3.0, Math.round((1.0 + Math.max(0, maxCombo) * 0.1) * 10) / 10);
+
+  const xpPerCorrect = gameMode === 'speed_run' || gameMode === 'hard_mode' ? 15 : 10;
+  const baseEarnedXp = Math.max(0, correctAnswersCount) * xpPerCorrect;
+  const earnedXp = Math.round(baseEarnedXp * streakMultiplier * comboMultiplier);
+  const newXp = (currentXp ?? 0) + earnedXp;
+
   return {
     earnedXp,
     newXp,
     newStreak,
+    streakMultiplier,
+    comboMultiplier,
+    baseEarnedXp,
   };
 }

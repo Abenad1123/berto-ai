@@ -51,7 +51,8 @@ export interface UserProfile {
   major: string;
   motto: string;
   avatarColor: string;
-  dailyGoalCards: number;
+  avatarIcon?: string;
+  dailyGoalCards?: number;
   xp?: number;
   streakDays?: number;
   lastStudyDate?: string;

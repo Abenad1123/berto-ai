@@ -443,7 +443,7 @@ export const DeckViewPage: React.FC<DeckViewPageProps> = ({
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   {/* Category Pill */}
                   <span className="tactile-pill bg-indigo-100 dark:bg-indigo-950/80 text-indigo-950 dark:text-indigo-200 border-slate-900 shadow-[0_2px_0_0_#09090b] text-[11px] sm:text-xs">
-                    {getCategoryIcon(deck.category, 'w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0')}
+                    {getCategoryIcon(deck.category, 'w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0', deck.icon)}
                     <span className="truncate max-w-[120px] sm:max-w-none">{deck.category}</span>
                   </span>
 

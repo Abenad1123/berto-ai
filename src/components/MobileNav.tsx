@@ -30,10 +30,10 @@ export const MobileNav: React.FC<MobileNavProps> = ({
           onOpenMenu();
         }}
         aria-label="Open menu"
-        className="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-2 py-1 gap-1 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 active:scale-95 transition-all cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        className="group flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-2 py-1 gap-1 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 active:scale-95 transition-all cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
       >
-        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 flex items-center justify-center shadow-[0_1.5px_0_0_#09090b] dark:shadow-[0_1.5px_0_0_#000]">
-          <Menu className="w-4 h-4 text-slate-900 dark:text-white" aria-hidden="true" />
+        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 flex items-center justify-center shadow-[0_1.5px_0_0_#09090b] dark:shadow-[0_1.5px_0_0_#000] group-hover:scale-105 group-active:scale-90 transition-transform">
+          <Menu className="w-4 h-4 text-slate-900 dark:text-white transition-transform duration-200 group-hover:rotate-6 group-active:-rotate-12" aria-hidden="true" />
         </div>
         <span className="text-[10px] font-black uppercase tracking-wider">Menu</span>
       </button>
@@ -65,7 +65,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         className="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-2 py-1 gap-1 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 active:scale-95 transition-all cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
       >
         <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border-[1.5px] border-slate-900 dark:border-slate-700 flex items-center justify-center shadow-[0_1.5px_0_0_#09090b] dark:shadow-[0_1.5px_0_0_#000]">
-          {profile?.name ? (
+          {profile?.avatarIcon ? (
+            <span className="text-sm font-black">{profile.avatarIcon}</span>
+          ) : profile?.name ? (
             <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
               {profile.name.charAt(0).toUpperCase()}
             </span>

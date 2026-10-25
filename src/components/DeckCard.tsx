@@ -116,7 +116,7 @@ export const DeckCard: React.FC<DeckCardProps> = ({
               {/* Tilted Icon Container with energetic hover */}
               <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${theme.iconBg} border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] dark:shadow-[0_3px_0_0_#000] flex items-center justify-center transform -rotate-3 group-hover:rotate-3 group-hover:scale-105 transition-all shrink-0`}>
                 <div className={theme.accent}>
-                  {getCategoryIcon(deck.category, 'w-5 h-5 stroke-[2.5]')}
+                  {getCategoryIcon(deck.category, 'w-5 h-5 stroke-[2.5]', deck.icon)}
                 </div>
               </div>
 
