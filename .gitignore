@@ -82,6 +82,13 @@ $RECYCLE.BIN/
 *.tmp
 *.temp
 
-# AI Agent & Local Tools
+# AI Agent Plans, Artifacts & Local Tools
 .gemini/
+.claude/
+.cursor/
+.agent/
+.superpowers/
+docs/superpowers/
 graphify-out/
+scratch/
+*.scratch.*
