@@ -3,11 +3,13 @@ import React from 'react';
 interface BertoMascotProps {
   className?: string;
   variant?: 'happy' | 'sparkle' | 'winking';
+  animated?: boolean;
 }
 
 export const BertoMascot: React.FC<BertoMascotProps> = ({
   className = 'w-8 h-8',
   variant = 'happy',
+  animated = false,
 }) => {
   return (
     <svg
@@ -26,14 +28,6 @@ export const BertoMascot: React.FC<BertoMascotProps> = ({
         strokeLinejoin="round"
       />
 
-      {/* Internal Cerebral Folds (Subtle White/Transparent Lines) */}
-      <path
-        d="M24 13V22M19 16C17 18 17 21 19 23M29 16C31 18 31 21 29 23"
-        stroke="rgba(255, 255, 255, 0.45)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
       {/* Golden Sparkle / Antenna on Top */}
       <path
         d="M24 3L25.8 7.2L30 9L25.8 10.8L24 15L22.2 10.8L18 9L22.2 7.2L24 3Z"
@@ -41,6 +35,7 @@ export const BertoMascot: React.FC<BertoMascotProps> = ({
         stroke="#09090b"
         strokeWidth="1.8"
         strokeLinejoin="round"
+        className={animated ? 'animate-star-twinkle' : ''}
       />
 
       {/* Expressive Cartoon Eyes */}
@@ -51,11 +46,27 @@ export const BertoMascot: React.FC<BertoMascotProps> = ({
           <circle cx="20" cy="25.5" r="1.2" fill="#ffffff" />
           {/* Right Eye: Wink Arc */}
           <path
-            d="M28 27C29 25 32 25 33 27"
+            d="M27 27.5C28.5 25 31.5 25 33 27.5"
             stroke="#09090b"
-            strokeWidth="2.5"
+            strokeWidth="2.8"
             strokeLinecap="round"
           />
+        </>
+      ) : variant === 'sparkle' ? (
+        <>
+          {/* Left Eye: Sparkle Star Glint */}
+          <ellipse cx="19" cy="27" rx="3.2" ry="4.2" fill="#09090b" />
+          <circle cx="20" cy="25.5" r="1.4" fill="#ffffff" />
+          <circle cx="18" cy="28.5" r="0.7" fill="#ffffff" />
+          {/* Tiny extra sparkle */}
+          <path d="M16 23L16.5 24L17.5 24.5L16.5 25L16 26L15.5 25L14.5 24.5L15.5 24Z" fill="#fbbf24" />
+
+          {/* Right Eye */}
+          <ellipse cx="29" cy="27" rx="3.2" ry="4.2" fill="#09090b" />
+          <circle cx="30" cy="25.5" r="1.4" fill="#ffffff" />
+          <circle cx="28" cy="28.5" r="0.7" fill="#ffffff" />
+          {/* Tiny extra sparkle */}
+          <path d="M32 23L32.5 24L33.5 24.5L32.5 25L32 26L31.5 25L30.5 24.5L31.5 24Z" fill="#fbbf24" />
         </>
       ) : (
         <>
@@ -72,8 +83,8 @@ export const BertoMascot: React.FC<BertoMascotProps> = ({
       )}
 
       {/* Cute Rosy Cheeks */}
-      <circle cx="14" cy="30" r="2.2" fill="#f43f5e" opacity="0.75" />
-      <circle cx="34" cy="30" r="2.2" fill="#f43f5e" opacity="0.75" />
+      <circle cx="14" cy="30" r="2.2" fill="#f43f5e" opacity="0.8" />
+      <circle cx="34" cy="30" r="2.2" fill="#f43f5e" opacity="0.8" />
 
       {/* Cheerful Smile */}
       <path

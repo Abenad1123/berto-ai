@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Sparkles, BookOpen, Search, Zap, Trophy, Brain, X, ArrowLeft, Tag, FolderTree } from 'lucide-react';
+import { Sparkles, BookOpen, Search, Zap, Trophy, X, ArrowLeft, Tag, FolderTree } from 'lucide-react';
 import { Header } from './components/Header';
 import { DeckCard } from './components/DeckCard';
 import { StudyView } from './components/StudyView';
 import { SummaryModal } from './components/SummaryModal';
 import { CreateDeckPage } from './components/CreateDeckPage';
 import { DeckViewPage } from './components/DeckViewPage';
-import { SettingsModal } from './components/SettingsModal';
+import { SettingsPage } from './components/SettingsPage';
 import { MobileNav } from './components/MobileNav';
 import { WeeklyStreakWidget } from './components/WeeklyStreakWidget';
 import { ShortcutsModal } from './components/ShortcutsModal';
@@ -22,6 +22,8 @@ import { HelpFaqPage } from './components/HelpFaqPage';
 import { AboutPrivacyPage } from './components/AboutPrivacyPage';
 import { FeedbackPage } from './components/FeedbackPage';
 import { ChangelogPage } from './components/ChangelogPage';
+import { AppSplashScreen } from './components/AppSplashScreen';
+import { BertoMascot } from './components/BertoMascot';
 
 import { db, seedInitialData } from './lib/db';
 import { sounds } from './lib/sound';
@@ -35,6 +37,7 @@ export type AppView =
   | { type: 'deck-view'; deckId: number }
   | { type: 'study'; deck: Deck }
   | { type: 'profile' }
+  | { type: 'settings'; initialTab?: 'ai' | 'study' | 'look' | 'audio' | 'vault' }
   | { type: 'help-faq' }
   | { type: 'about-privacy' }
   | { type: 'feedback' }
@@ -61,11 +64,11 @@ export function App() {
   const [activeLauncherConfig, setActiveLauncherConfig] = useState<QuizLauncherConfig | undefined>(undefined);
 
   // Modals & Navigation drawers
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [createdProfile, setCreatedProfile] = useState<UserProfile | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [isTourActive, setIsTourActive] = useState(false);
 
 
@@ -404,20 +407,30 @@ export function App() {
   // 0. ONBOARDING GATE FOR NEW USERS
   if (profileCount === undefined) {
     return (
-      <div className="min-h-screen bg-playful-grid flex items-center justify-center">
-        <div className="w-10 h-10 rounded-2xl bg-violet-600 animate-pulse border-2 border-slate-900" />
-      </div>
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="min-h-screen bg-playful-grid flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-violet-600 animate-pulse border-2 border-slate-900" />
+        </div>
+      </>
     );
   }
 
   if (profileCount === 0) {
-    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+    return (
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <OnboardingScreen onComplete={handleOnboardingComplete} />
+      </>
+    );
   }
 
   // 1. ACTIVE STUDY SESSION VIEW
   if (view.type === 'study') {
     return (
-      <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors animate-page-enter">
         <StudyView
           key={studyCards.map((c) => c.sourceCardId || c.id || c.question).join(':')}
           deck={view.deck}
@@ -475,22 +488,28 @@ export function App() {
             onStart={handleLauncherStart}
           />
         )}
-      </div>
+        </div>
+      </>
     );
   }
 
   // 2. DEDICATED CREATE DECK PAGE
   if (view.type === 'create-deck') {
     return (
-      <CreateDeckPage
-        onBack={() => navigateTo({ type: 'home' })}
-        existingDecks={decks || []}
-        defaultParentId={view.parentDeckId}
-        onCreated={(newDeckId) => {
-          navigateTo({ type: 'deck-view', deckId: newDeckId });
-        }}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <CreateDeckPage
+            onBack={() => navigateTo({ type: 'home' })}
+            existingDecks={decks || []}
+            defaultParentId={view.parentDeckId}
+            onCreated={(newDeckId) => {
+              navigateTo({ type: 'deck-view', deckId: newDeckId });
+            }}
+            onOpenSettings={() => navigateTo({ type: 'settings' })}
+          />
+        </div>
+      </>
     );
   }
 
@@ -510,7 +529,9 @@ export function App() {
     }
 
     return (
-      <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors animate-page-enter">
         <DeckViewPage
           deck={currentDeck}
           cards={currentDeckViewCards || []}
@@ -533,14 +554,6 @@ export function App() {
           }}
         />
 
-        {/* Global modals accessible from subpages */}
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          darkMode={darkMode}
-          onToggleDarkMode={handleToggleDarkMode}
-          userSettings={userSettings}
-        />
         <ShortcutsModal
           isOpen={isShortcutsOpen}
           onClose={() => setIsShortcutsOpen(false)}
@@ -557,14 +570,17 @@ export function App() {
             onStart={handleLauncherStart}
           />
         )}
-      </div>
+        </div>
+      </>
     );
   }
 
   // 4. DEDICATED STUDENT PROFILE PAGE VIEW
   if (view.type === 'profile') {
     return (
-      <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors animate-page-enter">
         <ProfilePage
           onBack={() => {
             sounds.playTap();
@@ -572,91 +588,136 @@ export function App() {
           }}
           onOpenSettings={() => {
             sounds.playTap();
-            setIsSettingsOpen(true);
+            navigateTo({ type: 'settings' });
           }}
           onProfileUpdated={() => {
             // Live query will refresh automatically
           }}
         />
+        </div>
+      </>
+    );
+  }
 
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          darkMode={darkMode}
-          onToggleDarkMode={handleToggleDarkMode}
-          userSettings={userSettings}
-        />
-      </div>
+  // 5. DEDICATED SETTINGS PAGE VIEW
+  if (view.type === 'settings') {
+    return (
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <SettingsPage
+            onBack={() => {
+              sounds.playTap();
+              navigateTo({ type: 'home' });
+            }}
+            darkMode={darkMode}
+            onToggleDarkMode={handleToggleDarkMode}
+            userSettings={userSettings}
+            onReplayTour={() => {
+              navigateTo({ type: 'home' });
+              setIsTourActive(true);
+            }}
+            initialTab={view.initialTab}
+          />
+        </div>
+      </>
     );
   }
 
   // 5. HELP & FAQ VIEW
   if (view.type === 'help-faq') {
     return (
-      <HelpFaqPage
-        onBack={() => {
-          sounds.playTap();
-          navigateTo({ type: 'home' });
-        }}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <HelpFaqPage
+            onBack={() => {
+              sounds.playTap();
+              navigateTo({ type: 'home' });
+            }}
+          />
+        </div>
+      </>
     );
   }
 
   // 6. ABOUT & PRIVACY VIEW
   if (view.type === 'about-privacy') {
     return (
-      <AboutPrivacyPage
-        onBack={() => {
-          sounds.playTap();
-          navigateTo({ type: 'home' });
-        }}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <AboutPrivacyPage
+            onBack={() => {
+              sounds.playTap();
+              navigateTo({ type: 'home' });
+            }}
+          />
+        </div>
+      </>
     );
   }
 
   // 7. FEEDBACK & BUG REPORT VIEW
   if (view.type === 'feedback') {
     return (
-      <FeedbackPage
-        onBack={() => {
-          sounds.playTap();
-          navigateTo({ type: 'home' });
-        }}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <FeedbackPage
+            onBack={() => {
+              sounds.playTap();
+              navigateTo({ type: 'home' });
+            }}
+          />
+        </div>
+      </>
     );
   }
 
   // 8. CHANGELOG & UPDATES VIEW
   if (view.type === 'changelog') {
     return (
-      <ChangelogPage
-        onBack={() => {
-          sounds.playTap();
-          navigateTo({ type: 'home' });
-        }}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <ChangelogPage
+            onBack={() => {
+              sounds.playTap();
+              navigateTo({ type: 'home' });
+            }}
+          />
+        </div>
+      </>
     );
   }
 
   // 9. CUSTOM 404 NOT FOUND VIEW
   if (view.type === 'not-found') {
     return (
-      <NotFoundPage
-        onHome={() => navigateTo({ type: 'home' })}
-        onCreateDeck={() => navigateTo({ type: 'create-deck' })}
-      />
+      <>
+        {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+        <div className="animate-page-enter min-h-screen">
+          <NotFoundPage
+            onHome={() => navigateTo({ type: 'home' })}
+            onCreateDeck={() => navigateTo({ type: 'create-deck' })}
+          />
+        </div>
+      </>
     );
   }
 
   // 10. MAIN HOME DASHBOARD VIEW
   return (
-    <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-200 dark:selection:bg-indigo-900 transition-colors">
+    <>
+      {showSplash && <AppSplashScreen onFinish={() => setShowSplash(false)} />}
+      <div className="min-h-screen bg-playful-grid text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-200 dark:selection:bg-indigo-900 transition-colors animate-page-enter">
       <Header
         onOpenMenu={() => setIsSidebarOpen(true)}
         onOpenCreate={() => navigateTo({ type: 'create-deck' })}
         onOpenSettings={() => {
           sounds.playTap();
-          setIsSettingsOpen(true);
+          navigateTo({ type: 'settings' });
         }}
         onOpenProfile={() => {
           navigateTo({ type: 'profile' });
@@ -671,10 +732,10 @@ export function App() {
       />
 
       <main className="max-w-4xl w-full mx-auto px-4 py-5 sm:py-7 flex-1 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-8">
-        {/* Clean Student Welcome Header (Decluttered) */}
-        <div className="tactile-card p-5 sm:p-7 bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-700 text-white mb-6 relative overflow-hidden border-[2.5px] border-slate-900 shadow-[0_6px_0_0_#09090b]">
+        {/* Clean Student Welcome Header (Decluttered with Micro-Animations) */}
+        <div className="tactile-card p-5 sm:p-7 bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-700 text-white mb-6 relative overflow-hidden border-[2.5px] border-slate-900 shadow-[0_6px_0_0_#09090b] after:absolute after:inset-0 after:pointer-events-none after:bg-gradient-to-r after:from-transparent after:via-white/10 after:to-transparent after:animate-shimmer">
           <div className="max-w-lg relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-300 text-slate-950 border-[1.5px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] mb-2.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-300 text-slate-950 border-[1.5px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] mb-2.5 animate-pulse-subtle">
               <Zap className="w-3 h-3 fill-slate-950 stroke-none" />
               <span>Spaced Repetition Active</span>
             </div>
@@ -708,9 +769,15 @@ export function App() {
             </div>
           </div>
 
-          {/* Decorative subtle icon */}
-          <div className="absolute right-4 top-4 opacity-15 hidden sm:block pointer-events-none">
-            <Brain className="w-40 h-40 stroke-white stroke-[1.5]" />
+          {/* Animated Mascot & Ambient Floating Glow in Hero */}
+          <div className="absolute -right-2 sm:right-6 -bottom-4 sm:top-1/2 sm:-translate-y-1/2 pointer-events-none opacity-25 sm:opacity-100 transition-opacity">
+            <div className="relative animate-float">
+              {/* Glow aura */}
+              <div className="absolute -inset-4 bg-indigo-300/30 rounded-full blur-xl animate-pulse-subtle" />
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white/15 backdrop-blur-md border-[2px] border-white/30 p-3 shadow-xl flex items-center justify-center transform rotate-6">
+                <BertoMascot className="w-16 h-16 sm:w-20 sm:h-20 text-white" variant="sparkle" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -948,7 +1015,7 @@ export function App() {
             <button
               onClick={() => {
                 sounds.playTap();
-                setIsSettingsOpen(true);
+                navigateTo({ type: 'settings' });
               }}
               className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline cursor-pointer transition-colors"
             >
@@ -985,7 +1052,7 @@ export function App() {
         onOpenCreate={() => navigateTo({ type: 'create-deck' })}
         onOpenSettings={() => {
           sounds.playTap();
-          setIsSettingsOpen(true);
+          navigateTo({ type: 'settings' });
         }}
         onOpenProfile={() => {
           navigateTo({ type: 'profile' });
@@ -1002,7 +1069,10 @@ export function App() {
         darkMode={darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         onOpenCreate={() => navigateTo({ type: 'create-deck' })}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => {
+          setIsSidebarOpen(false);
+          navigateTo({ type: 'settings' });
+        }}
         onOpenProfile={() => {
           setIsSidebarOpen(false);
           navigateTo({ type: 'profile' });
@@ -1019,16 +1089,6 @@ export function App() {
         onSelectDeck={(d) => {
           if (d.id) navigateTo({ type: 'deck-view', deckId: d.id });
         }}
-      />
-
-      {/* Settings Modal (Volume, Mute, Dark Mode, API Key) */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        darkMode={darkMode}
-        onToggleDarkMode={handleToggleDarkMode}
-        userSettings={userSettings}
-        onReplayTour={() => setIsTourActive(true)}
       />
 
       {/* Keyboard Shortcuts Cheat Sheet */}
@@ -1072,7 +1132,8 @@ export function App() {
           localStorage.setItem('berto_tour_completed', 'true');
         }}
       />
-</div>
+    </div>
+    </>
   );
 }
 

@@ -9,6 +9,7 @@ import {
   BookOpen,
   Flame,
   Menu,
+  Sparkles,
 } from 'lucide-react';
 import { sounds } from '../lib/sound';
 
@@ -26,6 +27,13 @@ const TOUR_STEPS: SpotlightStep[] = [
     description:
       'Tap here to create custom flashcard sets, generate full quizzes with AI from your notes or PDFs, or import CSV files.',
     icon: <PlusCircle className="w-5 h-5 text-indigo-500" />,
+  },
+  {
+    selector: '[data-tour="settings-btn"]',
+    title: 'AI Flashcard Forge & API Key',
+    description:
+      'Add your free Google Gemini or Groq API key in Settings to automatically generate high-yield flashcards from lecture slides and notes!',
+    icon: <Sparkles className="w-5 h-5 text-amber-500 fill-amber-400" />,
   },
   {
     selector: '[data-tour="deck-cards"]',
@@ -49,6 +57,16 @@ const TOUR_STEPS: SpotlightStep[] = [
     icon: <Menu className="w-5 h-5 text-violet-500" />,
   },
 ];
+
+const findVisibleTarget = (selector: string): HTMLElement | null => {
+  const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));
+  if (elements.length === 0) return null;
+  const visible = elements.find((el) => {
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+  return visible || elements[0];
+};
 
 interface SpotlightTourProps {
   isOpen: boolean;
@@ -87,13 +105,13 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ isOpen, onClose })
 
   const updateTargetPosition = useCallback(() => {
     if (!isOpen || !currentStep) return;
-    const el = document.querySelector(currentStep.selector);
+    const el = findVisibleTarget(currentStep.selector);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       setTargetRect(el.getBoundingClientRect());
       // Re-measure after scroll animation completes to ensure frame accuracy
       setTimeout(() => {
-        const updatedEl = document.querySelector(currentStep.selector);
+        const updatedEl = findVisibleTarget(currentStep.selector);
         if (updatedEl) {
           setTargetRect(updatedEl.getBoundingClientRect());
         }
@@ -111,7 +129,7 @@ export const SpotlightTour: React.FC<SpotlightTourProps> = ({ isOpen, onClose })
     });
 
     const handleResizeOrScroll = () => {
-      const el = document.querySelector(currentStep.selector);
+      const el = findVisibleTarget(currentStep.selector);
       if (el) {
         setTargetRect(el.getBoundingClientRect());
       }

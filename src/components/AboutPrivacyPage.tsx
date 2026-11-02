@@ -19,7 +19,7 @@ export function AboutPrivacyPage({ onBack }: AboutPrivacyPageProps) {
   return (
     <div className="min-h-screen bg-[#f8f7f4] dark:bg-slate-950 text-slate-900 dark:text-white transition-colors pb-16">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-4 py-3 sm:py-4">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 sm:pb-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button
@@ -43,7 +43,7 @@ export function AboutPrivacyPage({ onBack }: AboutPrivacyPageProps) {
             </div>
           </div>
           <span className="text-[10px] sm:text-xs font-mono font-black px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
-            v1.0.0
+            v1.0.1
           </span>
         </div>
       </header>

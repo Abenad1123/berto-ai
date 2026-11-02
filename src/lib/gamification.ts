@@ -76,3 +76,63 @@ export function calculateStudySessionRewards(
     baseEarnedXp,
   };
 }
+
+export interface LevelInfo {
+  level: number;
+  title: string;
+  currentLevelXP: number;
+  xpForNextLevel: number;
+  xpPercent: number;
+  minXP: number;
+  nextLevelXP: number;
+  isMaxLevel: boolean;
+}
+
+export const LEVEL_THRESHOLDS = [
+  { level: 1, title: 'Novice', minXP: 0, nextXP: 250 },
+  { level: 2, title: 'Scholar', minXP: 250, nextXP: 750 },
+  { level: 3, title: 'Adept', minXP: 750, nextXP: 1750 },
+  { level: 4, title: 'Master', minXP: 1750, nextXP: 3500 },
+  { level: 5, title: 'Grandmaster', minXP: 3500, nextXP: 6000 },
+  { level: 6, title: 'Sage', minXP: 6000, nextXP: 6000 },
+] as const;
+
+/**
+ * Calculates progressive level, title, and current-tier XP progress from total XP.
+ */
+export function getLevelInfo(totalXP: number = 0): LevelInfo {
+  const safeXP = Math.max(0, totalXP);
+
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    const tier = LEVEL_THRESHOLDS[i];
+    if (safeXP >= tier.minXP) {
+      const isMax = i === LEVEL_THRESHOLDS.length - 1;
+      const span = isMax ? 1 : tier.nextXP - tier.minXP;
+      const currentLevelXP = isMax ? safeXP - tier.minXP : safeXP - tier.minXP;
+      const xpForNextLevel = isMax ? 0 : span;
+      const xpPercent = isMax ? 100 : Math.min(100, Math.round(((safeXP - tier.minXP) / span) * 100));
+
+      return {
+        level: tier.level,
+        title: tier.title,
+        currentLevelXP,
+        xpForNextLevel,
+        xpPercent,
+        minXP: tier.minXP,
+        nextLevelXP: tier.nextXP,
+        isMaxLevel: isMax,
+      };
+    }
+  }
+
+  return {
+    level: 1,
+    title: 'Novice',
+    currentLevelXP: safeXP,
+    xpForNextLevel: 250,
+    xpPercent: Math.min(100, Math.round((safeXP / 250) * 100)),
+    minXP: 0,
+    nextLevelXP: 250,
+    isMaxLevel: false,
+  };
+}

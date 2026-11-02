@@ -6,9 +6,11 @@ import {
   ArrowLeft,
   Check,
   Flame,
+  ChevronDown,
 } from 'lucide-react';
 import type { UserProfile } from '../types';
 import { sounds } from '../lib/sound';
+import { BertoMascot } from './BertoMascot';
 
 export interface OnboardingScreenProps {
   onComplete: (profile: Omit<UserProfile, 'id'>) => void;
@@ -68,7 +70,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
 
   // Form State
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState('Undergraduate / College');
   const [major, setMajor] = useState('');
   const [motto, setMotto] = useState('');
   const [avatarColor, setAvatarColor] = useState<AvatarColor>('violet');
@@ -137,8 +139,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
         {/* Progress indicator */}
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-violet-600 text-white font-black flex items-center justify-center border-2 border-slate-900 dark:border-white shadow-[0_2px_0_0_#09090b]">
-              B
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center border-2 border-slate-900 dark:border-white shadow-[0_2px_0_0_#09090b]">
+              <BertoMascot className="w-6 h-6 text-white" />
             </div>
             <span className="font-black text-lg tracking-tight text-slate-950 dark:text-white">
               Berto AI
@@ -253,7 +255,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                     setName(e.target.value);
                     if (nameError) setNameError('');
                   }}
-                  placeholder="e.g. Jordan Rivera"
+                  placeholder="Your name or nickname"
                   className={`w-full px-4 py-2.5 rounded-xl border-2 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors ${
                     nameError
                       ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-950/20'
@@ -266,33 +268,41 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 )}
               </div>
 
-              {/* Major / Focus */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                    Field / Subject
-                  </label>
-                  <input
-                    type="text"
-                    value={major}
-                    onChange={(e) => setMajor(e.target.value)}
-                    placeholder="e.g. Biology &amp; CS"
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                    Stage
-                  </label>
-                  <input
-                    type="text"
+              {/* Education Level (Higher hierarchy, placed below name) */}
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                  Education Level
+                </label>
+                <div className="relative">
+                  <select
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    placeholder="e.g. University Student"
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
-                  />
+                    className="w-full px-4 py-2.5 pr-10 rounded-xl border-2 border-slate-900 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value="Elementary School">Elementary School</option>
+                    <option value="Junior High School">Junior High School</option>
+                    <option value="Senior High School">Senior High School</option>
+                    <option value="Undergraduate / College">Undergraduate / College</option>
+                    <option value="Graduate (Master's / PhD)">Graduate (Master's / PhD)</option>
+                    <option value="Professional / Self-Learner">Professional / Self-Learner</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
                 </div>
+              </div>
+
+              {/* Specific Field of Study / Major */}
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                  Field of Study / Major
+                </label>
+                <input
+                  type="text"
+                  value={major}
+                  onChange={(e) => setMajor(e.target.value)}
+                  placeholder="Major, degree, or primary subject focus"
+                  className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
+                />
               </div>
 
               {/* Study Motto */}
@@ -304,7 +314,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   type="text"
                   value={motto}
                   onChange={(e) => setMotto(e.target.value)}
-                  placeholder="e.g. Consistency beats intensity."
+                  placeholder="Consistency beats intensity"
                   className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-900 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 text-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors"
                 />
               </div>
@@ -355,7 +365,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                   )}
                 </label>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {['🧠', '🎓', '⚡', '🚀', '👑', '🔥', '🎯', '💡', '🦉', '🦊', '⭐', '🦾'].map((icon) => {
+                  {['🧠', '🎓', '💡', '🦉'].map((icon) => {
                     const isSelected = avatarIcon === icon;
                     return (
                       <button

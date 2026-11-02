@@ -17,6 +17,11 @@ const colorGradients: Record<string, string> = {
   amber: 'from-amber-400 via-amber-500 to-orange-500',
   rose: 'from-rose-500 via-pink-600 to-rose-700',
   sky: 'from-sky-400 via-sky-500 to-blue-600',
+  cyber_neon: 'from-fuchsia-500 via-purple-600 to-cyan-400',
+  sunset_blaze: 'from-amber-400 via-rose-500 to-purple-600',
+  aurora_borealis: 'from-emerald-400 via-teal-500 to-indigo-600',
+  obsidian_gold: 'from-amber-300 via-yellow-500 to-slate-900',
+  midnight_void: 'from-indigo-900 via-purple-900 to-slate-950',
 };
 
 export const WelcomeCelebrationModal: React.FC<WelcomeCelebrationModalProps> = ({

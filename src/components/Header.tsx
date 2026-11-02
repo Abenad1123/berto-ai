@@ -11,6 +11,11 @@ const avatarColorGradients: Record<string, string> = {
   amber: 'from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400',
   rose: 'from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500',
   sky: 'from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500',
+  cyber_neon: 'from-fuchsia-500 via-purple-600 to-cyan-400 hover:from-fuchsia-400 hover:to-cyan-300',
+  sunset_blaze: 'from-amber-400 via-rose-500 to-purple-600 hover:from-amber-300 hover:to-purple-500',
+  aurora_borealis: 'from-emerald-400 via-teal-500 to-indigo-600 hover:from-emerald-300 hover:to-indigo-500',
+  obsidian_gold: 'from-amber-300 via-yellow-500 to-slate-900 hover:from-amber-200 hover:to-slate-800',
+  midnight_void: 'from-indigo-900 via-purple-900 to-slate-950 hover:from-indigo-800 hover:to-slate-900',
 };
 
 interface HeaderProps {
@@ -144,6 +149,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Settings Button (Desktop - on mobile available via bottom MobileNav) */}
           <button
+            data-tour="settings-btn"
             onClick={() => {
               sounds.playTap();
               onOpenSettings();

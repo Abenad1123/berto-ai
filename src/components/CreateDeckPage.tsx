@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import type { Deck, Card, QuestionType } from '../types';
 import { db } from '../lib/db';
-import { generateCardsFromText } from '../lib/ai';
+import { generateCardsFromText, type GeneratedCardData } from '../lib/ai';
 import { initializeFSRSCard } from '../lib/fsrs';
 import { sounds } from '../lib/sound';
 import { extractTextFromFile } from '../lib/fileParser';
@@ -186,6 +186,11 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
   };
 
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingCards, setStreamingCards] = useState<GeneratedCardData[]>([]);
+  const [streamingTarget, setStreamingTarget] = useState(0);
+  const [isSavingEarly, setIsSavingEarly] = useState(false);
+  const hasEarlyNavigatedRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const showError = (msg: string | null) => {
@@ -261,90 +266,150 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
       return;
     }
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
+      hasEarlyNavigatedRef.current = false;
       setIsLoading(true);
+      setStreamingCards([]);
+      setStreamingTarget(count);
       const truncatedContent = content.slice(0, 40000);
+
       const generated = await generateCardsFromText({
         apiKey,
         provider,
         content: truncatedContent,
         count,
         type: aiQuestionFormat,
+        signal: controller.signal,
+        onProgress: (progress) => {
+          if (hasEarlyNavigatedRef.current || controller.signal.aborted) return;
+          setStreamingCards((prev) => {
+            const seen = new Set(prev.map((c) => c.question.toLowerCase().trim()));
+            const nextNew = progress.newCards.filter((c) => !seen.has(c.question.toLowerCase().trim()));
+            return [...prev, ...nextNew];
+          });
+        },
       });
+
+      if (hasEarlyNavigatedRef.current || controller.signal.aborted) return;
 
       if (!generated || generated.length === 0) {
         throw new Error('AI could not generate questions from this text. Try adding more detail.');
       }
 
-      const now = new Date();
-      let createdDeckId = 0;
-
-      await db.transaction('rw', [db.decks, db.cards], async () => {
-        const deckId = await db.decks.add({
-          title: title.trim(),
-          description: `Generated from ${importedFileName || content.slice(0, 40)}...`,
-          category: category.trim() || 'General',
-          color,
-          icon: customIcon || 'Sparkles',
-          cardCount: generated.length,
-          tags: parseTags(),
-          parentId: parentId || null,
-          createdAt: now,
-          updatedAt: now,
-        });
-
-        createdDeckId = Number(deckId);
-
-        const cardsToAdd: Card[] = generated
-          .filter((g) => g && typeof g.question === 'string' && g.question.trim().length > 0)
-          .map((g) => {
-            const rawType = g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat);
-            const validTypes: QuestionType[] = ['multiple_choice', 'multiple_select', 'fill_blank', 'true_false', 'flashcard'];
-            const cardType: QuestionType = validTypes.includes(rawType as QuestionType) ? (rawType as QuestionType) : 'multiple_choice';
-
-            const answer = typeof g.answer === 'string' ? g.answer.trim() : String(g.answer || '');
-            let options = Array.isArray(g.options) ? g.options.map((o) => String(o).trim()).filter(Boolean) : undefined;
-            if (cardType === 'multiple_choice' && options && !options.includes(answer)) {
-              options[0] = answer;
-            }
-            if (cardType === 'true_false') {
-              options = ['True', 'False'];
-            }
-
-            let correctAnswers = Array.isArray(g.correctAnswers)
-              ? g.correctAnswers.map((ca) => String(ca).trim()).filter(Boolean)
-              : undefined;
-            if (cardType === 'multiple_select' && (!correctAnswers || correctAnswers.length === 0)) {
-              correctAnswers = [answer];
-            }
-
-            return {
-              deckId: createdDeckId,
-              question: g.question.trim(),
-              answer,
-              options,
-              correctAnswers,
-              explanation: typeof g.explanation === 'string' ? g.explanation.trim() : undefined,
-              type: cardType,
-              createdAt: now,
-              ...initializeFSRSCard(),
-            };
-          });
-
-        if (cardsToAdd.length === 0) {
-          throw new Error('AI generated cards were not in the expected format. Please try again.');
-        }
-
-        await db.cards.bulkAdd(cardsToAdd);
-      });
-
+      const createdDeckId = await saveGeneratedDeck(generated);
       sounds.playCorrect();
       onCreated(createdDeckId);
     } catch (err: unknown) {
-      const errorObj = err as { message?: string };
+      if (hasEarlyNavigatedRef.current || controller.signal.aborted) return;
+      const errorObj = err as { message?: string; name?: string };
+      if (errorObj?.name === 'AbortError' || errorObj?.message === 'Generation cancelled') {
+        return;
+      }
       showError(errorObj.message || 'Failed to generate cards. Check your API key and connection.');
     } finally {
-      setIsLoading(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleCancelAI = () => {
+    sounds.playTap();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+    setStreamingCards([]);
+    setStreamingTarget(0);
+  };
+
+  const saveGeneratedDeck = async (cardsToSave: GeneratedCardData[]): Promise<number> => {
+    const now = new Date();
+    let createdDeckId = 0;
+
+    await db.transaction('rw', [db.decks, db.cards], async () => {
+      const deckId = await db.decks.add({
+        title: title.trim(),
+        description: `Generated from ${importedFileName || content.slice(0, 40)}...`,
+        category: category.trim() || 'General',
+        color,
+        icon: customIcon || 'Sparkles',
+        cardCount: cardsToSave.length,
+        tags: parseTags(),
+        parentId: parentId || null,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      createdDeckId = Number(deckId);
+
+      const cardsToAdd: Card[] = cardsToSave
+        .filter((g) => g && typeof g.question === 'string' && g.question.trim().length > 0)
+        .map((g) => {
+          const rawType = g.type || (aiQuestionFormat === 'mixed' ? 'multiple_choice' : aiQuestionFormat);
+          const validTypes: QuestionType[] = ['multiple_choice', 'multiple_select', 'fill_blank', 'true_false', 'flashcard'];
+          const cardType: QuestionType = validTypes.includes(rawType as QuestionType) ? (rawType as QuestionType) : 'multiple_choice';
+
+          const answer = typeof g.answer === 'string' ? g.answer.trim() : String(g.answer || '');
+          let options = Array.isArray(g.options) ? g.options.map((o) => String(o).trim()).filter(Boolean) : undefined;
+          if (cardType === 'multiple_choice' && options && !options.includes(answer)) {
+            options[0] = answer;
+          }
+          if (cardType === 'true_false') {
+            options = ['True', 'False'];
+          }
+
+          let correctAnswers = Array.isArray(g.correctAnswers)
+            ? g.correctAnswers.map((ca) => String(ca).trim()).filter(Boolean)
+            : undefined;
+          if (cardType === 'multiple_select' && (!correctAnswers || correctAnswers.length === 0)) {
+            correctAnswers = [answer];
+          }
+
+          return {
+            deckId: createdDeckId,
+            question: g.question.trim(),
+            answer,
+            options,
+            correctAnswers,
+            explanation: typeof g.explanation === 'string' ? g.explanation.trim() : undefined,
+            type: cardType,
+            createdAt: now,
+            ...initializeFSRSCard(),
+          };
+        });
+
+      if (cardsToAdd.length === 0) {
+        throw new Error('AI generated cards were not in the expected format. Please try again.');
+      }
+
+      await db.cards.bulkAdd(cardsToAdd);
+    });
+
+    return createdDeckId;
+  };
+
+  const handleStudyEarly = async () => {
+    if (streamingCards.length === 0 || isSavingEarly || hasEarlyNavigatedRef.current) return;
+    try {
+      setIsSavingEarly(true);
+      hasEarlyNavigatedRef.current = true;
+      sounds.playTap();
+      const createdDeckId = await saveGeneratedDeck(streamingCards);
+      sounds.playCorrect();
+      onCreated(createdDeckId);
+    } catch (err: unknown) {
+      hasEarlyNavigatedRef.current = false;
+      const errorObj = err as { message?: string };
+      showError(errorObj.message || 'Failed to save generated cards early.');
+    } finally {
+      setIsSavingEarly(false);
     }
   };
 
@@ -506,25 +571,42 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
           <div className="flex items-center gap-2 shrink-0">
             {tab === 'ai' ? (
-              <button
-                onClick={handleGenerateAI}
-                disabled={isLoading}
-                className="tactile-btn-primary px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none disabled:opacity-50 shrink-0"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                    <span className="hidden sm:inline">Generating...</span>
-                    <span className="sm:hidden">Generating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 fill-amber-300 stroke-none shrink-0" />
-                    <span className="hidden sm:inline">Generate Deck</span>
-                    <span className="sm:hidden">Generate</span>
-                  </>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={handleGenerateAI}
+                  disabled={isLoading}
+                  className="tactile-btn-primary px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm gap-1.5 sm:gap-2 shadow-[0_3px_0_0_#1e1b4b] active:translate-y-0.5 active:shadow-none disabled:opacity-50 shrink-0"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                      <span className="hidden sm:inline">
+                        {streamingCards.length > 0 ? `Forging (${streamingCards.length}/${streamingTarget || count})...` : 'Generating...'}
+                      </span>
+                      <span className="sm:hidden">
+                        {streamingCards.length > 0 ? `${streamingCards.length}/${streamingTarget || count}` : 'Generating...'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 fill-amber-300 stroke-none shrink-0" />
+                      <span className="hidden sm:inline">Generate Deck</span>
+                      <span className="sm:hidden">Generate</span>
+                    </>
+                  )}
+                </button>
+                {isLoading && (
+                  <button
+                    type="button"
+                    onClick={handleCancelAI}
+                    className="tactile-btn-secondary px-2.5 sm:px-3 py-2 min-h-[44px] text-xs font-black text-rose-600 dark:text-rose-400 border-rose-300 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-[0_2.5px_0_0_#991b1b] active:translate-y-0.5 active:shadow-none shrink-0"
+                    title="Cancel generation"
+                  >
+                    <X className="w-4 h-4 stroke-[2.5]" />
+                    <span className="hidden sm:inline">Cancel</span>
+                  </button>
                 )}
-              </button>
+              </div>
             ) : tab === 'folder' ? (
               <button
                 onClick={handleSaveManual}
@@ -765,7 +847,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Tags (e.g. exam, chapter1)"
+                  placeholder="Tags (comma or space separated)"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-base sm:text-xs font-bold shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500"
@@ -1017,25 +1099,137 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
 
             {/* Bottom Generate Action Button */}
             <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleGenerateAI}
-                disabled={isLoading}
-                className="tactile-btn tactile-btn-primary w-full py-3.5 min-h-[48px] text-sm sm:text-base font-black flex items-center justify-center gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled
+                    className="tactile-btn tactile-btn-primary flex-1 py-3.5 min-h-[48px] text-sm sm:text-base font-black flex items-center justify-center gap-2 shadow-[0_4px_0_0_#1e1b4b] opacity-80 cursor-wait"
+                  >
                     <Loader2 className="w-5 h-5 animate-spin shrink-0" />
-                    <span>Generating {count} cards...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 fill-amber-300 stroke-none shrink-0" />
-                    <span>Generate {count} Cards</span>
-                  </>
-                )}
-              </button>
+                    <span>
+                      {streamingCards.length > 0
+                        ? `Forging (${streamingCards.length}/${streamingTarget || count})...`
+                        : `Generating ${count} cards...`}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelAI}
+                    className="tactile-btn-secondary px-4 py-3.5 min-h-[48px] text-sm font-black flex items-center justify-center gap-1.5 text-rose-600 dark:text-rose-400 border-rose-400 dark:border-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 shadow-[0_3px_0_0_#991b1b] active:translate-y-0.5 active:shadow-none shrink-0"
+                    title="Cancel card generation"
+                  >
+                    <X className="w-4 h-4 stroke-[2.5]" />
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGenerateAI}
+                  className="tactile-btn tactile-btn-primary w-full py-3.5 min-h-[48px] text-sm sm:text-base font-black flex items-center justify-center gap-2 shadow-[0_4px_0_0_#1e1b4b] active:translate-y-1 active:shadow-none"
+                >
+                  <Sparkles className="w-5 h-5 fill-amber-300 stroke-none shrink-0" />
+                  <span>Generate {count} Cards</span>
+                </button>
+              )}
             </div>
+
+            {/* Progressive Card Streaming & Live Reveal Tray */}
+            {(isLoading || streamingCards.length > 0) && (
+              <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-indigo-50/80 dark:bg-slate-800/80 border-[2.5px] border-indigo-600 dark:border-indigo-500 shadow-[0_4px_0_0_#4338ca] space-y-3.5 transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5">
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 animate-spin shrink-0" />
+                    ) : (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                    )}
+                    <div>
+                      <div className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Streaming Cards:</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-black bg-indigo-600 text-white shadow-sm">
+                          {streamingCards.length} of {streamingTarget || count} ready
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {isLoading
+                          ? 'Generating in parallel... cards appear live as they finish.'
+                          : 'All batches generated successfully!'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {streamingCards.length > 0 && isLoading && (
+                      <button
+                        type="button"
+                        onClick={handleStudyEarly}
+                        disabled={isSavingEarly}
+                        className="tactile-btn tactile-btn-secondary px-3.5 py-2 text-xs font-black flex items-center justify-center gap-1.5 shadow-[0_2.5px_0_0_#09090b] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-600 shrink-0"
+                      >
+                        {isSavingEarly ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5 fill-emerald-400 text-emerald-600" />
+                        )}
+                        <span>Study Now ({streamingCards.length} Cards)</span>
+                      </button>
+                    )}
+                    {isLoading && (
+                      <button
+                        type="button"
+                        onClick={handleCancelAI}
+                        className="tactile-btn-secondary px-3 py-2 text-xs font-black flex items-center justify-center gap-1 shadow-[0_2px_0_0_#09090b] text-rose-600 dark:text-rose-400 border-rose-300 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 shrink-0"
+                        title="Cancel generation"
+                      >
+                        <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Cancel</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Live Progress Bar */}
+                <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300 ease-out"
+                    style={{
+                      width: `${Math.min(100, Math.round((streamingCards.length / (streamingTarget || count || 1)) * 100))}%`,
+                    }}
+                  />
+                </div>
+
+                {/* Live Preview List */}
+                {streamingCards.length > 0 && (
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {streamingCards.map((card, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-1 text-xs"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-slate-800 dark:text-slate-100 line-clamp-1">
+                            #{idx + 1}. {card.question}
+                          </span>
+                          <span className="uppercase text-[10px] font-black px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
+                            {card.type.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-slate-500 dark:text-slate-400 line-clamp-1">
+                          <strong className="text-emerald-600 dark:text-emerald-400">Ans:</strong> {card.answer}
+                          {card.explanation && (
+                            <span className="ml-2 italic text-[11px] text-slate-400 dark:text-slate-500">
+                              — {card.explanation}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         ) : (
           /* Tab B: Manual Cards */
@@ -1093,18 +1287,36 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   key={idx}
                   className="p-3.5 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-[2.5px] border-slate-900 dark:border-slate-700 shadow-[0_3px_0_0_#09090b] space-y-3 sm:space-y-3.5 relative"
                 >
-                  {/* Card Header & Type Selector */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b-[2px] border-slate-200 dark:border-slate-700">
+                  {/* Card Header with Number and Dedicated Delete Button (Never hidden in scroll!) */}
+                  <div className="flex items-center justify-between pb-2 border-b-[2px] border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-2">
                       <span className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black border-[1.5px] border-slate-900 shadow-[0_1.5px_0_0_#09090b] shrink-0">
                         #{idx + 1}
                       </span>
                       <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                        Question Format:
+                        Card #{idx + 1}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap scrollbar-none w-full sm:w-auto">
+                    {manualCards.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeManualCardRow(idx)}
+                        aria-label="Remove card"
+                        className="px-2.5 py-1 min-h-[32px] rounded-xl border-[1.5px] border-rose-300 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center gap-1.5 text-xs font-black cursor-pointer transition-all shadow-[0_1px_0_0_#e11d48] shrink-0"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Format Pills Selector */}
+                  <div>
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Question Format
+                    </label>
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap scrollbar-none w-full">
                       {[
                         { id: 'multiple_choice', label: 'Multiple Choice', icon: HelpCircle },
                         { id: 'multiple_select', label: 'Checkboxes (Multi)', icon: CheckSquare },
@@ -1130,17 +1342,6 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                           </button>
                         );
                       })}
-
-                      {manualCards.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeManualCardRow(idx)}
-                          aria-label="Remove card"
-                          className="w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] sm:min-w-[32px] sm:min-h-[32px] rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 text-slate-400 hover:text-rose-600 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center cursor-pointer ml-1 transition-all shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   </div>
 
@@ -1167,17 +1368,17 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       ref={(el) => {
                         textareaRefs.current[idx] = el;
                       }}
-                      rows={2}
+                      rows={3}
                       placeholder={
                         card.type === 'fill_blank'
-                          ? 'e.g. The powerhouse of the cell is Mitochondria (select word & click button to make blank)...'
+                          ? 'The powerhouse of the cell is Mitochondria (select word & click button to make blank)...'
                           : card.type === 'true_false'
-                          ? 'e.g. Ribosomes are responsible for protein synthesis in the cell...'
+                          ? 'Ribosomes are responsible for protein synthesis in the cell...'
                           : 'Type your question or statement...'
                       }
                       value={card.question}
                       onChange={(e) => updateManualCardField(idx, 'question', e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
+                      className="w-full px-3.5 py-2.5 min-h-[85px] rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                     />
 
                     {/* Cloze live preview badge if question contains [______] */}
@@ -1318,7 +1519,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Mitochondria (or use highlight button above)"
+                        placeholder="Correct word or phrase (or use highlight button above)"
                         value={card.answer}
                         onChange={(e) => updateManualCardField(idx, 'answer', e.target.value)}
                         className="w-full px-3.5 py-2.5 min-h-[44px] rounded-xl border-[2px] border-amber-500 bg-amber-50/50 dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-inner"
@@ -1387,7 +1588,7 @@ export const CreateDeckPage: React.FC<CreateDeckPageProps> = ({
                   <div>
                     <input
                       type="text"
-                      placeholder="Explanation / Memory Tip / Context (Optional)..."
+                      placeholder="Explanation or memory tip (optional)..."
                       value={card.explanation || ''}
                       onChange={(e) => updateManualCardField(idx, 'explanation', e.target.value)}
                       className="w-full px-3.5 py-2 min-h-[44px] rounded-xl border-[1.5px] border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-base sm:text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"

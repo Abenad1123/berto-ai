@@ -17,6 +17,7 @@ import {
 import type { Deck, UserProfile } from '../types';
 import { sounds } from '../lib/sound';
 import { getCategoryIcon } from '../lib/categoryIcons';
+import { getLevelInfo } from '../lib/gamification';
 
 const avatarColorGradients: Record<string, string> = {
   violet: 'from-violet-600 via-purple-600 to-indigo-600',
@@ -25,6 +26,11 @@ const avatarColorGradients: Record<string, string> = {
   amber: 'from-amber-400 via-amber-500 to-orange-500',
   rose: 'from-rose-500 via-pink-600 to-rose-700',
   sky: 'from-sky-400 via-sky-500 to-blue-600',
+  cyber_neon: 'from-fuchsia-500 via-purple-600 to-cyan-400',
+  sunset_blaze: 'from-amber-400 via-rose-500 to-purple-600',
+  aurora_borealis: 'from-emerald-400 via-teal-500 to-indigo-600',
+  obsidian_gold: 'from-amber-300 via-yellow-500 to-slate-900',
+  midnight_void: 'from-indigo-900 via-purple-900 to-slate-950',
 };
 
 interface SidebarProps {
@@ -69,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const avatarGradient =
     (profile?.avatarColor && avatarColorGradients[profile.avatarColor]) ||
     'from-violet-600 to-indigo-600';
-  const currentLevel = Math.max(1, Math.floor((profile?.xp ?? 0) / 500) + 1);
+  const currentLevel = getLevelInfo(profile?.xp ?? 0).level;
 
   const toggleDeckCollapse = (deckId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -358,37 +364,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       </div>
                     </div>
 
-                    {/* Sub-decks tree indentation (collapsible) */}
-                    {subDecks.length > 0 && !collapsedDeckIds[deck.id!] && (
-                      <div className="ml-4 pl-3 border-l-[2.5px] border-indigo-400 dark:border-indigo-600 space-y-1.5 my-1 animate-in fade-in duration-150">
-                        {subDecks.map((sub) => (
-                          <div
-                            key={sub.id}
-                            onClick={() => {
-                              sounds.playTap();
-                              onClose();
-                              if (onSelectDeck) onSelectDeck(sub);
-                            }}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                sounds.playTap();
-                                onClose();
-                                if (onSelectDeck) onSelectDeck(sub);
-                              }
-                            }}
-                            className="p-2 min-h-[44px] rounded-xl bg-slate-50 dark:bg-slate-800/80 border-[1.5px] border-slate-900/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between text-xs font-black text-slate-700 dark:text-slate-300 cursor-pointer transition-colors shadow-[0_1px_0_0_#09090b] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                          >
-                            <div className="flex items-center gap-1.5 truncate max-w-[160px]">
-                              <CornerDownRight className="w-3.5 h-3.5 text-indigo-500 shrink-0 stroke-[2.5]" aria-hidden="true" />
-                              <span className="truncate">{sub.title}</span>
-                            </div>
-                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 shrink-0">
-                              {sub.cardCount ?? 0}
-                            </span>
+                    {/* Sub-decks tree indentation (collapsible with smooth GPU height transition) */}
+                    {subDecks.length > 0 && (
+                      <div className={`accordion-content ${!collapsedDeckIds[deck.id!] ? 'is-open' : ''}`}>
+                        <div className="accordion-inner">
+                          <div className="ml-4 pl-3 border-l-[2.5px] border-indigo-400 dark:border-indigo-600 space-y-1.5 my-1.5">
+                            {subDecks.map((sub) => (
+                              <div
+                                key={sub.id}
+                                onClick={() => {
+                                  sounds.playTap();
+                                  onClose();
+                                  if (onSelectDeck) onSelectDeck(sub);
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    sounds.playTap();
+                                    onClose();
+                                    if (onSelectDeck) onSelectDeck(sub);
+                                  }
+                                }}
+                                className="p-2 min-h-[44px] rounded-xl bg-slate-50 dark:bg-slate-800/80 border-[1.5px] border-slate-900/60 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between text-xs font-black text-slate-700 dark:text-slate-300 cursor-pointer transition-colors shadow-[0_1px_0_0_#09090b] active:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                              >
+                                <div className="flex items-center gap-1.5 truncate max-w-[160px]">
+                                  <CornerDownRight className="w-3.5 h-3.5 text-indigo-500 shrink-0 stroke-[2.5]" aria-hidden="true" />
+                                  <span className="truncate">{sub.title}</span>
+                                </div>
+                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 shrink-0">
+                                  {sub.cardCount ?? 0}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     )}
                   </div>

@@ -15,10 +15,23 @@ interface Release {
 
 const RELEASES: Release[] = [
   {
-    version: 'v1.0.0',
-    date: 'Official Release',
+    version: 'v1.0.1',
+    date: 'Current Version',
     badge: 'Latest',
     badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-600',
+    highlights: [
+      '⚡ 3x–4x Faster AI Card Generation: Parallel batch execution with prompt token trimming and concise explanations under 15 words.',
+      '🌊 Progressive Card Reveal: Cards stream in live as each batch is forged, allowing early preview and study without waiting for full completion.',
+      '🛑 Instant Generation Cancellation: Abort in-flight AI generation at any time with dedicated Cancel buttons in the header, tray, and action bar.',
+      '🛡️ Resilient Multi-Model Fallback: Automatic recovery across Google Gemini models (Gemini 2.0 Flash, 1.5 Flash, 1.5 Flash 8B) on 503 high demand or 429 rate limit errors.',
+      '🔄 Automatic Remainder Refill: Guaranteed delivery of the exact requested card count without deficits.',
+    ],
+  },
+  {
+    version: 'v1.0.0',
+    date: 'Official Release',
+    badge: 'Previous',
+    badgeColor: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-400',
     highlights: [
       '🚀 Official Release: Berto AI offline-first active recall flashcard platform with local AI forge.',
       '🧠 FSRS Spaced Repetition Scheduler: Full active recall spaced repetition calculation engine based on retrievability and memory stability.',
@@ -38,7 +51,7 @@ export function ChangelogPage({ onBack }: ChangelogPageProps) {
   return (
     <div className="min-h-screen bg-[#f8f7f4] dark:bg-slate-950 text-slate-900 dark:text-white transition-colors pb-16">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-4 py-3 sm:py-4">
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b-[2.5px] border-slate-900 dark:border-slate-800 px-4 sm:px-6 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 sm:pb-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateStudySessionRewards } from './gamification';
+import { calculateStudySessionRewards, getLevelInfo } from './gamification';
 
 describe('Gamification: XP and Multiplier Calculations', () => {
   it('awards 10 XP per correct answer in normal game mode with 0 streak and 0 combo', () => {
@@ -136,5 +136,40 @@ describe('Gamification: XP and Multiplier Calculations', () => {
     });
 
     expect(result.newStreak).toBe(1);
+  });
+});
+
+describe('Gamification: Progressive Level Thresholds', () => {
+  it('starts at Level 1 Novice with 0 XP', () => {
+    const info = getLevelInfo(0);
+    expect(info.level).toBe(1);
+    expect(info.title).toBe('Novice');
+    expect(info.currentLevelXP).toBe(0);
+    expect(info.xpForNextLevel).toBe(250);
+    expect(info.xpPercent).toBe(0);
+  });
+
+  it('progresses through progressive scaling tiers', () => {
+    // Level 2 (Scholar) at 250 XP
+    expect(getLevelInfo(250).level).toBe(2);
+    expect(getLevelInfo(250).title).toBe('Scholar');
+
+    // Level 3 (Adept) at 750 XP
+    expect(getLevelInfo(750).level).toBe(3);
+    expect(getLevelInfo(750).title).toBe('Adept');
+
+    // Level 4 (Master) at 1750 XP
+    expect(getLevelInfo(1750).level).toBe(4);
+    expect(getLevelInfo(1750).title).toBe('Master');
+
+    // Level 5 (Grandmaster) at 3500 XP
+    expect(getLevelInfo(3500).level).toBe(5);
+    expect(getLevelInfo(3500).title).toBe('Grandmaster');
+
+    // Level 6 (Sage) at 6000 XP
+    expect(getLevelInfo(6000).level).toBe(6);
+    expect(getLevelInfo(6000).title).toBe('Sage');
+    expect(getLevelInfo(6000).isMaxLevel).toBe(true);
+    expect(getLevelInfo(6000).xpPercent).toBe(100);
   });
 });

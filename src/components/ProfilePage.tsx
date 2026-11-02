@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -21,10 +22,11 @@ import {
   Pencil,
   X,
   Palette,
-  Smile,
+  ChevronDown,
 } from 'lucide-react';
 import { db } from '../lib/db';
 import { sounds } from '../lib/sound';
+import { getLevelInfo } from '../lib/gamification';
 import type { UserProfile } from '../types';
 
 export interface ProfilePageProps {
@@ -33,7 +35,18 @@ export interface ProfilePageProps {
   onProfileUpdated?: () => void;
 }
 
-export type AvatarColor = 'violet' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'sky';
+export type AvatarColor =
+  | 'violet'
+  | 'indigo'
+  | 'emerald'
+  | 'amber'
+  | 'rose'
+  | 'sky'
+  | 'cyber_neon'
+  | 'sunset_blaze'
+  | 'aurora_borealis'
+  | 'obsidian_gold'
+  | 'midnight_void';
 
 interface BadgeItem {
   id: string;
@@ -56,8 +69,11 @@ const colorThemes: Record<
     accentHex: string;
     badgeBg: string;
     badgeText: string;
+    requiredLevel?: number;
+    requirementHint?: string;
   }
 > = {
+  // Starter Classic Themes (Default Unlocked)
   violet: {
     name: 'Arcane Violet',
     bgGradient: 'from-violet-600 via-purple-600 to-indigo-600',
@@ -112,9 +128,98 @@ const colorThemes: Record<
     badgeBg: 'bg-sky-100 dark:bg-sky-950/80',
     badgeText: 'text-sky-900 dark:text-sky-300',
   },
+
+  // Prestige Unlockable Gradients
+  cyber_neon: {
+    name: 'Cyberpunk Neon',
+    bgGradient: 'from-fuchsia-500 via-purple-600 to-cyan-400',
+    borderClass: 'border-fuchsia-950 dark:border-fuchsia-400',
+    shadowColor: '#4a044e',
+    accentHex: '#d946ef',
+    badgeBg: 'bg-fuchsia-100 dark:bg-fuchsia-950/80',
+    badgeText: 'text-fuchsia-950 dark:text-fuchsia-200',
+    requiredLevel: 2,
+    requirementHint: 'Unlocks at Level 2 (Scholar)',
+  },
+  sunset_blaze: {
+    name: 'Sunset Blaze',
+    bgGradient: 'from-amber-400 via-rose-500 to-purple-600',
+    borderClass: 'border-rose-950 dark:border-rose-500',
+    shadowColor: '#4c0519',
+    accentHex: '#f43f5e',
+    badgeBg: 'bg-rose-100 dark:bg-rose-950/80',
+    badgeText: 'text-rose-950 dark:text-rose-200',
+    requiredLevel: 3,
+    requirementHint: 'Unlocks at Level 3 (Adept)',
+  },
+  aurora_borealis: {
+    name: 'Mystic Aurora',
+    bgGradient: 'from-emerald-400 via-teal-500 to-indigo-600',
+    borderClass: 'border-teal-950 dark:border-teal-400',
+    shadowColor: '#042f2e',
+    accentHex: '#14b8a6',
+    badgeBg: 'bg-teal-100 dark:bg-teal-950/80',
+    badgeText: 'text-teal-950 dark:text-teal-200',
+    requiredLevel: 4,
+    requirementHint: 'Unlocks at Level 4 (Master)',
+  },
+  obsidian_gold: {
+    name: 'Obsidian & Gold',
+    bgGradient: 'from-amber-300 via-yellow-500 to-slate-950',
+    borderClass: 'border-amber-400 dark:border-amber-300',
+    shadowColor: '#18181b',
+    accentHex: '#eab308',
+    badgeBg: 'bg-amber-100 dark:bg-amber-950/80',
+    badgeText: 'text-amber-950 dark:text-amber-200',
+    requiredLevel: 5,
+    requirementHint: 'Unlocks at Level 5 (Grandmaster)',
+  },
+  midnight_void: {
+    name: 'Galactic Void',
+    bgGradient: 'from-indigo-900 via-purple-900 to-slate-950',
+    borderClass: 'border-purple-400 dark:border-purple-300',
+    shadowColor: '#09090b',
+    accentHex: '#6366f1',
+    badgeBg: 'bg-purple-100 dark:bg-purple-950/80',
+    badgeText: 'text-purple-950 dark:text-purple-200',
+    requiredLevel: 6,
+    requirementHint: 'Unlocks at Level 6 (Sage)',
+  },
 };
 
-const avatarIconPresets = ['🧠', '🎓', '⚡', '🚀', '👑', '🔥', '🎯', '💡', '🦉', '🦊', '⭐', '🦾'];
+const STARTER_THEMES: AvatarColor[] = ['violet', 'indigo', 'emerald', 'amber', 'rose', 'sky'];
+const PRESTIGE_THEMES: AvatarColor[] = ['cyber_neon', 'sunset_blaze', 'aurora_borealis', 'obsidian_gold', 'midnight_void'];
+
+interface AvatarIconDefinition {
+  icon: string;
+  name: string;
+  unlockType: 'default' | 'level' | 'quest';
+  requiredLevel?: number;
+  requiredQuestId?: string;
+  requirementHint: string;
+}
+
+const AVATAR_ICON_ROSTER: AvatarIconDefinition[] = [
+  // 1. Starter Icons (Unlocked by default)
+  { icon: '🧠', name: 'Brain', unlockType: 'default', requirementHint: 'Starter icon (Unlocked)' },
+  { icon: '🎓', name: 'Cap', unlockType: 'default', requirementHint: 'Starter icon (Unlocked)' },
+  { icon: '💡', name: 'Idea', unlockType: 'default', requirementHint: 'Starter icon (Unlocked)' },
+  { icon: '🦉', name: 'Owl', unlockType: 'default', requirementHint: 'Starter icon (Unlocked)' },
+
+  // 2. Level Progression Icons
+  { icon: '⚡', name: 'Lightning', unlockType: 'level', requiredLevel: 2, requirementHint: 'Unlocks at Level 2 (Scholar)' },
+  { icon: '🎯', name: 'Bullseye', unlockType: 'level', requiredLevel: 3, requirementHint: 'Unlocks at Level 3 (Adept)' },
+  { icon: '🚀', name: 'Rocket', unlockType: 'level', requiredLevel: 4, requirementHint: 'Unlocks at Level 4 (Master)' },
+  { icon: '👑', name: 'Crown', unlockType: 'level', requiredLevel: 5, requirementHint: 'Unlocks at Level 5 (Grandmaster)' },
+  { icon: '🦾', name: 'Cyborg', unlockType: 'level', requiredLevel: 6, requirementHint: 'Unlocks at Level 6 (Sage)' },
+
+  // 3. Quest / Milestone Icons
+  { icon: '🔥', name: 'Flame', unlockType: 'quest', requiredQuestId: 'streak_3', requirementHint: 'Unlocks with 3-Day Flame badge' },
+  { icon: '⭐', name: 'Star', unlockType: 'quest', requiredQuestId: 'speed_demon', requirementHint: 'Unlocks with Speed Demon badge' },
+  { icon: '🦊', name: 'Fox', unlockType: 'quest', requiredQuestId: 'perfect_recall', requirementHint: 'Unlocks with Perfect Recall badge' },
+  { icon: '🛡️', name: 'Shield', unlockType: 'quest', requiredQuestId: 'fsrs_master', requirementHint: 'Unlocks with Memory Architect badge' },
+  { icon: '📚', name: 'Tome', unlockType: 'quest', requiredQuestId: 'club_100', requirementHint: 'Unlocks with 100 Cards Club badge' },
+];
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({
   onBack,
@@ -170,6 +275,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Modal Dialog States
   const [isAvatarStudioOpen, setIsAvatarStudioOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [selectedLockedNotice, setSelectedLockedNotice] = useState<string | null>(null);
 
   // Draft state for modal editing
   const [draftProfile, setDraftProfile] = useState<UserProfile>(profile);
@@ -179,10 +285,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
   // Modular custom academic goals/notes state
   const [academicNotes, setAcademicNotes] = useState<string>(() => {
-    return (
-      localStorage.getItem('berto_academic_notes') ||
-      '• Master Cellular Biology Deck before midterm\n• Review daily 20 FSRS cards before bed\n• Maintain 7-day active study streak'
-    );
+    return localStorage.getItem('berto_academic_notes') || '';
   });
 
   const [notesSaved, setNotesSaved] = useState(false);
@@ -203,15 +306,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const { cardsDue, cardsLearning, cardsMature, cardsMastered, totalReviews, totalCardsCount } = metrics;
   const allTimeQuizzes = Math.floor(totalReviews / 5);
 
-  // Gamification XP & Level calculation
+  // Gamification XP & Level calculation (Progressive scaling)
   const totalXP = profile.xp ?? 0;
   const currentStreakDays = profile.streakDays ?? 0;
-  const currentLevel = Math.max(1, Math.floor(totalXP / 500) + 1);
-  const levelTitles = ['Novice', 'Scholar', 'Adept', 'Master', 'Grandmaster', 'Sage'];
-  const levelTitle = levelTitles[Math.min(currentLevel - 1, levelTitles.length - 1)];
-  const currentLevelXP = totalXP % 500;
-  const xpForNextLevel = 500;
-  const xpPercent = Math.min(100, Math.round((currentLevelXP / xpForNextLevel) * 100));
+  const levelData = getLevelInfo(totalXP);
+  const currentLevel = levelData.level;
+  const levelTitle = levelData.title;
+  const currentLevelXP = levelData.currentLevelXP;
+  const xpForNextLevel = levelData.xpForNextLevel;
+  const xpPercent = levelData.xpPercent;
 
   // Current active color configuration
   const activeColorKey = (profile.avatarColor as AvatarColor) in colorThemes
@@ -340,6 +443,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const inProgressCount = badges.filter((b) => b.status === 'in_progress').length;
   const lockedCount = badges.filter((b) => b.status === 'locked').length;
   const trophyProgressPercent = Math.round((unlockedCount / badges.length) * 100);
+
+  // Check if an avatar icon is unlocked based on student level or completed quests
+  const isIconUnlocked = (item: AvatarIconDefinition): boolean => {
+    if (item.unlockType === 'default') return true;
+    if (item.unlockType === 'level') {
+      return currentLevel >= (item.requiredLevel ?? 1);
+    }
+    if (item.unlockType === 'quest') {
+      const matchingBadge = badges.find((b) => b.id === item.requiredQuestId);
+      return matchingBadge?.status === 'unlocked';
+    }
+    return false;
+  };
+
+  // Check if a color theme / prestige gradient is unlocked based on student level
+  const isThemeUnlocked = (cKey: AvatarColor): boolean => {
+    const theme = colorThemes[cKey];
+    if (!theme?.requiredLevel) return true;
+    return currentLevel >= theme.requiredLevel;
+  };
 
   const filteredBadges = badges.filter((b) => {
     if (badgeFilter === 'all') return true;
@@ -507,7 +630,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       <span>XP Progress</span>
                     </span>
                     <span className="truncate text-right">
-                      {currentLevelXP} / {xpForNextLevel} XP <span className="hidden sm:inline">to Level {currentLevel + 1}</span>
+                      {levelData.isMaxLevel ? (
+                        <span>Max Level Achieved 🏆</span>
+                      ) : (
+                        <>
+                          {currentLevelXP} / {xpForNextLevel} XP{' '}
+                          <span className="hidden sm:inline">to Level {currentLevel + 1}</span>
+                        </>
+                      )}
                     </span>
                   </div>
                   <div className="w-full h-2.5 sm:h-3 rounded-full bg-slate-100 dark:bg-slate-800 border-[2px] border-slate-900 dark:border-slate-700 overflow-hidden shadow-inner p-0.5">
@@ -823,7 +953,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-                      Custom Academic Notes & Targets
+                      Study Notes & Goals
                     </h3>
                     <p className="text-[11px] font-bold text-slate-500">
                       Personalized focus list, exam countdowns, or study reminders
@@ -867,11 +997,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       {/* ========================================================================= */}
       {/* 1. AVATAR STUDIO MODAL: Color Theme + Emoji Picker in One Focused Pop-up */}
       {/* ========================================================================= */}
-      {isAvatarStudioOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
-          <div className="tactile-card w-full max-w-md bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-700 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] p-6 space-y-5 animate-scale-up">
+      {isAvatarStudioOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
+          <div className="tactile-card w-full max-w-md max-h-[85vh] flex flex-col bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-700 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] p-4 sm:p-5 animate-scale-up overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b-[2px] border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b-[2px] border-slate-100 dark:border-slate-800 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-amber-400 border-[2px] border-slate-900 flex items-center justify-center text-slate-950 shadow-[0_2px_0_0_#09090b]">
                   <Palette className="w-5 h-5 stroke-[2.5]" />
@@ -892,119 +1022,214 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </button>
             </div>
 
-            {/* Live Avatar Preview in Modal */}
-            <div className="flex items-center justify-center py-2">
-              <div className="relative">
-                <div
-                  className={`w-20 h-20 rounded-3xl bg-gradient-to-tr ${
-                    colorThemes[draftProfile.avatarColor as AvatarColor]?.bgGradient || activeTheme.bgGradient
-                  } border-[3px] border-slate-900 shadow-[0_5px_0_0_#09090b] flex items-center justify-center text-white text-3xl font-black transform -rotate-2`}
-                >
-                  {draftProfile.avatarIcon ? (
-                    <span>{draftProfile.avatarIcon}</span>
-                  ) : (
-                    getInitials(draftProfile.name)
-                  )}
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-400 text-slate-950 border-[2px] border-slate-900 flex items-center justify-center shadow-xs">
-                  <Sparkles className="w-3.5 h-3.5 fill-slate-950 stroke-none" />
+            {/* Scrollable Modal Body */}
+            <div className="overflow-y-auto overscroll-contain flex-1 pr-1.5 space-y-4 my-2">
+              {/* Live Avatar Preview in Modal */}
+              <div className="flex items-center justify-center py-1">
+                <div className="relative">
+                  <div
+                    className={`w-20 h-20 rounded-3xl bg-gradient-to-tr ${
+                      colorThemes[draftProfile.avatarColor as AvatarColor]?.bgGradient || activeTheme.bgGradient
+                    } border-[3px] border-slate-900 shadow-[0_5px_0_0_#09090b] flex items-center justify-center text-white text-3xl font-black transform -rotate-2`}
+                  >
+                    {draftProfile.avatarIcon ? (
+                      <span>{draftProfile.avatarIcon}</span>
+                    ) : (
+                      getInitials(draftProfile.name)
+                    )}
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-400 text-slate-950 border-[2px] border-slate-900 flex items-center justify-center shadow-xs">
+                    <Sparkles className="w-3.5 h-3.5 fill-slate-950 stroke-none" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Color Theme Selector */}
-            <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                Color Theme ({colorThemes[draftProfile.avatarColor as AvatarColor]?.name || activeTheme.name})
-              </label>
-              <div className="flex items-center justify-between gap-2">
-                {(Object.keys(colorThemes) as AvatarColor[]).map((cKey) => {
-                  const theme = colorThemes[cKey];
-                  const isSelected = draftProfile.avatarColor === cKey;
-                  return (
-                    <button
-                      key={cKey}
-                      type="button"
-                      onClick={() => {
-                        sounds.playTap();
-                        setDraftProfile({ ...draftProfile, avatarColor: cKey });
-                      }}
-                      className={`w-10 h-10 rounded-xl border-[2px] border-slate-900 bg-gradient-to-tr ${theme.bgGradient} flex items-center justify-center transition-all cursor-pointer shadow-[0_2px_0_0_#09090b] ${
-                        isSelected
-                          ? 'scale-115 ring-2 ring-slate-950 dark:ring-white -translate-y-1'
-                          : 'opacity-70 hover:opacity-100 hover:-translate-y-0.5'
-                      }`}
-                      title={theme.name}
-                    >
-                      {isSelected && <Check className="w-4 h-4 text-white stroke-[3.5]" />}
-                    </button>
-                  );
-                })}
+              {/* Color Theme Selector: Starter Themes & Prestige Gradients */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Color Theme ({colorThemes[draftProfile.avatarColor as AvatarColor]?.name || activeTheme.name})
+                  </label>
+                </div>
+
+                {/* Row 1: Starter Themes */}
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+                    <span>Starter Themes</span>
+                    <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Unlocked</span>
+                  </div>
+                  <div className="grid grid-cols-6 gap-2">
+                    {STARTER_THEMES.map((cKey) => {
+                      const theme = colorThemes[cKey];
+                      const isSelected = draftProfile.avatarColor === cKey;
+                      return (
+                        <button
+                          key={cKey}
+                          type="button"
+                          onClick={() => {
+                            sounds.playTap();
+                            setDraftProfile({ ...draftProfile, avatarColor: cKey });
+                            setSelectedLockedNotice(null);
+                          }}
+                          className={`h-9 rounded-xl border-[2px] border-slate-900 bg-gradient-to-tr ${theme.bgGradient} flex items-center justify-center transition-all cursor-pointer shadow-[0_2px_0_0_#09090b] ${
+                            isSelected
+                              ? 'scale-110 ring-2 ring-slate-950 dark:ring-white z-10 shadow-[0_3px_0_0_#09090b]'
+                              : 'hover:scale-105 opacity-90 hover:opacity-100'
+                          }`}
+                          title={theme.name}
+                        >
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3] drop-shadow-md" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Row 2: Prestige Gradients (Level-locked) */}
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-500 fill-amber-400" />
+                      <span>Prestige Gradients</span>
+                    </span>
+                    <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400">Level Progression</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-2">
+                    {PRESTIGE_THEMES.map((cKey) => {
+                      const theme = colorThemes[cKey];
+                      const unlocked = isThemeUnlocked(cKey);
+                      const isSelected = draftProfile.avatarColor === cKey;
+                      return (
+                        <button
+                          key={cKey}
+                          type="button"
+                          onClick={() => {
+                            sounds.playTap();
+                            if (unlocked) {
+                              setDraftProfile({ ...draftProfile, avatarColor: cKey });
+                              setSelectedLockedNotice(null);
+                            } else {
+                              setSelectedLockedNotice(`${theme.name}: ${theme.requirementHint || 'Locked'}`);
+                            }
+                          }}
+                          className={`h-10 rounded-xl border-[2px] border-slate-900 bg-gradient-to-tr ${theme.bgGradient} flex items-center justify-center transition-all cursor-pointer relative shadow-[0_2px_0_0_#09090b] ${
+                            isSelected
+                              ? 'scale-110 ring-2 ring-slate-950 dark:ring-white z-10 shadow-[0_3px_0_0_#09090b]'
+                              : unlocked
+                              ? 'hover:scale-105 opacity-95 hover:opacity-100 ring-1 ring-amber-400/40'
+                              : 'opacity-50 hover:opacity-80 border-slate-500'
+                          }`}
+                          title={unlocked ? theme.name : `Locked: ${theme.requirementHint}`}
+                        >
+                          {isSelected && <Check className="w-4 h-4 text-white stroke-[3] drop-shadow-md" />}
+                          {!unlocked && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-900 text-amber-300 flex items-center justify-center border border-white dark:border-slate-800 shadow-xs">
+                              <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Avatar Icon / Emoji Selector */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Icon / Emoji
-                </label>
-                {draftProfile.avatarIcon && (
+              {/* Avatar Icon & Initials Selector */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Avatar Icon / Initials
+                  </label>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    {draftProfile.avatarIcon ? 'Custom Icon' : `Initials (${getInitials(draftProfile.name)})`}
+                  </span>
+                </div>
+
+                {/* Grid of Initials + Curated Icons (15 tiles in 5 columns) */}
+                <div className="grid grid-cols-5 gap-2 mb-2.5">
+                  {/* 1. Explicit Initials Choice Tile */}
                   <button
                     type="button"
                     onClick={() => {
                       sounds.playTap();
                       setDraftProfile({ ...draftProfile, avatarIcon: undefined });
+                      setSelectedLockedNotice(null);
                     }}
-                    className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                    className={`h-11 sm:h-12 rounded-xl border-[2px] border-slate-900 flex flex-col items-center justify-center font-black transition-all cursor-pointer relative ${
+                      !draftProfile.avatarIcon
+                        ? 'bg-amber-300 scale-105 shadow-[0_2.5px_0_0_#09090b] ring-2 ring-slate-950 dark:ring-white z-10'
+                        : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 shadow-[0_1.5px_0_0_#09090b]'
+                    }`}
+                    title="Use Student Initials"
                   >
-                    Use Initials ({getInitials(draftProfile.name)})
+                    <span className="text-xs sm:text-sm font-black text-indigo-700 dark:text-indigo-400">
+                      {getInitials(draftProfile.name)}
+                    </span>
+                    <span className="text-[8px] font-black uppercase tracking-tight text-slate-600 dark:text-slate-400 -mt-0.5">
+                      Initials
+                    </span>
                   </button>
+
+                  {/* 2. Curated Roster Icons (Unlocked or Locked) */}
+                  {AVATAR_ICON_ROSTER.map((item) => {
+                    const unlocked = isIconUnlocked(item);
+                    const isSelected = draftProfile.avatarIcon === item.icon;
+
+                    return (
+                      <button
+                        key={item.icon}
+                        type="button"
+                        onClick={() => {
+                          sounds.playTap();
+                          if (unlocked) {
+                            setDraftProfile({
+                              ...draftProfile,
+                              avatarIcon: isSelected ? undefined : item.icon,
+                            });
+                            setSelectedLockedNotice(null);
+                          } else {
+                            setSelectedLockedNotice(`${item.name} (${item.icon}): ${item.requirementHint}`);
+                          }
+                        }}
+                        className={`h-11 sm:h-12 rounded-xl border-[2px] border-slate-900 flex items-center justify-center text-lg sm:text-xl transition-all cursor-pointer relative shadow-[0_1.5px_0_0_#09090b] ${
+                          isSelected
+                            ? 'bg-amber-300 scale-105 ring-2 ring-slate-950 dark:ring-white z-10'
+                            : unlocked
+                            ? 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
+                            : 'bg-slate-200/70 dark:bg-slate-800/50 opacity-60 hover:opacity-90 border-slate-400 dark:border-slate-700'
+                        }`}
+                        title={unlocked ? item.name : `Locked: ${item.requirementHint}`}
+                      >
+                        <span className={unlocked ? '' : 'grayscale-[75%] opacity-75'}>
+                          {item.icon}
+                        </span>
+                        {!unlocked && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-900 text-amber-300 flex items-center justify-center border border-white dark:border-slate-800 shadow-xs">
+                            <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Requirement Hint Banner */}
+                {selectedLockedNotice ? (
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border-[1.5px] border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs font-bold animate-fade-in">
+                    <Lock className="w-3.5 h-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <span className="leading-tight">{selectedLockedNotice}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 px-0.5">
+                    <span>Locked icons unlock as your Level & Quests progress.</span>
+                    <span>Level {currentLevel} • {unlockedCount}/{badges.length} Badges</span>
+                  </div>
                 )}
-              </div>
-
-              <div className="grid grid-cols-6 gap-2 mb-3">
-                {avatarIconPresets.map((icon) => {
-                  const isSelected = draftProfile.avatarIcon === icon;
-                  return (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => {
-                        sounds.playTap();
-                        setDraftProfile({
-                          ...draftProfile,
-                          avatarIcon: isSelected ? undefined : icon,
-                        });
-                      }}
-                      className={`h-10 rounded-xl border-[2px] border-slate-900 flex items-center justify-center text-lg transition-all cursor-pointer shadow-[0_2px_0_0_#09090b] ${
-                        isSelected
-                          ? 'bg-amber-300 scale-110 ring-2 ring-slate-950 dark:ring-white -translate-y-0.5'
-                          : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {icon}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Custom Emoji Input */}
-              <div className="flex items-center gap-2">
-                <Smile className="w-4 h-4 text-slate-400 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Or type any emoji (e.g. 🦊, 🚀)"
-                  maxLength={4}
-                  value={draftProfile.avatarIcon || ''}
-                  onChange={(e) => setDraftProfile({ ...draftProfile, avatarIcon: e.target.value })}
-                  className="flex-1 px-3 py-1.5 rounded-xl border-[2px] border-slate-900 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white"
-                />
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div className="flex items-center gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+            {/* Modal Actions (Pinned Footer) */}
+            <div className="flex items-center gap-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsAvatarStudioOpen(false)}
@@ -1026,17 +1251,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ========================================================================= */}
       {/* 2. EDIT PROFILE MODAL: Clean form for Student Info & Target Rhythm       */}
       {/* ========================================================================= */}
-      {isEditProfileOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
-          <div className="tactile-card w-full max-w-lg bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-700 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] p-6 space-y-4 animate-scale-up">
+      {isEditProfileOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-fade-in">
+          <div className="tactile-card w-full max-w-lg max-h-[85vh] flex flex-col bg-white dark:bg-slate-900 border-[3px] border-slate-900 dark:border-slate-700 shadow-[0_8px_0_0_#09090b] dark:shadow-[0_8px_0_0_#000] p-4 sm:p-6 animate-scale-up overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b-[2px] border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b-[2px] border-slate-100 dark:border-slate-800 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/80 border-[2px] border-slate-900 dark:border-violet-700 flex items-center justify-center text-violet-700 dark:text-violet-300 shadow-[0_2px_0_0_#09090b]">
                   <Target className="w-5 h-5 stroke-[2.5]" />
@@ -1063,68 +1289,78 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 await handleSaveProfile(draftProfile);
                 setIsEditProfileOpen(false);
               }}
-              className="space-y-3.5"
+              className="flex-1 flex flex-col min-h-0 overflow-hidden"
             >
-              {/* Student Name */}
-              <div>
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
-                  Student Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={draftProfile.name}
-                  onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
-                  placeholder="e.g. Alex Henderson"
-                  className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500"
-                />
-              </div>
-
-              {/* Major / Academic Track & Age/Grade */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="overflow-y-auto overscroll-contain flex-1 pr-1.5 space-y-3.5 my-2">
+                {/* Student Name */}
                 <div>
                   <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
-                    Major / Academic Track
+                    Student Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={draftProfile.name}
+                    onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
+                    placeholder="Student name"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                </div>
+
+                {/* Education Level (Dropdown) */}
+                <div>
+                  <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
+                    Education Level
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={draftProfile.age}
+                      onChange={(e) => setDraftProfile({ ...draftProfile, age: e.target.value })}
+                      className="w-full px-3.5 py-2 pr-10 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500 appearance-none cursor-pointer"
+                    >
+                      <option value="Elementary School">Elementary School</option>
+                      <option value="Junior High School">Junior High School</option>
+                      <option value="Senior High School">Senior High School</option>
+                      <option value="Undergraduate / College">Undergraduate / College</option>
+                      <option value="Graduate (Master's / PhD)">Graduate (Master's / PhD)</option>
+                      <option value="Professional / Self-Learner">Professional / Self-Learner</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none stroke-[2.5]" />
+                  </div>
+                </div>
+
+                {/* Major / Academic Track */}
+                <div>
+                  <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
+                    Major / Field of Study
                   </label>
                   <input
                     type="text"
                     value={draftProfile.major}
                     onChange={(e) => setDraftProfile({ ...draftProfile, major: e.target.value })}
-                    placeholder="e.g. Computer Science"
+                    placeholder="Degree, major, or primary focus"
                     className="w-full px-3.5 py-2 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500"
                   />
                 </div>
 
+                {/* Academic Motto / Focus Quote */}
                 <div>
                   <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
-                    Academic Level / Year
+                    Academic Motto / Focus Quote
                   </label>
                   <input
                     type="text"
-                    value={draftProfile.age}
-                    onChange={(e) => setDraftProfile({ ...draftProfile, age: e.target.value })}
-                    placeholder="e.g. Undergraduate"
+                    value={draftProfile.motto}
+                    onChange={(e) => setDraftProfile({ ...draftProfile, motto: e.target.value })}
+                    placeholder="Consistency beats intensity"
                     className="w-full px-3.5 py-2 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500"
                   />
                 </div>
               </div>
 
-              {/* Academic Motto / Focus Quote */}
-              <div>
-                <label className="block text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-1">
-                  Academic Motto / Focus Quote
-                </label>
-                <input
-                  type="text"
-                  value={draftProfile.motto}
-                  onChange={(e) => setDraftProfile({ ...draftProfile, motto: e.target.value })}
-                  placeholder="e.g. Consistency beats intensity."
-                  className="w-full px-3.5 py-2 rounded-xl border-[2px] border-slate-900 bg-white dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white shadow-[0_2px_0_0_#09090b] dark:shadow-[0_2px_0_0_#000] focus:outline-none focus:ring-2 focus:ring-violet-500"
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div className="flex items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              {/* Modal Actions (Pinned Footer) */}
+              <div className="flex items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsEditProfileOpen(false)}
@@ -1143,7 +1379,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -52,6 +52,9 @@ android/app/*.iml
 # Mobile (iOS & Capacitor)
 ios/App/build/
 ios/App/Pods/
+
+# Developer Test Files (Private)
+dev/
 *.pbxuser
 *.mode1v3
 *.mode2v3

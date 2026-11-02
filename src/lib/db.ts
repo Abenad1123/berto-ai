@@ -242,3 +242,86 @@ export async function seedStarterDecks() {
 
   await db.cards.bulkAdd(csCards as Card[]);
 }
+
+/**
+ * Test & Demo helper: Sets student account data to Max Level (Level 6 Sage)
+ * and unlocks all quests, achievements, badges, and prestige avatar gradients.
+ */
+export async function upgradeToMaxLevelAndQuests() {
+  const existingProfile = await db.profile.toCollection().first();
+  const profileData: UserProfile = {
+    name: existingProfile?.name || 'Grand Scholar',
+    age: existingProfile?.age || 'Undergraduate / College',
+    major: existingProfile?.major || 'Computer Science & AI',
+    motto: existingProfile?.motto || 'Consistency beats intensity.',
+    avatarColor: existingProfile?.avatarColor || 'obsidian_gold',
+    avatarIcon: existingProfile?.avatarIcon || '👑',
+    xp: 3500, // Level 6 Sage (requires >= 2500 XP)
+    streakDays: 7, // Unlocks 3-Day Flame badge
+  };
+
+  if (existingProfile?.id) {
+    await db.profile.update(existingProfile.id, profileData);
+  } else {
+    await db.profile.add(profileData);
+  }
+
+  // Ensure a deck exists with at least 100 cards, 15 mature cards, and 75 reviews
+  let deck = await db.decks.toCollection().first();
+  const now = new Date();
+  if (!deck?.id) {
+    const deckId = await db.decks.add({
+      title: 'Master Study Arena',
+      description: 'Comprehensive mastery deck with unlocked quests and stats.',
+      category: 'Science',
+      color: 'violet',
+      icon: 'Trophy',
+      cardCount: 0,
+      tags: ['#mastery', '#arena'],
+      parentId: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    deck = await db.decks.get(deckId);
+  }
+
+  if (deck?.id) {
+    const currentCardCount = await db.cards.count();
+    const needed = Math.max(0, 100 - currentCardCount);
+
+    if (needed > 0) {
+      const newCards: Omit<Card, 'id'>[] = [];
+      for (let i = 0; i < needed; i++) {
+        const isMature = i < 15;
+        newCards.push({
+          deckId: deck.id,
+          type: 'multiple_choice',
+          question: `Mastery Challenge Card #${currentCardCount + i + 1}`,
+          answer: 'Optimal Retention',
+          options: ['Optimal Retention', 'Passive Review', 'Cramming', 'Ignoring'],
+          explanation: 'Active recall spaced over time yields highest neural retention.',
+          state: isMature ? 2 : 1, // 2 = mature
+          due: new Date(now.getTime() - 86400000),
+          reps: isMature ? 5 : 1,
+          difficulty: 0.3,
+          stability: 15.0,
+          createdAt: now,
+        });
+      }
+      await db.cards.bulkAdd(newCards as Card[]);
+    }
+
+    // Ensure at least 15 cards have mature state (state 2) and 5 reps each (15 * 5 = 75 total reviews)
+    let matureUpdated = 0;
+    await db.cards.toCollection().modify((card) => {
+      if (matureUpdated < 15) {
+        card.state = 2; // mature (unlocks Perfect Recall >= 10)
+        card.reps = 5; // 75 reviews (unlocks Memory Architect >= 50 and Speed Demon >= 3 quizzes)
+        matureUpdated++;
+      }
+    });
+
+    const updatedTotal = await db.cards.count();
+    await db.decks.update(deck.id, { cardCount: updatedTotal });
+  }
+}

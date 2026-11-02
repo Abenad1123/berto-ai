@@ -313,8 +313,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     try {
       if (provider === 'gemini') {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`,
-          { method: 'GET' }
+          'https://generativelanguage.googleapis.com/v1beta/models', { method: 'GET', headers: { 'x-goog-api-key': apiKey.trim() } }
         );
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -398,7 +397,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       version: 2,
       exportedAt: new Date().toISOString(),
       profile,
-      settings: existingSettings,
+      settings: existingSettings ? { ...existingSettings, apiKey: '' } : undefined,
       decks,
       cards,
     };
@@ -489,8 +488,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       }
 
       if (data.settings) {
+        const currentSettings = await db.settings.toCollection().first();
         await db.settings.clear();
-        await db.settings.add(data.settings);
+        await db.settings.add({
+          ...data.settings,
+          apiKey: currentSettings?.apiKey || data.settings.apiKey || '',
+        });
       }
 
       const dCount = await db.decks.count();

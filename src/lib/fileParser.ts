@@ -140,6 +140,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
       });
     }
 
+    orderedSlideFiles = orderedSlideFiles.slice(0, 100);
     for (let i = 0; i < orderedSlideFiles.length; i++) {
       const filename = orderedSlideFiles[i];
       const xmlString = await zip.files[filename].async('text');

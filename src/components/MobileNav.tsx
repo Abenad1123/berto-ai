@@ -79,6 +79,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       </button>
 
       <button
+        data-tour="settings-btn"
         type="button"
         onClick={() => {
           sounds.playTap();
